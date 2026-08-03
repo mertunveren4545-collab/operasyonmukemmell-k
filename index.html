@@ -628,9 +628,15 @@ function ciz(){
 
  if(V=='ana'){
   var mn=bende(),gc=mn.filter(function(j){return as(cur(j))>0}).length;
-  h='<button class="big" data-a="bende"><div><b>Bende bekleyen iş</b>'+
+  var BD=bildirimler();
+  h='<button class="big" data-a="bende"><div><b>Bende bekleyen iş'+rz(BD.gec)+'</b>'+
     '<span>'+(gc?gc+' tanesi termini aştı':'termin aşımı yok')+'</span></div>'+
     '<div class="num">'+mn.length+'</div></button>';
+  if(BD.ekSure){
+   h+='<div class="r wt"><div class="ml"><b>Ek süre onayı bekliyor</b>'+
+     '<span>senin onayını bekleyen talepler</span></div>'+
+     '<div class="rt"><b>'+BD.ekSure+'</b><span>talep</span></div></div>';
+  }
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
