@@ -259,7 +259,8 @@ body.dk .tg{background:#17304F}
 .giris .kut{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.09)}
 .giris h1{font-size:19px;margin:0 0 4px;color:#12315C;text-align:center}
 .giris .alt{font-size:12.5px;color:#8592A0;text-align:center;margin:0 0 18px}
-.giris .hata{background:#F8E6E3;color:#8E2F21;border-radius:7px;padding:10px;font-size:13px;margin-bottom:12px}
+.giris .hata{background:#F8E6E3;color:#8E2F21;border-radius:7px;padding:10px;font-size:13px;
+ margin-bottom:12px;line-height:1.4;word-break:break-word}
 body.dk .giris .kut{background:#1A1F26;border:1px solid #262D36}
 body.dk .giris h1{color:#8FB6EA}
 .cik{background:#1E4A85;border:0;color:#fff;padding:8px 11px;border-radius:6px;font-size:13px;flex:none}
@@ -1057,10 +1058,17 @@ document.addEventListener('click',function(e){
   var ku=(document.getElementById('gk').value||'').trim().toLowerCase().replace('@opmuk.local','');
   var sf=document.getElementById('gs').value||'';
   if(!ku||!sf){HATA='Kullanıcı adı ve şifre gerekli.';ciz();return}
-  if(!dbClient){HATA='Sunucuya bağlanılamadı.';ciz();return}
+  if(!dbClient){HATA='Supabase kütüphanesi yüklenmedi — sayfayı yenile (Ctrl+F5).';ciz();return}
   t.textContent='Giriş yapılıyor…';t.disabled=true;
   dbClient.auth.signInWithPassword({email:ku+'@opmuk.local',password:sf}).then(function(r){
-   if(r.error){HATA='Kullanıcı adı veya şifre hatalı.';GIRIS=false;ciz();return}
+   if(r.error){
+    var m=(r.error.message||'').toLowerCase();
+    if(m.indexOf('invalid login')>=0) HATA='Kullanıcı adı veya şifre hatalı. (Hesap Supabase\'de açıldı mı?)';
+    else if(m.indexOf('email not confirmed')>=0) HATA='Hesap onaylanmamış — Supabase\'de "Confirm email" kapatılmalı.';
+    else if(m.indexOf('failed to fetch')>=0||m.indexOf('network')>=0) HATA='Sunucuya ulaşılamadı — internet ya da Supabase adresi hatalı.';
+    else HATA='Giriş hatası: '+r.error.message;
+    console.log('AUTH HATASI:',r.error);
+    GIRIS=false;ciz();return}
    OTURUM=r.data.user;
    var hedef=null;
    for(var i=0;i<P.length;i++) if(P[i][0]==ku) hedef=P[i][0];
