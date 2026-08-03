@@ -463,6 +463,7 @@ var OP2='mert';
 var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[],DURUMLAR=[];
 var MESAJLAR=[],SON_OKUMA=null,MHEDEF='herkes',MZAMAN=null;
 function yonetici(){return ME=='mert'||ME=='mesut'}
+function bYetkiTum(){return sistemci()}
 function cevrimici(t){ if(!t)return false; return (new Date()-new Date(t))<180000 }
 function gecenSure(t){
  if(!t)return 'hiç girmedi';
@@ -516,9 +517,11 @@ function cur(j){for(var i=0;i<j.a.length;i++)if(j.a[i].d=='a')return j.a[i];retu
 function gec(s){return s.g?gn(s.g,TODAY):0}
 function as(s){return gec(s)-s.t}
 function gor(j){var p=pn(ME);
- if(p[4]=='ust')return true;
+ if(p[4]=='ust'||sistemci())return true;
  return j.br==p[3]||j.a.some(function(s){return s.k==ME})}
-function tumBolum(){return pn(ME)[4]=='ust'}
+var SISTEM=['mert'];                       /* sistem sorumlusu — tam yetki */
+function sistemci(){return SISTEM.indexOf(ME)>=0}
+function tumBolum(){return pn(ME)[4]=='ust'||sistemci()}
 function bolumListesi(){
  if(tumBolum())return Object.keys(B);
  var mb=pn(ME)[3];
@@ -940,6 +943,7 @@ function ciz(){
     '<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan '+tw+' gün</span>'+
     '<span><i style="background:#C08A1E"></i>Beklenen '+tb+' gün</span></div></div>';
   var kv=K.filter(function(r){return tumBolum()||pn(r.k)[3]==pn(ME)[3]});
+  var TUMKAYIT=sistemci();
   var tt={i:[0,0],k:[0,0],o:[0,0]};
   vis.forEach(function(j){j.a.forEach(function(x){if(!x.g)return;
    var d=x.d=='t'?gn(x.g,x.b):gec(x),tp3=stip(x);tt[tp3][0]+=d;tt[tp3][1]++})});
