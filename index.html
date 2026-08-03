@@ -710,7 +710,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s6</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s7</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -775,7 +775,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s6 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s7 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1386,13 +1386,22 @@ document.addEventListener('click',function(e){
   if(p1.length<6){HATA='Şifre en az 6 karakter olmalı.';ciz();return}
   if(p1!=p2){HATA='İki şifre aynı değil.';ciz();return}
   if(p1=='123456'){HATA='Geçici şifreyi tekrar kullanamazsın.';ciz();return}
+  var btn=t;btn.textContent='Kaydediliyor…';btn.disabled=true;
   dbClient.auth.updateUser({password:p1,data:{pw_set:true}}).then(function(r){
-   if(r.error){HATA='Değiştirilemedi: '+r.error.message;ciz();return}
-   ZORUNLU=false;HATA='';V='ana';
-   if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
-     son_giris:new Date().toISOString(),sifre_belirlendi:true}).then(function(){},function(){});
-   ciz();say('Şifren güncellendi.');
-  });
+   if(r.error){console.log('SIFRE:',r.error);
+    HATA='Şifre değiştirilemedi: '+r.error.message;ciz();return}
+   /* yeni şifreyle giriş testi */
+   dbClient.auth.signInWithPassword({email:ME+'@opmuk.com',password:p1}).then(function(r2){
+    if(r2.error){console.log('DOGRULAMA:',r2.error);
+     HATA='Şifre kaydedildi ama giriş doğrulanamadı: '+r2.error.message+' — tekrar dene.';ciz();return}
+    if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
+      son_giris:new Date().toISOString(),son_gorulme:new Date().toISOString(),
+      sifre_belirlendi:true}).then(function(){},function(){});
+    ZORUNLU=false;HATA='';V='ana';ciz();
+    say('Şifren kaydedildi ve doğrulandı — bundan sonra bu şifreyle gir.');
+   }).catch(function(e){HATA='Doğrulama hatası: '+(e.message||e);ciz()});
+  }).catch(function(e){console.log('SIFRE:',e);
+   HATA='Şifre değiştirilemedi: '+(e.message||e);ciz()});
   return;
  }
  if(a=='talepkapat'){
