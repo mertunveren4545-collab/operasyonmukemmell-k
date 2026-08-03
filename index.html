@@ -779,7 +779,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s10</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s11</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -845,7 +845,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s10 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s11 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1776,6 +1776,7 @@ document.addEventListener('click',function(e){
   J.unshift({id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:ts3,a:adm,
    lg:[{ts:ts3,k:ME,tip:'İş açıldı'}]});
   V='ana';say('İş başlatıldı — sorumlu '+ad(kk));
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
  }
  else return;
  ciz();window.scrollTo(0,0);
@@ -1844,28 +1845,36 @@ function talepleriGetir(){
  if(!dbClient){console.log('Cevrimdisi mod — veriler kaydedilmeyecek');return}
  var yazilan={},zaman=null,ilk=true;
 
- function isSatiri(j){
-  return {id:String(j.id),ad:j.ad,bolum:j.br,tesis:j.ts_,
-    durum:cur(j)?'acik':'kapali',veri:j,guncelleme:new Date().toISOString()};
+ function isSatiri(j){ return {id:String(j.id),ad:j.ad,veri:j}; }
+ async function guvenliYaz(tablo,satirlar,adi){
+  if(!satirlar.length)return true;
+  var r=await dbClient.from(tablo).upsert(satirlar);
+  if(r&&r.error){
+   console.log('YAZMA HATASI ['+tablo+']:',r.error.message);
+   if(adi){say(adi+' kaydedilemedi: '+r.error.message);}
+   return false;
+  }
+  return true;
  }
  async function senkron(){
   try{
-   await dbClient.from('tesisler').upsert(T.map(function(x){return {id:x.id,ad:x.ad}}));
-   await dbClient.from('personel').upsert(P.map(function(p){
+   var ok=await guvenliYaz('isler',J.map(isSatiri),'İşler');
+   if(ok&&ilk){ilk=false;console.log('Bulut baglantisi tamam')}
+   await guvenliYaz('tesisler',T.map(function(x){return {id:x.id,ad:x.ad}}));
+   await guvenliYaz('personel',P.map(function(p){
      return {id:p[0],ad:p[1],unvan:p[2],bolum:p[3],rol:p[4]}}));
-   await dbClient.from('bolumler').upsert(Object.keys(B).map(function(k,i){
+   await guvenliYaz('bolumler',Object.keys(B).map(function(k,i){
      return {id:k,ad:B[k].ad,sef:B[k].sef,ust:B[k].ust,ust_gerek:!!B[k].ug,sira:i}}));
-   await dbClient.from('isler').upsert(J.map(isSatiri));
    var yeni=K.filter(function(r){return !yazilan[r.id]});
    if(yeni.length){
-    await dbClient.from('kayitlar').upsert(yeni.map(function(r){
+    var ok2=await guvenliYaz('kayitlar',yeni.map(function(r){
       return {id:String(r.id),personel:r.k,bolum:pn(r.k)[3],tesis:r.ts_,faaliyet:r.tip,
-              aciklama:r.ac,baslangic:r.ts,bitis:r.bit||null,dakika:r.dk}}));
-    yeni.forEach(function(r){yazilan[r.id]=1});
+              aciklama:r.ac,baslangic:r.ts,bitis:r.bit||null,dakika:r.dk}}),'Çalışma kayıtları');
+    if(ok2)yeni.forEach(function(r){yazilan[r.id]=1});
    }
-   if(ilk){ilk=false;console.log('Bulut baglantisi tamam')}
-  }catch(e){ console.log('Senkron hatasi:',e.message||e); }
+  }catch(e){ console.log('Senkron hatasi:',e.message||e);say('Kaydetme hatası: '+(e.message||e)); }
  }
+ window.senkronCalistir=senkron;
  document.addEventListener('click',function(){clearTimeout(zaman);zaman=setTimeout(senkron,1500)});
 
  (async function(){
