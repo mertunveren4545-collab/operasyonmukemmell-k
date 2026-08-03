@@ -1055,12 +1055,12 @@ document.addEventListener('click',function(e){
   ciz();return;
  }
  if(a=='girisyap'){
-  var ku=(document.getElementById('gk').value||'').trim().toLowerCase().replace('@opmuk.local','');
+  var ku=(document.getElementById('gk').value||'').trim().toLowerCase().replace('@opmuk.com','');
   var sf=document.getElementById('gs').value||'';
   if(!ku||!sf){HATA='Kullanıcı adı ve şifre gerekli.';ciz();return}
   if(!dbClient){HATA='Supabase kütüphanesi yüklenmedi — sayfayı yenile (Ctrl+F5).';ciz();return}
   t.textContent='Giriş yapılıyor…';t.disabled=true;
-  var mail=ku+'@opmuk.local';
+  var mail=ku+'@opmuk.com';
   var kisiVar=false;for(var i8=0;i8<P.length;i8++)if(P[i8][0]==ku)kisiVar=true;
   if(!kisiVar){HATA='Bu kullanıcı adı personel listesinde yok.';GIRIS=false;ciz();return}
 
