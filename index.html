@@ -255,6 +255,19 @@ body.dk .lg2,body.dk .rw .t i{color:#7E8B98}
 body.dk svg text{fill:#C7D0D9}
 .tg{background:#1E4A85;border:0;color:#fff;padding:8px 11px;border-radius:6px;font-size:15px;flex:none}
 body.dk .tg{background:#17304F}
+.giris{max-width:360px;margin:40px auto;padding:0 14px}
+.giris .kut{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.09)}
+.giris h1{font-size:19px;margin:0 0 4px;color:#12315C;text-align:center}
+.giris .alt{font-size:12.5px;color:#8592A0;text-align:center;margin:0 0 18px}
+.giris .hata{background:#F8E6E3;color:#8E2F21;border-radius:7px;padding:10px;font-size:13px;margin-bottom:12px}
+body.dk .giris .kut{background:#1A1F26;border:1px solid #262D36}
+body.dk .giris h1{color:#8FB6EA}
+.cik{background:#1E4A85;border:0;color:#fff;padding:8px 11px;border-radius:6px;font-size:13px;flex:none}
+body.dk .cik{background:#17304F}
+.kul{width:100%;padding:10px;border-radius:6px;background:#1E4A85;color:#fff;font-size:15px;
+ display:flex;align-items:center;gap:8px}
+body.dk .kul{background:#17304F}
+.kul b{font-weight:600}.kul span{font-size:11.5px;color:#A9C4E8;margin-left:auto}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
 </style>
@@ -263,7 +276,8 @@ body.dk .tg{background:#17304F}
 <body>
 <header>
  <div class="top" id="top"></div>
- <select class="who" id="who"></select>
+ <select class="who" id="who" style="display:none"></select>
+ <div class="kul" id="kul"></div>
 </header>
 <main id="app"></main>
 <div id="t"></div>
@@ -420,6 +434,7 @@ function bekleyenDestek(){var r=[];
   if(d.durum=='b'&&d.kimden==ME)r.push({j:j,d:d,i:i})})});
  return r}
 var OP2='mert';
+var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[];
 var ME='mert',V='ana',OB='SI',OJ=0,NS=null,RED=0,ED=0,YP={ad:'',unvan:'',br:'SI',rol:'c'};
 
 /* ---------- HESAP ---------- */
@@ -476,14 +491,64 @@ function hafta(rec){
  return h+'</svg>';
 }
 /* ---------- ÇİZ ---------- */
+function unutEkrani(){
+ document.getElementById('top').innerHTML='<button class="bk" data-a="girisdon">‹ Geri</button>'+
+  '<div class="tt">Şifremi unuttum</div>';
+ document.getElementById('who').style.display='none';
+ document.getElementById('app').innerHTML=
+  '<div class="giris"><div class="kut">'+
+  '<h1>Şifre sıfırlama</h1><p class="alt">Talebin yöneticiye iletilir</p>'+
+  (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
+  '<label>Kullanıcı adın</label><input id="uk" placeholder="Kullanıcı adın" autocapitalize="off">'+
+  '<div style="height:14px"></div><button class="b" data-a="unutgo">Sıfırlama iste</button>'+
+  '<div class="note">Mert Ünveren veya Mesut Ünver şifreni <b>123456</b> olarak sıfırlar. '+
+  'Sonra bu şifreyle girip kendi şifreni belirlersin.</div></div></div>';
+}
+function girisEkrani(){
+ if(UNUT){unutEkrani();return}
+ document.getElementById('top').innerHTML='<div class="tt">Operasyonel Mükemmellik</div>'+
+  '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>';
+ document.getElementById('who').style.display='none';
+ document.getElementById('app').innerHTML=
+  '<div class="giris"><div class="kut">'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir</p>'+
+  (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
+  '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
+  '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
+  '<div style="height:14px"></div><button class="b" data-a="girisyap">Giriş yap</button>'+
+  '<div style="height:8px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
+  '</div></div>';
+}
+function sifreEkrani(zorunlu){
+ document.getElementById('top').innerHTML=(zorunlu?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
+  '<div class="tt">Şifre belirle</div>';
+ var kk=document.getElementById('kul');if(kk)kk.style.display=zorunlu?'none':'flex';
+ document.getElementById('app').innerHTML=
+  '<div class="giris"><div class="kut">'+
+  '<h1>'+(zorunlu?'Yeni şifreni belirle':'Şifre değiştir')+'</h1>'+
+  '<p class="alt">'+(zorunlu?'Devam etmek için şifreni değiştirmelisin':'En az 6 karakter')+'</p>'+
+  (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
+  '<label>Yeni şifre</label><input id="s1" type="password" autocomplete="new-password">'+
+  '<label>Tekrar</label><input id="s2" type="password" autocomplete="new-password">'+
+  '<div style="height:14px"></div><button class="b" data-a="sifrekaydet">Kaydet</button>'+
+  '<div class="note">Kolay hatırlayacağın ama başkasının tahmin edemeyeceği bir şey seç.</div>'+
+  '</div></div>';
+}
 function ciz(){
+ if(!GIRIS){girisEkrani();return}
+ if(ZORUNLU){sifreEkrani(true);return}
+ if(V=='sifre'){sifreEkrani(false);return}
+ var wsel=document.getElementById('who');if(wsel)wsel.style.display='none';
  var t=document.getElementById('top');
  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',kayit:'Çalışma kaydı',
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:'Bende bekleyenler',
-   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle'};
+   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir'};
  t.innerHTML=(V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
    '<div class="tt">'+bl[V]+'</div>'+
-   '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>';
+   '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>'+
+   '<button class="cik" data-a="cikis">Çıkış</button>';
+  var kk2=document.getElementById('kul');
+  if(kk2)kk2.innerHTML='<b>'+ad(ME)+'</b><span>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</span>';
  var el=document.getElementById('app'),h='';
 
  if(V=='ana'){
@@ -958,6 +1023,61 @@ document.addEventListener('click',function(e){
   d.innerHTML='<button data-a="fsx">Kapat</button><img src="'+t.dataset.src+'">';
   document.body.appendChild(d);return}
  if(a=='fsx'){var e2=document.getElementById('fsv');if(e2)e2.parentNode.removeChild(e2);return}
+ if(a=='unut'){UNUT=true;HATA='';ciz();return}
+ if(a=='girisdon'){UNUT=false;HATA='';ciz();return}
+ if(a=='unutgo'){
+  var uk=(document.getElementById('uk').value||'').trim().toLowerCase();
+  var varmi=false;for(var i9=0;i9<P.length;i9++)if(P[i9][0]==uk)varmi=true;
+  if(!varmi){HATA='Bu kullanıcı adı bulunamadı.';ciz();return}
+  if(dbClient)dbClient.from('sifre_talep').insert({id:'st'+Date.now(),kisi:uk,ts:now(),durum:'b'})
+   .then(function(){},function(){});
+  UNUT=false;HATA='';ciz();
+  say('Talebin iletildi. Yönetici şifreni 123456 yapacak.');
+  return;
+ }
+ if(a=='sifre'){V='sifre';HATA='';ciz();return}
+ if(a=='sifrekaydet'){
+  var p1=document.getElementById('s1').value,p2=document.getElementById('s2').value;
+  if(p1.length<6){HATA='Şifre en az 6 karakter olmalı.';ciz();return}
+  if(p1!=p2){HATA='İki şifre aynı değil.';ciz();return}
+  if(p1=='123456'){HATA='Geçici şifreyi tekrar kullanamazsın.';ciz();return}
+  dbClient.auth.updateUser({password:p1,data:{pw_set:true}}).then(function(r){
+   if(r.error){HATA='Değiştirilemedi: '+r.error.message;ciz();return}
+   ZORUNLU=false;HATA='';V='ana';ciz();say('Şifren güncellendi.');
+  });
+  return;
+ }
+ if(a=='talepkapat'){
+  var tid=t.dataset.i;
+  TALEPLER=TALEPLER.filter(function(x){return x.id!=tid});
+  if(dbClient)dbClient.from('sifre_talep').update({durum:'t'}).eq('id',tid).then(function(){},function(){});
+  ciz();return;
+ }
+ if(a=='girisyap'){
+  var ku=(document.getElementById('gk').value||'').trim().toLowerCase().replace('@opmuk.local','');
+  var sf=document.getElementById('gs').value||'';
+  if(!ku||!sf){HATA='Kullanıcı adı ve şifre gerekli.';ciz();return}
+  if(!dbClient){HATA='Sunucuya bağlanılamadı.';ciz();return}
+  t.textContent='Giriş yapılıyor…';t.disabled=true;
+  dbClient.auth.signInWithPassword({email:ku+'@opmuk.local',password:sf}).then(function(r){
+   if(r.error){HATA='Kullanıcı adı veya şifre hatalı.';GIRIS=false;ciz();return}
+   OTURUM=r.data.user;
+   var hedef=null;
+   for(var i=0;i<P.length;i++) if(P[i][0]==ku) hedef=P[i][0];
+   if(!hedef){HATA='Bu hesap personel listesinde tanımlı değil.';
+    dbClient.auth.signOut();GIRIS=false;ciz();return}
+   ME=hedef;GIRIS=true;HATA='';V='ana';
+   ZORUNLU=!(r.data.user.user_metadata&&r.data.user.user_metadata.pw_set);
+   talepleriGetir();
+   ciz();window.scrollTo(0,0);
+   say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
+  });
+  return;
+ }
+ if(a=='cikis'){
+  if(dbClient)dbClient.auth.signOut();
+  GIRIS=false;OTURUM=null;HATA='';ciz();return;
+ }
  if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';ciz();return}
  if(a=='ana'){V='ana';RED=0;ED=0}
  else if(a=='bdet'){V='bdet';OB=t.dataset.b}
@@ -1158,6 +1278,12 @@ function menu(){
 }
 menu();ciz();
 
+function talepleriGetir(){
+ if(!dbClient||(ME!='mert'&&ME!='mesut'))return;
+ dbClient.from('sifre_talep').select('*').eq('durum','b').then(function(r){
+  if(r.data){TALEPLER=r.data;ciz()}
+ },function(){});
+}
 /* ---------- BULUT SENKRONU ---------- */
 (function(){
  if(!dbClient){console.log('Cevrimdisi mod — veriler kaydedilmeyecek');return}
@@ -1207,7 +1333,18 @@ menu();ciz();
     K.forEach(function(x){yazilan[x.id]=1});
    }
   }catch(e){ console.log('Yukleme hatasi:',e.message||e); }
-  menu();ciz();senkron();
+  menu();
+  try{
+   var oto=await dbClient.auth.getSession();
+   var u=oto&&oto.data&&oto.data.session&&oto.data.session.user;
+   if(u){
+    var ku2=(u.email||'').split('@')[0];
+    for(var q2=0;q2<P.length;q2++) if(P[q2][0]==ku2){ME=P[q2][0];GIRIS=true}
+    if(GIRIS){ZORUNLU=!(u.user_metadata&&u.user_metadata.pw_set);talepleriGetir()}
+   }
+  }catch(e){}
+  ciz();
+  if(GIRIS)senkron();
  })();
 })();
 </script>
