@@ -435,7 +435,8 @@ function bekleyenDestek(){var r=[];
   if(d.durum=='b'&&d.kimden==ME)r.push({j:j,d:d,i:i})})});
  return r}
 var OP2='mert';
-var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[];
+var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[],DURUMLAR=[];
+function yonetici(){return ME=='mert'||ME=='mesut'}
 var ME='mert',V='ana',OB='SI',OJ=0,NS=null,RED=0,ED=0,YP={ad:'',unvan:'',br:'SI',rol:'c'};
 
 /* ---------- HESAP ---------- */
@@ -543,7 +544,7 @@ function ciz(){
  var t=document.getElementById('top');
  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',kayit:'Çalışma kaydı',
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:'Bende bekleyenler',
-   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir'};
+   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',kullanicilar:'Kullanıcı durumu'};
  t.innerHTML=(V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
    '<div class="tt">'+bl[V]+'</div>'+
    '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>'+
@@ -961,6 +962,52 @@ function ciz(){
     '<div style="height:10px"></div><button class="b" data-a="tnew">Tesisi ekle</button>'+
     '<div class="note">Eklenen tesis, iş açma ve çalışma kaydı ekranlarında hemen seçilebilir olur.</div></div>';
  }
+ else if(V=='kullanicilar'){
+  if(!yonetici()){h='<div class="emp">Bu ekran için yetkin yok.</div>';el.innerHTML=h;return}
+  function drm(id){for(var i=0;i<DURUMLAR.length;i++)if(DURUMLAR[i].id==id)return DURUMLAR[i];return null}
+  var girmis=0,belirlemis=0;
+  P.forEach(function(p){var d=drm(p[0]);if(d){girmis++;if(d.sifre_belirlendi)belirlemis++}});
+  h='<div class="kv"><div><b>'+girmis+'/'+P.length+'</b><span>Giriş yaptı</span></div>'+
+    '<div class="'+(belirlemis<girmis?'bad':'')+'"><b>'+belirlemis+'</b><span>Kendi şifresini belirledi</span></div>'+
+    '<div class="'+(TALEPLER.length?'bad':'')+'"><b>'+TALEPLER.length+'</b><span>Sıfırlama talebi</span></div></div>';
+  if(TALEPLER.length){
+   h+='<div class="card"><h3>Sıfırlama talepleri</h3>';
+   TALEPLER.forEach(function(x){
+    h+='<div class="li"><div class="h"><b>'+ad(x.kisi)+'</b><i>'+fmt(x.ts)+'</i></div>'+
+      '<div class="s">Supabase → Authentication → Users → '+x.kisi+'@opmuk.com → şifresini 123456 yap</div>'+
+      '<div style="height:8px"></div><button class="b g" data-a="talepkapat" data-i="'+x.id+'">Yapıldı</button></div>';
+   });
+   h+='</div>';
+  }
+  Object.keys(B).forEach(function(k){
+   var g=P.filter(function(p){return p[3]==k});
+   if(!g.length)return;
+   h+='<div class="card"><h3>'+B[k].ad+'</h3>';
+   g.forEach(function(p){
+    var d=drm(p[0]),dur,renk;
+    if(!d){dur='Henüz giriş yapmadı';renk='#B2402F'}
+    else if(!d.sifre_belirlendi){dur='123456 kullanıyor — şifre belirlemedi';renk='#B07C16'}
+    else {dur='Kendi şifresini belirledi';renk='#2E7D4B'}
+    h+='<div class="li"><div class="h"><b>'+p[1]+'</b>'+
+      '<i>'+(d&&d.son_giris?fmt(d.son_giris.slice(0,16)):'—')+'</i></div>'+
+      '<div class="s">kullanıcı adı: <b>'+p[0]+'</b></div>'+
+      '<div class="s" style="color:'+renk+';font-weight:600">'+dur+'</div></div>';
+   });
+   h+='</div>';
+  });
+  var dirp=P.filter(function(p){return !p[3]});
+  if(dirp.length){
+   h+='<div class="card"><h3>Direktörlük</h3>';
+   dirp.forEach(function(p){
+    var d=drm(p[0]),dur=!d?'Henüz giriş yapmadı':(!d.sifre_belirlendi?'123456 kullanıyor':'Kendi şifresini belirledi');
+    h+='<div class="li"><div class="h"><b>'+p[1]+'</b><i>'+(d&&d.son_giris?fmt(d.son_giris.slice(0,16)):'—')+'</i></div>'+
+      '<div class="s">kullanıcı adı: <b>'+p[0]+'</b></div><div class="s">'+dur+'</div></div>';
+   });
+   h+='</div>';
+  }
+  h+='<div class="note">Şifreler görülemez — Supabase\'de şifrelenmiş saklanır. '+
+    'Yapabileceğin şey sıfırlamaktır: Supabase → Authentication → Users → kişi → şifresini 123456 yap.</div>';
+ }
  else if(V=='kayit'){
   var mb=pn(ME)[3]||'SI',ls=FT[mb];
   var bugun=new Date().toISOString().slice(0,10);
@@ -1037,6 +1084,7 @@ document.addEventListener('click',function(e){
   return;
  }
  if(a=='sifre'){V='sifre';HATA='';ciz();return}
+ if(a=='kullanicilar'){V='kullanicilar';talepleriGetir();ciz();return}
  if(a=='sifrekaydet'){
   var p1=document.getElementById('s1').value,p2=document.getElementById('s2').value;
   if(p1.length<6){HATA='Şifre en az 6 karakter olmalı.';ciz();return}
@@ -1044,7 +1092,10 @@ document.addEventListener('click',function(e){
   if(p1=='123456'){HATA='Geçici şifreyi tekrar kullanamazsın.';ciz();return}
   dbClient.auth.updateUser({password:p1,data:{pw_set:true}}).then(function(r){
    if(r.error){HATA='Değiştirilemedi: '+r.error.message;ciz();return}
-   ZORUNLU=false;HATA='';V='ana';ciz();say('Şifren güncellendi.');
+   ZORUNLU=false;HATA='';V='ana';
+   if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
+     son_giris:new Date().toISOString(),sifre_belirlendi:true}).then(function(){},function(){});
+   ciz();say('Şifren güncellendi.');
   });
   return;
  }
@@ -1066,6 +1117,11 @@ document.addEventListener('click',function(e){
 
   function basarili(u){
    ME=ku;GIRIS=true;HATA='';V='ana';
+   if(dbClient){
+    var pw=!!(u&&u.user_metadata&&u.user_metadata.pw_set);
+    dbClient.from('kullanici_durum').upsert({id:ku,ad:ad(ku),bolum:pn(ku)[3]||'',
+      son_giris:new Date().toISOString(),sifre_belirlendi:pw}).then(function(){},function(){});
+   }
    ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
    talepleriGetir();ciz();window.scrollTo(0,0);
    say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
@@ -1309,10 +1365,11 @@ function menu(){
 menu();ciz();
 
 function talepleriGetir(){
- if(!dbClient||(ME!='mert'&&ME!='mesut'))return;
+ if(!dbClient||!yonetici())return;
  dbClient.from('sifre_talep').select('*').eq('durum','b').then(function(r){
-  if(r.data){TALEPLER=r.data;ciz()}
- },function(){});
+  if(r.data){TALEPLER=r.data;ciz()}},function(){});
+ dbClient.from('kullanici_durum').select('*').then(function(r){
+  if(r.data){DURUMLAR=r.data;ciz()}},function(){});
 }
 /* ---------- BULUT SENKRONU ---------- */
 (function(){
