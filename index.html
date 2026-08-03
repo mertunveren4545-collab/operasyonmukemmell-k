@@ -294,6 +294,14 @@ body.dk .msj.ben .bal{background:#1D3A2A;border-color:#2E5A40}
 .tabs button.on{background:#12315C;border-color:#12315C;color:#fff}
 body.dk .tabs button{background:#1A1F26;border-color:#2A323B;color:#A9B4BF}
 body.dk .tabs button.on{background:#1E4A85;border-color:#1E4A85;color:#fff}
+.msj .bal img{max-width:100%;border-radius:8px;display:block}
+.msj .bal audio{width:220px;display:block}
+.mek{display:flex;gap:6px;margin-bottom:7px}
+.mek button,.mek label{flex:none;width:auto;padding:8px 12px;font-size:13px;background:#fff;color:#12315C;
+ border:1px solid #CDD3D9;border-radius:8px;font-weight:600;cursor:pointer;display:inline-block}
+.mek button.rec{background:#B2402F;color:#fff;border-color:#B2402F}
+body.dk .mek button,body.dk .mek label{background:#1A1F26;color:#8FB6EA;border-color:#333C46}
+.mek input{display:none}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
 </style>
@@ -462,6 +470,7 @@ function bekleyenDestek(){var r=[];
 var OP2='mert';
 var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[],DURUMLAR=[];
 var MESAJLAR=[],SON_OKUMA=null,MHEDEF='herkes',MZAMAN=null,MTASLAK='',MSAYI=0,SES=true;
+var KAYITCI=null,KAYITTA=false,KPARCA=[];
 function yonetici(){return ME=='mert'||ME=='mesut'}
 function bYetkiTum(){return sistemci()}
 function cevrimici(t){ if(!t)return false; return (new Date()-new Date(t))<180000 }
@@ -512,6 +521,39 @@ function bip(){
   setTimeout(function(){try{c.close()}catch(e){}},600);
  }catch(e){}
 }
+function mesajHTML(){
+ var h='';
+ var liste=MESAJLAR.filter(function(m){
+  if(MHEDEF=='herkes')return m.alici=='herkes';
+  if(MHEDEF.slice(0,2)=='b:')return m.alici==MHEDEF;
+  return (m.gonderen==ME&&m.alici==MHEDEF)||(m.gonderen==MHEDEF&&m.alici==ME);
+ });
+ if(!liste.length)return '<div style="font-size:13px;color:#8592A0;text-align:center;padding:18px">Henüz mesaj yok.</div>';
+ liste.forEach(function(m){
+  var ic;
+  if(m.tur=='gorsel'&&m.veri) ic='<img src="'+m.veri+'" data-a="fs" data-src="'+m.veri+'">';
+  else if(m.tur=='ses'&&m.veri) ic='<audio controls src="'+m.veri+'"></audio>';
+  else ic=esc(m.metin||'');
+  h+='<div class="msj'+(m.gonderen==ME?' ben':'')+'">'+
+    (m.gonderen!=ME?'<div class="kim">'+ad(m.gonderen)+'</div>':'')+
+    '<div class="bal">'+ic+'</div>'+
+    '<div class="mt">'+fmt(m.ts)+'</div></div>';
+ });
+ return h;
+}
+function listeYenile(){
+ var lst=document.querySelector('.mliste');
+ if(!lst){ciz();return}
+ lst.innerHTML=mesajHTML();
+ lst.scrollTop=lst.scrollHeight;
+}
+function mesajYolla(o){
+ var yeni={id:'m'+Date.now()+Math.floor(Math.random()*99),gonderen:ME,alici:MHEDEF,
+   metin:o.metin||'',tur:o.tur||'metin',veri:o.veri||null,ts:new Date().toISOString()};
+ MESAJLAR.push(yeni);MSAYI=MESAJLAR.length;
+ if(dbClient)dbClient.from('mesajlar').insert(yeni).then(function(){},function(e){console.log('msj:',e)});
+ listeYenile();
+}
 function mesajGetir(){
  if(!dbClient||!GIRIS)return;
  dbClient.from('mesajlar').select('*').order('ts',{ascending:true}).limit(300).then(function(r){
@@ -524,7 +566,8 @@ function mesajGetir(){
    return m.alici=='herkes'||m.alici==ME||(mb&&m.alici=='b:'+mb)});
   if(bana.length){bip();
    if(V!='mesaj')say(ad(bana[bana.length-1].gonderen)+': '+bana[bana.length-1].metin.slice(0,40));}
-  if(MESAJLAR.length!=MSAYI){MSAYI=MESAJLAR.length;if(V=='mesaj'||V=='ana')ciz()}
+  if(MESAJLAR.length!=MSAYI){MSAYI=MESAJLAR.length;
+   if(V=='mesaj')listeYenile(); else if(V=='ana')ciz();}
  },function(){});
 }
 function nabiz(){
@@ -1079,20 +1122,11 @@ function ciz(){
     P.filter(function(p){return p[0]!=ME}).map(function(p){
      return '<button class="'+(MHEDEF==p[0]?'on':'')+'" data-a="mh" data-v="'+p[0]+'">'+ks(p[0])+'</button>'}).join('')+
     '</div>';
-  var liste=MESAJLAR.filter(function(m){
-   if(MHEDEF=='herkes')return m.alici=='herkes';
-   if(MHEDEF.slice(0,2)=='b:')return m.alici==MHEDEF;
-   return (m.gonderen==ME&&m.alici==MHEDEF)||(m.gonderen==MHEDEF&&m.alici==ME);
-  });
-  h+='<div class="card mliste">';
-  if(!liste.length)h+='<div style="font-size:13px;color:#8592A0;text-align:center;padding:18px">Henüz mesaj yok.</div>';
-  liste.forEach(function(m){
-   h+='<div class="msj'+(m.gonderen==ME?' ben':'')+'">'+
-     (m.gonderen!=ME?'<div class="kim">'+ad(m.gonderen)+'</div>':'')+
-     '<div class="bal">'+esc(m.metin)+'</div>'+
-     '<div class="mt">'+fmt(m.ts)+'</div></div>';
-  });
-  h+='</div>';
+  h+='<div class="card mliste">'+mesajHTML()+'</div>';
+  h+='<div class="mek">'+
+    '<label>📎 Görsel / GIF<input type="file" id="mf" accept="image/*"></label>'+
+    '<button class="'+(KAYITTA?'rec':'')+'" data-a="mses">'+(KAYITTA?'⏹ Kaydı bitir':'🎤 Sesli mesaj')+'</button>'+
+    '</div>';
   h+='<div style="text-align:right;margin-bottom:6px"><button class="b g" style="width:auto;padding:6px 11px;font-size:12px" '+
     'data-a="ses">'+(SES?'🔔 Ses açık':'🔕 Ses kapalı')+'</button></div>';
   h+='<div class="card"><div class="note" style="margin:0 0 6px">Gönderilecek: <b>'+
@@ -1237,14 +1271,32 @@ document.addEventListener('click',function(e){
   ciz();return}
  if(a=='mh'){MHEDEF=t.dataset.v;ciz();return}
  if(a=='ses'){SES=!SES;if(SES)bip();ciz();return}
+ if(a=='mses'){
+  if(KAYITTA){try{KAYITCI.stop()}catch(e){}KAYITTA=false;ciz();return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){say('Tarayıcı ses kaydını desteklemiyor.');return}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(str){
+   KPARCA=[];
+   try{KAYITCI=new MediaRecorder(str)}catch(e){say('Kayıt başlatılamadı.');return}
+   KAYITCI.ondataavailable=function(ev){if(ev.data.size)KPARCA.push(ev.data)};
+   KAYITCI.onstop=function(){
+    str.getTracks().forEach(function(x){x.stop()});
+    var blob=new Blob(KPARCA,{type:'audio/webm'});
+    if(blob.size>2*1048576){say('Kayıt çok uzun.');return}
+    var rd=new FileReader();
+    rd.onload=function(){mesajYolla({tur:'ses',veri:rd.result,metin:'Sesli mesaj'});say('Sesli mesaj gönderildi')};
+    rd.readAsDataURL(blob);
+   };
+   KAYITCI.start();KAYITTA=true;say('Kayıt başladı — bitirmek için tekrar bas');ciz();
+   setTimeout(function(){if(KAYITTA){try{KAYITCI.stop()}catch(e){}KAYITTA=false;ciz()}},60000);
+  }).catch(function(){say('Mikrofon izni verilmedi.')});
+  return;
+ }
  if(a=='mgonder'){
-  var mt2=(document.getElementById('mm').value||'').trim();
+  var el9=document.getElementById('mm');
+  var mt2=(el9?el9.value:'').trim();
   if(mt2.length<1){say('Mesaj yaz.');return}
-  var yeni={id:'m'+Date.now(),gonderen:ME,alici:MHEDEF,metin:mt2,ts:new Date().toISOString()};
-  MESAJLAR.push(yeni);MSAYI=MESAJLAR.length;MTASLAK='';
-  if(dbClient)dbClient.from('mesajlar').insert(yeni).then(function(){},function(){});
-  say(MHEDEF=='herkes'?'Toplu mesaj gönderildi':'Gönderildi');
-  ciz();return}
+  MTASLAK='';if(el9)el9.value='';
+  mesajYolla({metin:mt2});return}
  if(a=='sifrekaydet'){
   var p1=document.getElementById('s1').value,p2=document.getElementById('s2').value;
   if(p1.length<6){HATA='Şifre en az 6 karakter olmalı.';ciz();return}
@@ -1492,6 +1544,13 @@ document.addEventListener('click',function(e){
  ciz();window.scrollTo(0,0);
 });
 document.addEventListener('change',function(e){
+ if(e.target.id=='mf'){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  if(f.size>2*1048576){say('Görsel 2 MB üstünde olamaz.');e.target.value='';return}
+  var rd=new FileReader();
+  rd.onload=function(){mesajYolla({tur:'gorsel',veri:rd.result,metin:f.name});say('Görsel gönderildi')};
+  rd.readAsDataURL(f);e.target.value='';return;
+ }
  if(e.target.id!='fu')return;
  var j=bul(+e.target.dataset.j),fs2=e.target.files;
  if(!j||!fs2.length)return;
