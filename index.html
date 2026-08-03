@@ -122,7 +122,8 @@ textarea{min-height:76px;resize:vertical}
 .emp{background:#fff;border-radius:9px;padding:24px 16px;text-align:center;color:#8592A0;font-size:13.5px}
 .note{font-size:11.5px;color:#8592A0;margin-top:8px;line-height:1.45}
 /* ---- yatay şema ---- */
-.ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:stretch}
+.ogrid>div{display:flex}
 .oc,.och,.obul li,.oper .pi b,.omgr b{word-break:break-word;overflow-wrap:anywhere;hyphens:auto}
 .och{white-space:normal}
 .tip{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
@@ -176,27 +177,30 @@ body.dk .zbtn{background:#1A1F26;border-color:#333C46;color:#8FB6EA}
 .odir span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#A9C4E8}
 .odir b{display:block;font-size:18px;margin-top:3px}
 .oarr{text-align:center;color:#2E7D4B;font-size:18px;line-height:1;margin:2px 0 8px}
-.oc{border:1.5px solid #2E7D4B;border-radius:12px;padding:11px;margin-bottom:12px;background:#fff}
+.oc{border:1.5px solid #2E7D4B;border-radius:12px;padding:10px;margin-bottom:0;background:#fff;
+ display:flex;flex-direction:column;height:100%}
 .och{background:#2E7D4B;color:#fff;border-radius:7px;padding:9px 11px;text-align:center;
  font-size:14px;font-weight:700;line-height:1.3}
 .obul{list-style:none;margin:10px 0 0;padding:0}
-.obul li{font-size:12.5px;color:#12315C;padding:3px 0 3px 14px;position:relative;line-height:1.35}
+.obul li{font-size:12px;color:#3B4A5A;padding:2px 0 2px 13px;position:relative;line-height:1.3}
 .obul li:before{content:'•';position:absolute;left:2px;color:#2E7D4B;font-weight:700}
-.osub{border:1px solid #C9D6CD;border-radius:8px;padding:9px;margin-top:9px}
+.osub{border:1px solid #DCE5DF;border-radius:8px;padding:8px;margin-top:9px;background:#FAFCFB}
 .osub b{display:block;font-size:12.5px;color:#12315C;text-align:center;
  border-bottom:1px solid #E4EAE6;padding-bottom:5px;margin-bottom:5px}
 .osub .obul li{font-size:11.5px;padding:2px 0 2px 13px}
-.omgr{border:1.5px solid #2E7D4B;border-radius:8px;padding:9px;margin-top:10px;text-align:center;background:#F4F9F6}
+.omgr{border:1px solid #2E7D4B;border-radius:8px;padding:8px;margin-top:9px;text-align:center;background:#EDF5F0}
 .omgr b{display:block;font-size:14px;color:#12315C}
 .omgr span{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:#5A6672}
-.oper{border:1.5px solid #2E7D4B;border-radius:8px;padding:8px 10px;margin-top:8px;
- display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:#fff}
+.oper{border:1px solid #D3DDD7;border-radius:8px;padding:7px 9px;margin-top:6px;
+ display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#fff}
 .oper .pi{flex:1;min-width:0}
 .oper .pi b{display:block;font-size:13.5px;color:#12315C;line-height:1.25}
 .oper .pi span{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#5A6672}
 .oper .pe{flex:none;color:#8592A0;font-size:14px}
-.oadd{width:100%;border:1.5px dashed #9CBFA9;border-radius:8px;padding:10px;margin-top:9px;
- background:#F4F9F6;color:#1E5C36;font-size:13px;font-weight:600}
+.oadd{width:100%;border:1.5px dashed #9CBFA9;border-radius:8px;padding:9px;margin-top:auto;
+ background:#F4F9F6;color:#1E5C36;font-size:12.5px;font-weight:600}
+.oper .pi b{font-size:13px}
+.och{margin-bottom:2px}
 .oamac{border:1.5px solid #2E7D4B;border-radius:10px;padding:12px;font-size:12.5px;
  color:#12315C;line-height:1.45;background:#fff}
 .oamac b{color:#2E7D4B}
