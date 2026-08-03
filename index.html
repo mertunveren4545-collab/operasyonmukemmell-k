@@ -1060,25 +1060,47 @@ document.addEventListener('click',function(e){
   if(!ku||!sf){HATA='Kullanıcı adı ve şifre gerekli.';ciz();return}
   if(!dbClient){HATA='Supabase kütüphanesi yüklenmedi — sayfayı yenile (Ctrl+F5).';ciz();return}
   t.textContent='Giriş yapılıyor…';t.disabled=true;
-  dbClient.auth.signInWithPassword({email:ku+'@opmuk.local',password:sf}).then(function(r){
-   if(r.error){
-    var m=(r.error.message||'').toLowerCase();
-    if(m.indexOf('invalid login')>=0) HATA='Kullanıcı adı veya şifre hatalı. (Hesap Supabase\'de açıldı mı?)';
-    else if(m.indexOf('email not confirmed')>=0) HATA='Hesap onaylanmamış — Supabase\'de "Confirm email" kapatılmalı.';
-    else if(m.indexOf('failed to fetch')>=0||m.indexOf('network')>=0) HATA='Sunucuya ulaşılamadı — internet ya da Supabase adresi hatalı.';
-    else HATA='Giriş hatası: '+r.error.message;
-    console.log('AUTH HATASI:',r.error);
-    GIRIS=false;ciz();return}
-   OTURUM=r.data.user;
-   var hedef=null;
-   for(var i=0;i<P.length;i++) if(P[i][0]==ku) hedef=P[i][0];
-   if(!hedef){HATA='Bu hesap personel listesinde tanımlı değil.';
-    dbClient.auth.signOut();GIRIS=false;ciz();return}
-   ME=hedef;GIRIS=true;HATA='';V='ana';
-   ZORUNLU=!(r.data.user.user_metadata&&r.data.user.user_metadata.pw_set);
-   talepleriGetir();
-   ciz();window.scrollTo(0,0);
+  var mail=ku+'@opmuk.local';
+  var kisiVar=false;for(var i8=0;i8<P.length;i8++)if(P[i8][0]==ku)kisiVar=true;
+  if(!kisiVar){HATA='Bu kullanıcı adı personel listesinde yok.';GIRIS=false;ciz();return}
+
+  function basarili(u){
+   ME=ku;GIRIS=true;HATA='';V='ana';
+   ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
+   talepleriGetir();ciz();window.scrollTo(0,0);
    say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
+  }
+  function hataGoster(e){
+   var m=((e&&e.message)||'').toLowerCase();
+   if(m.indexOf('confirm')>=0||m.indexOf('not confirmed')>=0)
+    HATA='Supabase ayarı eksik: Authentication → Providers → Email → "Confirm email" kapatılmalı.';
+   else if(m.indexOf('invalid login')>=0)
+    HATA='Şifre hatalı. Unuttuysan "Şifremi unuttum" ile talep gönder.';
+   else if(m.indexOf('rate')>=0)
+    HATA='Çok fazla deneme oldu, birkaç dakika bekle.';
+   else if(m.indexOf('failed to fetch')>=0||m.indexOf('network')>=0)
+    HATA='Sunucuya ulaşılamadı — internet bağlantını kontrol et.';
+   else HATA='Giriş hatası: '+((e&&e.message)||'bilinmiyor');
+   console.log('AUTH:',e);GIRIS=false;ciz();
+  }
+
+  dbClient.auth.signInWithPassword({email:mail,password:sf}).then(function(r){
+   if(!r.error){OTURUM=r.data.user;basarili(r.data.user);return}
+   var m=(r.error.message||'').toLowerCase();
+   /* hesap yoksa ve varsayılan şifreyle giriliyorsa otomatik oluştur */
+   if(m.indexOf('invalid login')>=0 && sf=='123456'){
+    dbClient.auth.signUp({email:mail,password:'123456'}).then(function(r2){
+     if(r2.error){hataGoster(r2.error);return}
+     if(!r2.data.session){
+      HATA='Hesap oluşturuldu ama giriş yapılamadı. Supabase → Authentication → Providers → Email → "Confirm email" kapatılmalı.';
+      GIRIS=false;ciz();return}
+     OTURUM=r2.data.user;
+     say('Hesabın oluşturuldu');
+     basarili(r2.data.user);
+    });
+    return;
+   }
+   hataGoster(r.error);
   });
   return;
  }
