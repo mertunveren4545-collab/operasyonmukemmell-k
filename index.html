@@ -1232,11 +1232,15 @@ document.addEventListener('click',function(e){
   if(!ku||!sf){HATA='Kullanıcı adı ve şifre gerekli.';ciz();return}
   if(!dbClient){HATA='Supabase kütüphanesi yüklenmedi — sayfayı yenile (Ctrl+F5).';ciz();return}
   t.textContent='Giriş yapılıyor…';t.disabled=true;
+  var zamanAsimi=setTimeout(function(){
+   HATA='Sunucu yanıt vermedi. İnternet bağlantını kontrol edip tekrar dene.';GIRIS=false;ciz();
+  },15000);
   var mail=ku+'@opmuk.com';
   var kisiVar=false;for(var i8=0;i8<P.length;i8++)if(P[i8][0]==ku)kisiVar=true;
   if(!kisiVar){HATA='Bu kullanıcı adı personel listesinde yok.';GIRIS=false;ciz();return}
 
   function basarili(u){
+   clearTimeout(zamanAsimi);
    ME=ku;GIRIS=true;HATA='';V='ana';
    if(dbClient){
     var pw=!!(u&&u.user_metadata&&u.user_metadata.pw_set);
@@ -1244,12 +1248,15 @@ document.addEventListener('click',function(e){
       son_giris:new Date().toISOString(),sifre_belirlendi:pw}).then(function(){},function(){});
    }
    ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
-   talepleriGetir();mesajGetir();nabiz();
-   setInterval(nabiz,120000);setInterval(mesajGetir,25000);
-   ciz();window.scrollTo(0,0);
-   say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
+   try{ talepleriGetir();mesajGetir();nabiz();
+    if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);setInterval(mesajGetir,25000);}
+   }catch(e){ console.log('yan islem:',e); }
+   try{ ciz();window.scrollTo(0,0);
+    say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
+   }catch(e){ HATA='Ekran hatası: '+e.message;GIRIS=false;ciz(); }
   }
   function hataGoster(e){
+   clearTimeout(zamanAsimi);
    var m=((e&&e.message)||'').toLowerCase();
    if(m.indexOf('confirm')>=0||m.indexOf('not confirmed')>=0)
     HATA='Supabase ayarı eksik: Authentication → Providers → Email → "Confirm email" kapatılmalı.';
@@ -1276,11 +1283,11 @@ document.addEventListener('click',function(e){
      OTURUM=r2.data.user;
      say('Hesabın oluşturuldu');
      basarili(r2.data.user);
-    });
+    }).catch(function(e){ hataGoster(e); });
     return;
    }
    hataGoster(r.error);
-  });
+  }).catch(function(e){ hataGoster(e); });
   return;
  }
  if(a=='cikis'){
