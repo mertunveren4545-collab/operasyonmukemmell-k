@@ -586,7 +586,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir</p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s4</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -1264,7 +1264,9 @@ document.addEventListener('click',function(e){
   function hataGoster(e){
    clearTimeout(zamanAsimi);
    var m=((e&&e.message)||'').toLowerCase();
-   if(m.indexOf('confirm')>=0||m.indexOf('not confirmed')>=0)
+   if(m.indexOf('already registered')>=0||m.indexOf('already been registered')>=0)
+    HATA='Bu hesap zaten var — 123456 artık geçerli değil. Kendi belirlediğin şifreyi gir. Hatırlamıyorsan "Şifremi unuttum" ile talep gönder.';
+   else if(m.indexOf('confirm')>=0||m.indexOf('not confirmed')>=0)
     HATA='Supabase ayarı eksik: Authentication → Providers → Email → "Confirm email" kapatılmalı.';
    else if(m.indexOf('invalid login')>=0)
     HATA='Şifre hatalı. Unuttuysan "Şifremi unuttum" ile talep gönder.';
