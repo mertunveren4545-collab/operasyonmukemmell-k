@@ -652,13 +652,18 @@ function ciz(){
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
   h+='<div class="note" style="margin:10px 0 0">'+
-    (tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
+    (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
+     tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
+    '<button data-a="mesaj"><i>💬</i>Mesajlar'+rz(BD.mesaj)+'</button>'+
     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
     '<button data-a="yeni"><i>＋</i>Yeni iş</button></div>';
   h+='<div class="acts">'+
+    '<button data-a="sifre"><i>🔑</i>Şifre</button>'+
+    (yonetici()?'<button data-a="kullanicilar"><i>👥</i>Kullanıcılar'+rz(BD.sifre)+'</button>':'')+
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
-    '<button data-a="akis"><i>⇉</i>Onay akışı</button>'+
+    '<button data-a="akis"><i>⇉</i>Onay akışı</button></div>';
+  h+='<div class="acts">'+
     '<button data-a="veri"><i>▦</i>Veriler</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button></div>';
  }
