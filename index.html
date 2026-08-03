@@ -1,0 +1,834 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Operasyonel Mükemmellik</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,.06)}body{margin:0;background:#F0F1F3;color:#16202B; font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:24px}button,select,textarea,input{font:inherit}button{touch-action:manipulation}header{background:#12315C;color:#fff;padding:11px 12px}.top{display:flex;align-items:center;gap:9px;margin-bottom:9px}.top .bk{background:#1E4A85;border:0;color:#fff;padding:8px 12px;border-radius:6px;font-size:14px}.top .tt{font-size:15.5px;font-weight:600;flex:1}select.who{width:100%;padding:10px;border:0;border-radius:6px;background:#1E4A85;color:#fff;font-size:15px}main{padding:12px;max-width:620px;margin:0 auto}h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#77838F;margin:18px 0 8px}h2:first-child{margin-top:0}
+.r{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:#fff;border:0; border-radius:9px;padding:13px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.06)}.r:active{background:#EDF2EE}.r .ml{flex:1;min-width:0}.r .ml b{display:block;font-size:15px;line-height:1.3}.r .ml span{font-size:12px;color:#8592A0}.r .rt{flex:none;text-align:right}.r .rt b{display:block;font-size:20px;line-height:1;color:#12315C}.r .rt span{font-size:10.5px;color:#8592A0}.r .ar{flex:none;color:#B4BCC4;font-size:17px}.r.lt{border-left:4px solid #B2402F}.r.ok{border-left:4px solid #2E7D4B}.r.wt{border-left:4px solid #C08A1E}
+.big{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#12315C;color:#fff; border:0;border-radius:10px;padding:15px 14px;margin-bottom:10px}.big b{font-size:17px;display:block}.big span{font-size:12.5px;color:#B6CCEA}.big .num{margin-left:auto;font-size:30px;font-weight:700}
+.acts{display:flex;gap:8px;margin-top:10px}.acts button{flex:1;background:#fff;border:0;border-radius:9px;padding:14px 8px;font-size:13px; font-weight:600;color:#12315C;box-shadow:0 1px 2px rgba(0,0,0,.06)}.acts button:active{background:#EDF2EE}.acts button i{display:block;font-style:normal;font-size:19px;margin-bottom:5px}
+.card{background:#fff;border-radius:9px;padding:13px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}.card h3{margin:0 0 10px;font-size:14px}.kv{display:flex;gap:8px;margin-bottom:10px}.kv div{flex:1;background:#fff;border-radius:9px;padding:11px;box-shadow:0 1px 2px rgba(0,0,0,.06)}.kv b{display:block;font-size:21px;line-height:1.1;color:#12315C}.kv span{font-size:11px;color:#5A6672}.kv div.bad b{color:#B2402F}
+.li{padding:9px 0;border-bottom:1px solid #F0F2F4;font-size:14px}.li:last-child{border-bottom:0}.li .h{display:flex;justify-content:space-between;gap:8px}.li .h b{font-weight:600}.li .h i{font-style:normal;font-size:11.5px;color:#8592A0;flex:none}.li .s{font-size:12px;color:#8592A0;margin-top:2px}.li.late .h i{color:#B2402F;font-weight:600}.sub{display:block;width:100%;text-align:left;background:#F7F8F9;border:0;border-radius:7px; padding:9px 10px;margin-top:6px;font-size:13px;color:#16202B}.sub:active{background:#E9EEF1}.sub span{display:block;font-size:11.5px;color:#8592A0;margin-top:2px}.sub span.l{color:#B2402F;font-weight:600}.bar{height:7px;background:#EDEFF1;border-radius:4px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:#2E7D4B}.bar i.w{background:#C08A1E}.msg{margin-top:5px;background:#FBF4E4;border-left:3px solid #C08A1E;padding:7px 9px;border-radius:4px; font-size:12.5px;color:#5A4A22}
+/* organizasyon */.org{background:#fff;border-radius:9px;padding:13px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}.org .dir{background:#12315C;color:#fff;border-radius:8px;padding:12px;text-align:center;margin-bottom:12px}.org .dir b{display:block;font-size:16px}.org .dir span{font-size:11.5px;color:#B6CCEA}.ob{border:1px solid #DDE2E6;border-radius:8px;margin-bottom:9px;overflow:hidden}.ob .oh{background:#EDF3EE;padding:10px 12px;border-bottom:1px solid #DDE2E6}.ob .oh b{font-size:14px;color:#1E5C36}.ob .oh span{display:block;font-size:11px;color:#5A6672;margin-top:1px}.ob .op{padding:8px 12px;font-size:13.5px;border-bottom:1px solid #F2F4F5}.ob .op:last-child{border-bottom:0}.ob .op span{display:block;font-size:11px;color:#8592A0}.ob .op.sef b:after{content:' ★';color:#C08A1E;font-size:11px}.ob .oe{padding:8px 12px;font-size:12.5px;color:#8592A0;font-style:italic}
+.fl{background:#fff;border-radius:9px;padding:13px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}.fl .fh{font-size:14px;font-weight:600;color:#1E5C36;margin-bottom:10px}.stg{display:flex;align-items:stretch;gap:6px}.stg .nd{flex:1;background:#F4F6F8;border:1px solid #DDE2E6;border-radius:7px;padding:9px 8px;text-align:center;min-width:0}.stg .nd b{display:block;font-size:12.5px;line-height:1.25;word-break:break-word}.stg .nd span{font-size:10px;color:#8592A0}.stg .nd.s1{background:#EDF3EE;border-color:#BBD6C4}.stg .nd.s2{background:#FBF4E4;border-color:#E4D0A5}.stg .ok{flex:none;display:flex;align-items:center;color:#8592A0;font-size:17px;font-weight:700}.edt{margin-top:10px;padding-top:10px;border-top:1px solid #F0F2F4}.edt label{margin:8px 0 4px}.ky{display:inline-block;background:#FBF4E4;color:#8A6512;font-size:10.5px;font-weight:700; padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}svg.ch{display:block;width:100%;height:auto;max-width:340px;margin:0 auto}.lg2{display:flex;gap:12px;font-size:11.5px;color:#5A6672;margin-top:6px;flex-wrap:wrap}.lg2 span{display:flex;align-items:center;gap:5px}.lg2 i{width:9px;height:9px;border-radius:2px;display:block}.rw{margin-bottom:9px;font-size:13.5px}.rw .t{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}.rw .t i{font-style:normal;color:#5A6672;font-size:12px;flex:none}label{display:block;font-size:12px;font-weight:600;color:#5A6672;margin:12px 0 5px}input,textarea,select.n{width:100%;padding:11px;border:1px solid #CDD3D9;border-radius:7px; font-size:16px;background:#fff}textarea{min-height:76px;resize:vertical}.b{width:100%;padding:13px;border:0;border-radius:8px;background:#2E7D4B;color:#fff;font-weight:600;font-size:15px}.b.g{background:#fff;color:#12315C;border:1px solid #CDD3D9}.b.r{background:#B2402F}.b:active{opacity:.75}.two{display:flex;gap:8px}.two .b{flex:1}.sr{display:flex;gap:6px;margin-bottom:8px}.sr input.d{width:60px;flex:none;text-align:center}.sr button{width:42px;flex:none;border:1px solid #CDD3D9;background:#fff;border-radius:7px;color:#B2402F;font-size:18px}.emp{background:#fff;border-radius:9px;padding:24px 16px;text-align:center;color:#8592A0;font-size:13.5px}.note{font-size:11.5px;color:#8592A0;margin-top:8px;line-height:1.45}
+/* ---- gece modu ---- */body.dk{background:#11151A;color:#E4E9EE}body.dk header{background:#0C1D36}body.dk select.who{background:#17304F;color:#E4E9EE}body.dk .top .bk{background:#17304F;color:#E4E9EE}body.dk h2{color:#7E8B98}body.dk .r,body.dk .card,body.dk .kv div,body.dk .acts button,body.dk .org,body.dk .fl{ background:#1A1F26;box-shadow:none;border:1px solid #262D36;color:#E4E9EE}body.dk .acts button{color:#8FD3AC}body.dk .r .ml b{color:#E4E9EE}body.dk .r .ml span,body.dk .r .rt span,body.dk .li .s,body.dk .note,body.dk .kv span{color:#7E8B98}body.dk .r .rt b,body.dk .kv b{color:#8FB6EA}body.dk .r:active,body.dk .acts button:active{background:#222A33}body.dk .big{background:#17304F}body.dk .card h3{color:#E4E9EE}body.dk .li{border-bottom-color:#262D36}body.dk .sub{background:#222A33;color:#E4E9EE}body.dk .sub:active{background:#2A333D}body.dk .bar{background:#262D36}body.dk .msg{background:#2A2416;color:#E3C98A;border-left-color:#8A6512}body.dk input,body.dk textarea,body.dk select.n{background:#1A1F26;border-color:#333C46;color:#E4E9EE}body.dk .b.g{background:#1A1F26;color:#8FB6EA;border-color:#333C46}body.dk .emp{background:#1A1F26;color:#7E8B98;border:1px solid #262D36}body.dk .ob{border-color:#2B333D}body.dk .ob .oh{background:#1D2A22;border-bottom-color:#2B333D}body.dk .ob .oh b{color:#8FD3AC}body.dk .ob .oh span,body.dk .ob .op span,body.dk .ob .oe{color:#7E8B98}body.dk .ob .op{border-bottom-color:#242B33}body.dk .org .dir{background:#17304F}body.dk .obas{color:#8FB6EA;border-bottom-color:#7A6522}body.dk .odir{background:#17304F}body.dk .oc,body.dk .oamac{background:#1A1F26;border-color:#31513C}body.dk .och{background:#1E5C36}body.dk .obul li,body.dk .osub b,body.dk .omgr b,body.dk .oper .pi b,body.dk .oamac{color:#D5DDE4}body.dk .osub{border-color:#2B3A31}body.dk .osub b{border-bottom-color:#2B3A31}body.dk .omgr,body.dk .oper{background:#1D2A22;border-color:#31513C}body.dk .omgr span,body.dk .oper .pi span{color:#8FA79A}body.dk .oadd{background:#1D2A22;border-color:#3E6A4E;color:#8FD3AC}body.dk .conn .vt,body.dk .conn .hz,body.dk .conn .dn{background:#3E6A4E}body.dk .conn .ar{border-top-color:#3E6A4E}body.dk .stg .nd{background:#222A33;border-color:#333C46}body.dk .stg .nd.s1{background:#1D2A22;border-color:#31513C}body.dk .stg .nd.s2{background:#2A2416;border-color:#5C4A1E}body.dk .stg .ok{color:#7E8B98}body.dk .edt{border-top-color:#262D36}body.dk .fl .fh{color:#8FD3AC}body.dk .lg2,body.dk .rw .t i{color:#7E8B98}body.dk svg text{fill:#C7D0D9}.tg{background:#1E4A85;border:0;color:#fff;padding:8px 11px;border-radius:6px;font-size:15px;flex:none}body.dk .tg{background:#17304F}#t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px; border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}</style>
+
+<!-- Supabase Kütüphanesi -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body><header> <div class="top" id="top"></div> <select class="who" id="who"></select></header><main id="app"></main><div id="t"></div>
+<script>
+/* ---------- SUPABASE BAĞLANTISI (HATASIZ) ---------- */
+const SUPABASE_URL = 'https://jdemzkcsressnxuxwqbc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_chrxzJfkyRB-alPEIrx49Q_BxgGaZYz';
+let dbClient = null;
+try {
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+} catch (e) {
+  console.log('Supabase başlatılamadı:', e);
+}
+
+/* ---------- VERİLER ---------- */
+var B={ SI:{ad:'Süreç İyileştirme',sef:'mesut',ust:'ozkan',ug:1}, IK:{ad:'İç Kontrol & Süreç Denetimi',sef:'kamil',ust:'ozkan',ug:0}, DY:{ad:'Doküman Yönetim Sistemleri',sef:'ozkan',ust:'ozkan',ug:0}, VA:{ad:'Veri Analitiği & İş Zekası',sef:'gizem',ust:'ozkan',ug:1}, PY:{ad:'Proje Yönetimi',sef:'ozkan',ust:'ozkan',ug:0}};
+var T=[ {id:'t1',ad:'Pastörize Tesisi'}, {id:'t2',ad:'Kırım Tesisi'}, {id:'t3',ad:'İleri İşlem'}, {id:'t4',ad:'Kesimhane (Meyn 1)'}, {id:'t5',ad:'Kesimhane (Meyn 2)'}, {id:'t6',ad:'Viyol Tesisi'}, {id:'t7',ad:'Yem Fabrikası'}, {id:'t8',ad:'Kuluçkahane'}, {id:'t9',ad:'Damızlık İşletmeleri'}, {id:'t10',ad:'Paslanmaz Atölye'}, {id:'t11',ad:'Argon Atölyesi'}, {id:'t12',ad:'Kademe (Araç Bakım)'}, {id:'t13',ad:'Laboratuvar'}, {id:'t14',ad:'Lojistik / Depo'}, {id:'t15',ad:'Genel / Tesis dışı'}];
+
+function tad(i){for(var x=0;x<T.length;x++)if(T[x].id==i)return T[x].ad;return '—'}
+var ODAK={
+ SI:{alt:[{b:'Süreç İyileştirme',l:['Süreç haritalama','Süreç standardizasyonu','Yalın (Lean), Six Sigma projeleri','Süreç KPI takibi']},
+          {b:'Yalın Dönüşüm',l:['Kaizen çalışmaları','İsraf azaltma','Verimlilik arttırma projeleri','Saha iyileştirme uygulamaları']}]},
+ IK:{l:['Süreç riskleri','Kontrol noktaları','Uyum ve işleyiş kontrolü','Operasyonel risk azaltma']},
+ DY:{l:['Süreç doküman standartları','Doküman yönetim süreçleri']},
+ VA:{l:['Operasyonel veri analizi','Dashboardlar','Verimlilik analizi','Tahminleme modelleri']},
+ PY:{l:['Stratejik projelerin takibi','Dönüşüm projeleri','Proje metodolojisi (Agile / Waterfall)','Proje performans raporlama']}};
+var AMAC='Müşteri odaklı, veriyle yönetilen, karlılığı arttıran ve sürdürülebilir büyümeyi destekleyen entegre bir operasyonel mükemmellik yapısı oluşturmak.';
+var KEY=['mert','ozkan','mesut'];
+function bYetki(k){return KEY.indexOf(ME)>=0||B[k].sef==ME}
+function anahtar(){return KEY.indexOf(ME)>=0}
+var DIR={id:'ozkan',ad:'Özkan Üreyener',unvan:'Operasyonel Mükemmellik Direktörü'};
+var P=[
+ ['ozkan','Özkan Üreyener','Operasyonel Mükemmellik Direktörü',null,'ust'],
+ ['mesut','Mesut Ünver','Süreç İyileştirme Müdürü','SI','ust'],
+ ['mert','Mert Ünveren','Süreç İyileştirme Uzmanı','SI','c'],
+ ['gokhan','Gökhan Pandur','Süreç İyileştirme Uzmanı','SI','c'],
+ ['berna','Berna Türker','Süreç İyileştirme Sorumlusu','SI','c'],
+ ['emre','Emre Kaan Filiz','Süreç İyileştirme Sorumlusu','SI','c'],
+ ['kamil','Kamil Ayrancı','İç Denetim Yöneticisi','IK','l'],
+ ['meltem','Meltem Türkmenel','İç Denetim Yöneticisi','IK','l'],
+ ['feyza','Feyza Şahin','İç Denetçi','IK','c'],
+ ['alican','Alican Akyüz','İç Denetçi','IK','c'],
+ ['ilyas','İlyas Yılmaz','İç Denetçi','IK','c'],
+ ['dilvin','Dilvin Eymen Aydın','Doküman Yönetim Uzmanı','DY','c'],
+ ['gizem','Gizem Kaya Akın','İş Zekası ve Raporlama Ekip Lideri','VA','l'],
+ ['dilek','Dilek Alparslan Güner','İş Zekası ve Raporlama Uzmanı','VA','c']];
+var FT={
+ SI:['Süreç haritalama','Zaman etüdü','Kaizen','SMED','Norm kadro','5S / saha','Raporlama','Toplantı'],
+ IK:['Denetim planı','Saha denetimi','Kontrol noktası','Bulgu takibi','Risk analizi','Raporlama','Toplantı'],
+ DY:['Doküman revizyonu','Standart hazırlama','Yayın / dağıtım','Arşiv','Eğitim','Toplantı'],
+ VA:['Veri hazırlama','Dashboard geliştirme','Analiz','Model çalışması','Raporlama','Toplantı'],
+ PY:['Proje planlama','İlerleme takibi','Paydaş görüşmesi','Performans raporu','Toplantı']};
+var AY=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+
+function pn(i){for(var x=0;x<P.length;x++)if(P[x][0]==i)return P[x];return P[2]}
+function ad(i){return pn(i)[1]}
+function ks(i){var p=pn(i)[1].split(' ');return p[0]+' '+p[p.length-1][0]+'.'}
+function bad(k){return (B[k]||{ad:k}).ad}
+function ii(n){return(n<10?'0':'')+n}
+function yer(d){return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())+'T'+ii(d.getHours())+':'+ii(d.getMinutes())}
+var ST=['08:40','10:15','13:20','15:45','09:30','11:50','16:20','14:05'],SX=0;
+function ago(n,s){var d=new Date();d.setDate(d.getDate()-n);var t=s||ST[SX++%8];
+ d.setHours(+t.slice(0,2),+t.slice(3),0,0);return yer(d)}
+function now(){return yer(new Date())}
+var TODAY=now();
+function gn(a,b){return Math.max(0,Math.round((new Date(b)-new Date(a))/864e5))}
+function fmt(t){if(!t)return'';var d=new Date(t);return d.getDate()+' '+AY[d.getMonth()]+' '+ii(d.getHours())+':'+ii(d.getMinutes())}
+function gunAd(t){var d=new Date(t),b=new Date();b.setHours(0,0,0,0);
+ var f=Math.round((b-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
+ return f===0?'Bugün':f===1?'Dün':d.getDate()+' '+AY[d.getMonth()]}
+function sa(d){return (d/60).toFixed(1).replace('.',',')}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+/* Başlangıç Verileri */
+var J=[
+{id:1,ts_:'t10',ad:'Paslanmaz Atölye norm kadro raporu',br:'SI',bas:ago(14,'08:30'),a:[
+ {a:'Saha veri toplama',k:'mert',t:5,o:0,d:'t',g:ago(14,'08:30'),b:ago(8,'16:10')},
+ {a:'Veri kontrolü',k:'gokhan',t:2,o:0,tp:'k',d:'t',g:ago(8,'16:10'),b:ago(3,'11:25')},
+ {a:'Müdür onayı',k:'mesut',t:1,o:1,d:'a',g:ago(3,'11:25'),b:0},
+ {a:'Raporlama',k:'mert',t:3,o:0,d:'b',g:0,b:0}],
+ lg:[{ts:ago(14,'08:30'),k:'mesut',tip:'İş açıldı'},
+     {ts:ago(11,'09:15'),k:'mesut',hedef:'mert',tip:'Geri gönderdi → Mert Ünveren',msg:'Gözlem sayısı yetersiz, en az 40 tur olmalı.'},
+     {ts:ago(3,'11:25'),k:'gokhan',tip:'Adımı tamamladı → Mesut Ünver'}]},
+{id:2,ts_:'t11',ad:'Argon Atölyesi kapasite analizi',br:'SI',bas:ago(9,'09:00'),a:[
+ {a:'SAP PM veri çekimi',k:'dilek',t:2,o:0,d:'t',g:ago(9,'09:00'),b:ago(6,'14:40')},
+ {a:'Kapasite modeli',k:'mert',t:4,o:0,d:'a',g:ago(6,'14:40'),b:0},
+ {a:'Veri doğrulama kontrolü',k:'dilek',t:2,o:0,tp:'k',d:'b',g:0,b:0},
+ {a:'Müdür onayı',k:'mesut',t:1,o:1,d:'b',g:0,b:0}],
+ lg:[{ts:ago(9,'09:00'),k:'mesut',tip:'İş açıldı'}]}
+];
+
+var K=[];
+[['mert',0,'Zaman etüdü','Paslanmaz atölyede 40 gözlem turu alındı.',180,'t10'],
+ ['mert',1,'Norm kadro','Argon iş listesi çıkarıldı.',150,'t11']
+].forEach(function(x,i){K.push({id:'k'+i,k:x[0],ts:ago(x[1]),tip:x[2],ac:x[3],dk:x[4],ts_:x[5]||'t15'})});
+
+var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0;
+var OP2='mert';
+var ME='mert',V='ana',OB='SI',OJ=0,NS=null,RED=0,ED=0,YP={ad:'',unvan:'',br:'SI',rol:'c'};
+
+/* ---------- SUPABASE & VERİ ÇEKME ---------- */
+async function verileriGetir() {
+  try {
+    if (dbClient) {
+      let { data: islerVerisi, error } = await dbClient.from('isler').select('*');
+      if (!error && islerVerisi && islerVerisi.length > 0) {
+        J = islerVerisi.map(item => item.veri);
+      }
+      let { data: tesisVerisi } = await dbClient.from('tesisler').select('*');
+      if (tesisVerisi && tesisVerisi.length > 0) {
+        T = tesisVerisi;
+      }
+      ciz();
+    }
+  } catch (err) {}
+}
+
+async function işiBulutaKaydet(yeniIs) {
+  J.unshift(yeniIs);
+  ciz();
+  try {
+    if (dbClient) {
+      await dbClient.from('isler').insert([{ id: yeniIs.id, ad: yeniIs.ad, veri: yeniIs }]);
+    }
+  } catch (err) {}
+}
+
+async function işiBuluttaGüncelle(j) {
+  ciz();
+  try {
+    if (dbClient) {
+      await dbClient.from('isler').update({ veri: j }).eq('id', j.id);
+    }
+  } catch (err) {}
+}
+
+/* ---------- HESAPLAMA VE ÇİZİM ---------- */
+function stip(x){return x.tp||(x.o?'o':'i')}
+function tipAd(t){return t=='o'?'ONAY':t=='k'?'KONTROL':'İŞ'}
+function cur(j){for(var i=0;i<j.a.length;i++)if(j.a[i].d=='a')return j.a[i];return null}
+function gec(s){return s.g?gn(s.g,TODAY):0}
+function as(s){return gec(s)-s.t}
+function gor(j){var p=pn(ME); if(p[4]=='ust')return true; return j.br==p[3]||j.a.some(function(s){return s.k==ME})}
+function tumBolum(){return pn(ME)[4]=='ust'}
+function bolumListesi(){ if(tumBolum())return Object.keys(B); var mb=pn(ME)[3]; return mb?[mb]:[]}
+function bende(){return J.filter(function(j){var c=cur(j);return c&&c.k==ME})}
+function bek(j){var w=0,b=0;j.a.forEach(function(s){if(!s.g)return; var d=s.d=='t'?gn(s.g,s.b):gec(s);w+=Math.min(d,s.t);b+=Math.max(0,d-s.t)});return[w,b]}
+function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return n}
+function bj(k){return J.filter(gor).filter(function(j){return j.br==k})}
+function say(m){var e=document.getElementById('t');if(!e)return; e.textContent=m;e.style.display='block'; clearTimeout(say.h);say.h=setTimeout(function(){e.style.display='none'},2300)}
+function bul(id){for(var i=0;i<J.length;i++)if(J[i].id==id)return J[i];return null}
+
+function donut(w,b){
+ var t=w+b||1,p=w/t,r=28,c=2*Math.PI*r,o=c*p;
+ return '<svg class="ch" viewBox="0 0 230 72">'+
+  '<g transform="translate(38,36)">'+
+  '<circle r="'+r+'" fill="none" stroke="#C08A1E" stroke-width="12"></circle>'+
+  '<circle r="'+r+'" fill="none" stroke="#2E7D4B" stroke-width="12" stroke-dasharray="'+o+' '+(c-o)+'" transform="rotate(-90)"></circle>'+
+  '<text y="2" text-anchor="middle" font-size="14" font-weight="700" fill="#12315C">%'+Math.round(b/t*100)+'</text>'+
+  '<text y="13" text-anchor="middle" font-size="7" fill="#5A6672">bekleme</text></g>'+
+  '<text x="82" y="30" font-size="10" fill="#5A6672">Toplam süre</text>'+
+  '<text x="82" y="49" font-size="18" font-weight="700" fill="#12315C">'+t+' gün</text></svg>';
+}
+
+function hafta(rec){
+ var W=320,H=70,n=8,d=[];
+ for(var w=n-1;w>=0;w--){
+  var son=new Date();son.setDate(son.getDate()-w*7);son.setHours(23,59,59,0);
+  var bas=new Date(son);bas.setDate(bas.getDate()-6);bas.setHours(0,0,0,0);
+  var dk=0;rec.forEach(function(r){var t=new Date(r.ts);if(t>=bas&&t<=son)dk+=r.dk});
+  d.push([bas.getDate()+'/'+(bas.getMonth()+1),dk/60]);
+ }
+ var mx=1;d.forEach(function(x){mx=Math.max(mx,x[1])});
+ var bw=(W-10)/n,h='<svg class="ch" viewBox="0 0 '+W+' '+H+'">';
+ h+='<line x1="0" y1="'+(H-14)+'" x2="'+W+'" y2="'+(H-14)+'" stroke="#DFE3E7"></line>';
+ d.forEach(function(x,i){
+  var bh=(x[1]/mx)*(H-28),bx=5+i*bw,by=H-14-bh;
+  h+='<rect x="'+(bx+bw*0.22)+'" y="'+by+'" width="'+(bw*0.56)+'" height="'+bh+'" fill="#2E7D4B" rx="2"></rect>';
+  if(x[1])h+='<text x="'+(bx+bw/2)+'" y="'+(by-2.5)+'" font-size="7.5" text-anchor="middle" fill="#1E5C36" font-weight="700">'+Math.round(x[1])+'</text>';
+  h+='<text x="'+(bx+bw/2)+'" y="'+(H-4)+'" font-size="7" text-anchor="middle" fill="#8592A0">'+x[0]+'</text>';
+ });
+ return h+'</svg>';
+}
+
+function ciz(){
+ var t=document.getElementById('top');
+ var el=document.getElementById('app');
+ if(!t || !el) return;
+
+ try {
+  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',kayit:'Çalışma kaydı',
+    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:'Bende bekleyenler',
+    akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle'};
+  t.innerHTML=(V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
+    '<div class="tt">'+bl[V]+'</div>'+
+    '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>';
+  var h='';
+
+  if(V=='ana'){
+   var mn=bende(),gc=mn.filter(function(j){return as(cur(j))>0}).length;
+   h='<button class="big" data-a="bende"><div><b>Bende bekleyen iş</b>'+
+     '<span>'+(gc?gc+' tanesi termini aştı':'termin aşımı yok')+'</span></div>'+
+     '<div class="num">'+mn.length+'</div></button>';
+   h+='<h2>'+(tumBolum()?'Bölümler':'Bölümüm')+'</h2>';
+   bolumListesi().forEach(function(k){
+    var jb=bj(k),ac=jb.filter(cur);
+    var g=ac.filter(function(j){return as(cur(j))>0}).length;
+    var np=P.filter(function(p){return p[3]==k}).length;
+    h+='<button class="r '+(g?'lt':ac.length?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
+      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
+      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
+   });
+   h+='<div class="note" style="margin:10px 0 0">'+
+     (tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
+   h+='<div class="acts">'+
+     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
+     '<button data-a="yeni"><i>＋</i>Yeni iş</button></div>';
+   h+='<div class="acts">'+
+     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
+     '<button data-a="akis"><i>⇉</i>Onay akışı</button>'+
+     '<button data-a="veri"><i>▦</i>Veriler</button>'+
+     '<button data-a="tesis"><i>📍</i>Tesisler</button></div>';
+  }
+  else if(V=='bdet'&&bolumListesi().indexOf(OB)<0){
+   h='<div class="emp">Bu bölümü görüntüleme yetkin yok.<br>Sadece kendi bölümünü görebilirsin.</div>';
+   el.innerHTML=h;return;
+  }
+  else if(V=='bende'||V=='bdet'){
+   var L,kis=[];
+   if(V=='bende'){L=bende();}
+   else{L=bj(OB).filter(cur);kis=P.filter(function(p){return p[3]==OB});}
+   if(V=='bdet'){
+    var jb=bj(OB),w=0,b2=0,ia=0;
+    jb.forEach(function(j){var x=bek(j);w+=x[0];b2+=x[1];ia+=iade(j)});
+    var gg=L.filter(function(j){return as(cur(j))>0}).length;
+    h='<div class="kv"><div><b>'+L.length+'</b><span>Açık iş</span></div>'+
+      '<div class="'+(gg?'bad':'')+'"><b>'+gg+'</b><span>Gecikme</span></div>'+
+      '<div class="'+(ia?'bad':'')+'"><b>'+ia+'</b><span>Geri dönen</span></div></div>';
+    h+='<div class="card"><h3>Onay mercii</h3><div style="font-size:14px">'+ad(B[OB].sef)+'</div>'+
+      '<div style="font-size:12px;color:#8592A0">'+pn(B[OB].sef)[2]+'</div></div>';
+   }
+   var dg={};L.forEach(function(j){var c=cur(j);(dg[c.k]=dg[c.k]||[]).push(j)});
+   var dl=Object.keys(dg).map(function(x){return[x,dg[x]]}).sort(function(a,b){return b[1].length-a[1].length});
+   h+='<div class="card"><h3>İşler kimde ('+L.length+')</h3>';
+   if(!dl.length)h+='<div style="font-size:13px;color:#8592A0">Açık iş yok.</div>';
+   dl.forEach(function(x){
+    h+='<div class="li"><div class="h"><b>'+ad(x[0])+'</b><i>'+x[1].length+' iş</i></div>';
+    x[1].forEach(function(j){var c=cur(j),a2=as(c);
+     h+='<button class="sub" data-a="det" data-j="'+j.id+'">'+esc(j.ad)+
+       '<span>📍 '+tad(j.ts_)+'</span>'+
+       '<span class="'+(a2>0?'l':'')+'">['+tipAd(stip(c))+'] '+c.a+' · '+gec(c)+'/'+c.t+' gün'+
+       (a2>0?' · +'+a2+' aşım':'')+'</span></button>';
+    });
+    h+='</div>';
+   });
+   h+='</div>';
+   if(V=='bdet'){
+    var h7=ago(7);
+    h+='<div class="card"><h3>Personel ('+kis.length+')</h3>';
+    if(!kis.length)h+='<div style="font-size:13px;color:#8592A0">Personel atanmamış.</div>';
+    kis.forEach(function(p){
+     var rec=K.filter(function(r){return r.k==p[0]&&r.ts>=h7}),dk=0;
+     rec.forEach(function(r){dk+=r.dk});
+     var n=L.filter(function(j){return cur(j).k==p[0]}).length;
+     h+='<div class="li"><div class="h"><b>'+p[1]+'</b><i>'+(n?n+' iş':'—')+'</i></div>'+
+       '<div class="s">'+p[2]+'</div>'+
+       '<div class="s">son 7 gün: '+rec.length+' kayıt · '+sa(dk)+' saat</div>'+
+       '<div class="bar"><i class="'+(dk>=900?'':'w')+'" style="width:'+Math.min(100,Math.round(dk/2400*100))+'%"></i></div></div>';
+    });
+    h+='<div style="height:10px"></div><button class="b g" data-a="ekle" data-b="'+OB+'">+ Personel ekle</button></div>';
+   }
+  }
+  else if(V=='det'){
+   var j=bul(OJ),c=cur(j),x=bek(j),gr=gn(j.bas,TODAY),pl=0;
+   j.a.forEach(function(s){pl+=s.t});
+   h='<div class="card"><h3 style="font-size:16px">'+esc(j.ad)+'</h3>'+
+     '<div style="font-size:12px;color:#8592A0">📍 '+tad(j.ts_)+'</div>'+
+     '<div style="font-size:12px;color:#8592A0">'+bad(j.br)+' · '+fmt(j.bas)+'</div></div>';
+   h+='<div class="kv"><div><b>'+pl+'</b><span>Plan gün</span></div>'+
+     '<div class="'+(gr>pl?'bad':'')+'"><b>'+gr+'</b><span>Geçen gün</span></div>'+
+     '<div class="'+(x[1]?'bad':'')+'"><b>'+x[1]+'</b><span>Bekleme</span></div></div>';
+   h+='<div class="card"><h3>Adımlar</h3>';
+   j.a.forEach(function(s){
+    var mk=s.d=='t'?'✓':s.d=='a'?'▶':'○',lt=(s.d=='a'&&as(s)>0);
+    var tp2=stip(s),bl2=pn(s.k)[3];
+    h+='<div class="li'+(lt?' late':'')+'"><div class="h"><b>'+mk+' '+s.a+
+      '<span class="tip '+tp2+'">'+tipAd(tp2)+'</span></b>'+
+      '<i>'+(s.d=='t'?gn(s.g,s.b)+'/'+s.t+' g':s.d=='a'?gec(s)+'/'+s.t+' g':s.t+' g')+
+      (s.ekg?' <b style="color:#8A6512">+'+s.ekg+'</b>':'')+'</i></div>'+
+      '<div class="s">'+ad(s.k)+(bl2?' · '+bad(bl2):'')+'</div>'+
+      '<div class="s">'+(s.d=='t'?'gönderildi '+fmt(s.g)+' → tamamlandı '+fmt(s.b)
+        :s.d=='a'?'gönderildi '+fmt(s.g)+' → bekliyor':'sırada')+'</div></div>';
+   });
+   h+='</div>';
+   var ek=j.ek||[],ims=ek.filter(function(x){return x.tur=='i'}),dcs=ek.filter(function(x){return x.tur!='i'});
+   h+='<div class="card"><h3>Ekler ('+ek.length+')</h3>';
+   if(ims.length){h+='<div class="thm">';
+    ims.forEach(function(x){h+='<img src="'+x.veri+'" data-a="fs" data-src="'+x.veri+'">'});
+    h+='</div>'}
+   dcs.forEach(function(x){
+    h+='<div class="ekl"><div class="ic '+(x.tur=='x'?'x':x.tur=='p'?'p':'')+'">'+
+      (x.tur=='x'?'XLS':x.tur=='p'?'PDF':'DOC')+'</div>'+
+      '<div><div class="nm">'+esc(x.ad)+'</div><div class="mt">'+ad(x.k)+' · '+fmt(x.ts)+' · '+x.boyut+'</div></div>'+
+      '<a class="b g" style="margin-left:auto;width:auto;padding:7px 11px;font-size:12px;text-decoration:none" '+
+      'href="'+x.veri+'" download="'+esc(x.ad)+'">Aç</a></div>';
+   });
+   if(!ek.length)h+='<div style="font-size:13px;color:#8592A0;margin-bottom:9px">Henüz ek yok.</div>';
+   h+='<div style="height:8px"></div><label class="upl">Excel, PDF veya fotoğraf ekle'+
+     '<input type="file" id="fu" data-j="'+j.id+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label></div>';
+   h+='<div class="card"><h3>Geçmiş</h3>';
+   (j.lg||[]).slice().reverse().forEach(function(l){
+    h+='<div class="li"><div class="h"><b>'+esc(l.tip)+'</b><i>'+fmt(l.ts)+'</i></div>'+
+      '<div class="s">'+ad(l.k)+'</div>'+(l.msg?'<div class="msg">'+esc(l.msg)+'</div>':'')+'</div>';
+   });
+   h+='</div>';
+   var tlp=(j.tal||[]).filter(function(x){return x.durum=='b'});
+   if(tlp.length){
+    h+='<div class="card"><h3>Ek süre talebi</h3>';
+    tlp.forEach(function(x,xi){
+     var yetkili=(B[j.br].sef==ME)||KEY.indexOf(ME)>=0;
+     h+='<div class="li"><div class="h"><b>+'+x.gun+' iş günü</b><i>'+fmt(x.ts)+'</i></div>'+
+       '<div class="s">'+ad(x.k)+' · '+esc(x.adim)+'</div>'+
+       '<div class="msg">'+esc(x.neden)+'</div>'+
+       (yetkili?'<div class="two" style="margin-top:8px">'+
+         '<button class="b" data-a="tkab" data-j="'+j.id+'" data-x="'+xi+'">Kabul et</button>'+
+         '<button class="b g" data-a="tret" data-j="'+j.id+'" data-x="'+xi+'">Reddet</button></div>'
+        :'<div class="s" style="margin-top:6px">Onay bekleniyor: '+ad(B[j.br].sef)+'</div>')+
+       '</div>';
+    });
+    h+='</div>';
+   }
+   if(c&&c.k==ME){
+    if(TAL==j.id){
+     h+='<div class="card"><h3>Ek süre talebi</h3>'+
+       '<label>Kaç iş günü ek süre?</label><input type="number" id="tg" min="1" value="2">'+
+       '<label>Neden</label><textarea id="tn" placeholder="Örn. Araya acil bir hat duruşu girdi, saha çalışması 2 gün ertelendi."></textarea>'+
+       '<div style="height:10px"></div><div class="two">'+
+       '<button class="b" data-a="tgo" data-j="'+j.id+'">Talebi gönder</button>'+
+       '<button class="b g" data-a="tno">Vazgeç</button></div></div>';
+    }else if(GEC2==j.id){
+     h+='<div class="card"><h3>Termin aşıldı — nedeni nedir?</h3>'+
+       '<textarea id="gn" placeholder="Örn. Veriyi bakım biriminden geç aldım, 3 gün bekledim."></textarea>'+
+       '<div style="height:10px"></div><div class="two">'+
+       '<button class="b" data-a="gok" data-j="'+j.id+'">Kaydet ve devret</button>'+
+       '<button class="b g" data-a="gno">Vazgeç</button></div>'+
+       '<div class="note">Bu açıklama sürecin nerede tıkandığını görmek için kayda geçer.</div></div>';
+    }else if(RED==j.id){
+     h+='<div class="card"><h3>Neden geri gönderiyorsun?</h3>'+
+       '<textarea id="rt" placeholder="Eksik olan neyse yaz. Karşı taraf bunu görecek."></textarea>'+
+       '<div style="height:10px"></div><div class="two">'+
+       '<button class="b r" data-a="rgo" data-j="'+j.id+'">Gönder</button>'+
+       '<button class="b g" data-a="rno">Vazgeç</button></div></div>';
+    }else{
+     var tc=stip(c);
+     h+='<button class="b" data-a="ok" data-j="'+j.id+'">'+
+       (tc=='o'?'Onayla':tc=='k'?'Kontrol ettim':'Bitirdim')+' ve devret</button>';
+     if(j.a.indexOf(c)>0)h+='<div style="height:8px"></div><button class="b g" data-a="red" data-j="'+j.id+'">Geri gönder</button>';
+     h+='<div style="height:8px"></div><button class="b g" data-a="tal" data-j="'+j.id+'">Ek süre talep et</button>';
+    }
+   }else if(c)h+='<div class="emp">Şu an '+ad(c.k)+' üzerinde — '+fmt(c.g)+' tarihinden beri.</div>';
+  }
+  else if(V=='org'){
+   var ky=Object.keys(B),n=ky.length;
+   h='<button class="zbtn" data-a="zoom">'+(ZOOM?'▤ Okunur görünüme dön':'⤢ Tam şema görünümü')+'</button>';
+   h+=ZOOM?'<div class="swrap" id="sw"><div class="sch" id="sc">':'<div><div>';
+   h+='<div class="obas">OPERASYONEL MÜKEMMELLİK</div>';
+   h+='<div class="'+(ZOOM?'sdir':'')+'"><div class="odir"><span>Operasyonel Mükemmellik Direktörü</span><b>'+DIR.ad+'</b></div></div>';
+   h+='<div class="conn">'+(ZOOM?'<div class="vt"></div><div class="hz"></div>':'')+'';
+   if(ZOOM)for(var q=0;q<n;q++){
+    var pc=(100/n)*(q+0.5);
+    h+='<div class="dn" style="left:'+pc+'%"></div><div class="ar" style="left:'+pc+'%"></div>';
+   }
+   if(!ZOOM)h+='<div class="vt" style="left:50%"></div><div class="ar" style="left:50%;top:14px"></div>';
+   h+='</div>'+(ZOOM?'<div class="cols">':'<div class="ogrid">');
+   ky.forEach(function(k){
+    var g=P.filter(function(p){return p[3]==k}),o=ODAK[k]||{},yt=bYetki(k);
+    h+='<div><div class="oc"><div class="och">'+B[k].ad+'</div>';
+    g.filter(function(p){return p[4]!='c'}).forEach(function(p){
+     h+='<div class="omgr"><b>'+p[1]+'</b><span>'+p[2]+'</span></div>';
+    });
+    if(o.l)h+='<ul class="obul">'+o.l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';
+    if(o.alt){h+='<div class="osubs">';
+     o.alt.forEach(function(a){
+      h+='<div class="osub"><b>'+a.b+'</b><ul class="obul">'+
+        a.l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>';
+     });
+     h+='</div>';}
+    g.filter(function(p){return p[4]=='c'}).forEach(function(p){
+     h+=(yt?'<button class="oper" data-a="pedit" data-p="'+p[0]+'">':'<div class="oper">')+
+       '<div class="pi"><b>'+p[1]+'</b><span>'+p[2]+'</span></div>'+
+       (yt?'<div class="pe">✎</div>':'')+(yt?'</button>':'</div>');
+    });
+    if(!g.length)h+='<div style="font-size:11.5px;color:#8592A0;text-align:center;padding:8px">personel atanmamış</div>';
+    if(yt)h+='<button class="oadd" data-a="ekle" data-b="'+k+'">+ Personel</button>';
+    h+='</div></div>';
+   });
+   h+='</div>';
+   h+='<div class="oamac" style="margin-top:12px"><b>Amaç:</b> '+AMAC+'</div>';
+   h+='</div></div>';
+   SIG=ZOOM;
+   h+='<div class="note">Bölüm yöneticisi kendi bölümüne personel ekleyebilir ve unvan değiştirebilir. '+
+     'Yetkililer: '+KEY.map(ad).join(', ')+' ve her bölümün kendi yöneticisi.</div>';
+  }
+  else if(V=='pedit'){
+   var pp=pn(OP2);
+   if(!bYetki(pp[3])){h='<div class="emp">Bu personeli düzenleme yetkin yok.</div>';el.innerHTML=h;return}
+   h='<div class="card"><label>Ad soyad</label><input id="ea" value="'+esc(pp[1]).replace(/"/g,'&quot;')+'">'+
+     '<label>Unvan</label><input id="eu" value="'+esc(pp[2]).replace(/"/g,'&quot;')+'">'+
+     '<label>Bölüm</label><select class="n" id="eb">'+
+     Object.keys(B).map(function(k){return '<option value="'+k+'"'+(k==pp[3]?' selected':'')+'>'+B[k].ad+'</option>'}).join('')+
+     '</select><label>Yetki</label><select class="n" id="er">'+
+     '<option value="c"'+(pp[4]=='c'?' selected':'')+'>Çalışan</option>'+
+     '<option value="l"'+(pp[4]=='l'?' selected':'')+'>Ekip lideri</option>'+
+     '<option value="ust"'+(pp[4]=='ust'?' selected':'')+'>Yönetici — tüm bölümler</option>'+
+     '</select><div style="height:14px"></div>'+
+     '<button class="b" data-a="psave" data-p="'+pp[0]+'">Kaydet</button></div>';
+  }
+  else if(V=='ekle'){
+   if(!bYetki(YP.br)){h='<div class="emp">Bu bölüme personel ekleme yetkin yok.</div>';el.innerHTML=h;return}
+   h='<div class="card"><label>Ad soyad</label><input id="pa" value="'+esc(YP.ad)+'" placeholder="Örn. Ayşe Yılmaz">'+
+     '<label>Unvan</label><input id="pu" value="'+esc(YP.unvan)+'" placeholder="Örn. Süreç İyileştirme Uzmanı">'+
+     '<label>Bölüm</label><select class="n" id="pb">'+
+     Object.keys(B).map(function(k){return '<option value="'+k+'"'+(k==YP.br?' selected':'')+'>'+B[k].ad+'</option>'}).join('')+
+     '</select><label>Yetki</label><select class="n" id="pr">'+
+     '<option value="c"'+(YP.rol=='c'?' selected':'')+'>Çalışan — sadece kendi işleri</option>'+
+     '<option value="l"'+(YP.rol=='l'?' selected':'')+'>Ekip lideri — kendi bölümü</option>'+
+     '<option value="ust"'+(YP.rol=='ust'?' selected':'')+'>Yönetici — tüm bölümler</option>'+
+     '</select><div style="height:14px"></div><button class="b" data-a="pnew">Personeli ekle</button></div>';
+  }
+  else if(V=='akis'){
+   var yet=anahtar();
+   h='<div class="note" style="margin-bottom:10px">Bir iş açıldığında son adımlar otomatik olarak buradaki zincire göre atanır.'+
+     (yet?' Değiştirebilirsin.':' Düzenleme yetkisi: '+KEY.map(ad).join(', ')+'.')+'</div>';
+   (yet?Object.keys(B):bolumListesi()).forEach(function(k){
+    var c=B[k];
+    h+='<div class="fl"><div class="fh">'+c.ad+(yet?'<span class="ky">düzenlenebilir</span>':'')+'</div>';
+    h+='<div class="stg">'+
+      '<div class="nd"><b>Çalışan</b><span>işi yapan</span></div>'+
+      '<div class="ok">→</div>'+
+      '<div class="nd s1"><b>'+ks(c.sef)+'</b><span>1. onay</span></div>'+
+      (c.ug?'<div class="ok">→</div><div class="nd s2"><b>'+ks(c.ust)+'</b><span>2. onay</span></div>':'')+
+      '<div class="ok">→</div><div class="nd"><b>Kapanış</b><span>iş biter</span></div></div>';
+    if(yet){
+     h+='<div class="edt"><label>1. onay</label><select class="n" data-a="sset" data-b="'+k+'">'+
+       P.filter(function(p){return p[4]!='c'||!p[3]}).map(function(p){
+        return '<option value="'+p[0]+'"'+(p[0]==c.sef?' selected':'')+'>'+p[1]+'</option>'}).join('')+
+       '</select>'+
+       '<label>2. onay (üst kademe)</label><select class="n" data-a="uset" data-b="'+k+'">'+
+       '<option value="0"'+(c.ug?'':' selected')+'>— gerekmiyor —</option>'+
+       P.filter(function(p){return p[4]=='ust'}).map(function(p){
+        return '<option value="'+p[0]+'"'+(c.ug&&p[0]==c.ust?' selected':'')+'>'+p[1]+'</option>'}).join('')+
+       '</select></div>';
+    }
+    h+='</div>';
+   });
+   h+='<div class="note">1. onay bölümün kendi yöneticisidir. 2. onay yalnız üst kademe gerektiren işler için açılır — '+
+     'her işe koyarsan süre uzar, gerçekten gerekmedikçe kapalı bırak.</div>';
+  }
+  else if(V=='veri'){
+   var vis=J.filter(gor);
+   var tw=0,tb=0,ia=0;vis.forEach(function(j){var x=bek(j);tw+=x[0];tb+=x[1];ia+=iade(j)});
+   var acc=vis.filter(cur),gcc=acc.filter(function(j){return as(cur(j))>0}).length;
+   h='<div class="kv"><div><b>'+acc.length+'</b><span>Açık iş</span></div>'+
+     '<div class="'+(gcc?'bad':'')+'"><b>'+gcc+'</b><span>Gecikme</span></div>'+
+     '<div class="'+(ia?'bad':'')+'"><b>'+ia+'</b><span>Geri dönen</span></div></div>';
+   h+='<div class="card"><h3>Süre nereye gidiyor</h3>'+donut(tw,tb)+
+     '<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan '+tw+' gün</span>'+
+     '<span><i style="background:#C08A1E"></i>Beklenen '+tb+' gün</span></div></div>';
+   var kv=K.filter(function(r){return tumBolum()||pn(r.k)[3]==pn(ME)[3]});
+   var tt={i:[0,0],k:[0,0],o:[0,0]};
+   vis.forEach(function(j){j.a.forEach(function(x){if(!x.g)return;
+    var d=x.d=='t'?gn(x.g,x.b):gec(x),tp3=stip(x);tt[tp3][0]+=d;tt[tp3][1]++})});
+   var nd=[];
+   vis.forEach(function(j){(j.lg||[]).forEach(function(l){
+    if(l.msg&&/Gecikme nedeni|Ek süre talep/.test(l.tip))nd.push({j:j,l:l})})});
+   if(nd.length){
+    h+='<div class="card"><h3>Bekleme ve gecikme nedenleri</h3>';
+    nd.sort(function(x,y){return x.l.ts<y.l.ts?1:-1}).slice(0,8).forEach(function(x){
+     h+='<div class="li"><div class="h"><b>'+esc(x.l.tip)+'</b><i>'+fmt(x.l.ts)+'</i></div>'+
+       '<div class="s">'+ad(x.l.k)+' · '+esc(x.j.ad)+'</div>'+
+       '<div class="msg">'+esc(x.l.msg)+'</div></div>';
+    });
+    h+='<div class="note">Tekrar eden nedenler süreç sorunudur — kişisel değil.</div></div>';
+   }
+   h+='<div class="card"><h3>Adım tipine göre ortalama süre</h3>';
+   ['i','k','o'].forEach(function(x){
+    var av=tt[x][1]?(tt[x][0]/tt[x][1]):0,mx2=6;
+    h+='<div class="rw"><div class="t"><span>'+tipAd(x)+' adımları</span><i>'+
+      (tt[x][1]?av.toFixed(1).replace('.',',')+' gün · '+tt[x][1]+' adım':'—')+'</i></div>'+
+      '<div class="bar"><i class="'+(x=='o'?'w':'')+'" style="width:'+Math.min(100,av/mx2*100)+'%"></i></div></div>';
+   });
+   h+='<div class="note">Kontrol adımları uzuyorsa iş birlikte yürütülen kişide bekliyor demektir — '+
+     'onay gecikmesinden farklı bir sorundur, farklı çözülür.</div></div>';
+   h+='<div class="card"><h3>Haftalık kayda geçen saat</h3>'+hafta(kv)+'</div>';
+   var ft={};kv.forEach(function(r){ft[r.tip]=(ft[r.tip]||0)+r.dk});
+   var fl=Object.keys(ft).map(function(x){return[x,ft[x]]}).sort(function(a,b){return b[1]-a[1]});
+   var mf=fl.length?fl[0][1]:1;
+   h+='<div class="card"><h3>Emek hangi işe gidiyor</h3>';
+   if(!fl.length)h+='<div style="font-size:13px;color:#8592A0">Kayıt yok.</div>';
+   fl.forEach(function(x){h+='<div class="rw"><div class="t"><span>'+esc(x[0])+'</span><i>'+sa(x[1])+' sa</i></div>'+
+     '<div class="bar"><i style="width:'+Math.round(x[1]/mf*100)+'%"></i></div></div>'});
+   h+='</div>';
+   var mb3=1,st=[];
+   bolumListesi().forEach(function(k){var jb=bj(k),w=0,b4=0;
+    jb.forEach(function(j){var x=bek(j);w+=x[0];b4+=x[1]});
+    if(w+b4)st.push([k,w,b4]);mb3=Math.max(mb3,w+b4)});
+   var tz={};vis.forEach(function(j){tz[j.ts_]=(tz[j.ts_]||0)+1});
+   var tl=Object.keys(tz).map(function(x){return[x,tz[x]]}).sort(function(a,b){return b[1]-a[1]});
+   var mt=tl.length?tl[0][1]:1;
+   if(tl.length){h+='<div class="card"><h3>Tesise göre iş dağılımı</h3>';
+    tl.forEach(function(x){h+='<div class="rw"><div class="t"><span>'+esc(tad(x[0]))+'</span><i>'+x[1]+' iş</i></div>'+
+     '<div class="bar"><i style="width:'+Math.round(x[1]/mt*100)+'%"></i></div></div>'});
+    h+='</div>'}
+   if(st.length){h+='<div class="card"><h3>'+(tumBolum()?'Bölümlerde süre':'Bölümümde süre')+'</h3>';
+    st.forEach(function(x){h+='<div class="rw"><div class="t"><span>'+B[x[0]].ad+'</span><i>'+(x[1]+x[2])+' gün</i></div>'+
+     '<div class="bar" style="display:flex"><i style="width:'+Math.round(x[1]/mb3*100)+'%"></i>'+
+     '<i class="w" style="width:'+Math.round(x[2]/mb3*100)+'%"></i></div></div>'});
+    h+='<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan</span>'+
+      '<span><i style="background:#C08A1E"></i>Beklenen</span></div></div>'}
+  }
+  else if(V=='tesis'){
+   var vj=J.filter(gor);
+   h='<div class="card"><h3>Tesisler ('+T.length+')</h3>';
+   T.forEach(function(x){
+    var n=vj.filter(function(j){return j.ts_==x.id}).length;
+    var dk=0;K.forEach(function(r){if(r.ts_==x.id)dk+=r.dk});
+    if(ED===x.id){
+     h+='<div class="li"><input id="te" value="'+esc(x.ad).replace(/"/g,'&quot;')+'">'+
+       '<div style="height:8px"></div><div class="two">'+
+       '<button class="b" data-a="tsave" data-i="'+x.id+'">Kaydet</button>'+
+       '<button class="b g" data-a="tcancel">Vazgeç</button></div>'+
+       (n||dk?'':'<div style="height:8px"></div><button class="b g" data-a="tdel" data-i="'+x.id+'">Tesisi sil</button>')+
+       '</div>';
+    }else{
+     h+='<button class="li" style="display:block;width:100%;text-align:left;background:none;border:0;'+
+       'border-bottom:1px solid #F0F2F4" data-a="tedit" data-i="'+x.id+'">'+
+       '<div class="h"><b>'+esc(x.ad)+'</b><i>'+(n?n+' iş':'—')+' ✎</i></div>'+
+       '<div class="s">'+(dk?sa(dk)+' saat kayıtlı çalışma':'kayıt yok')+'</div></button>';
+    }
+   });
+   h+='<div class="note">Adı değiştirmek için tesise dokun. Şu an herkes düzenleyebilir; '+
+     'ileride bu yetki anahtar kullanıcılara alınacak.</div></div>';
+   h+='<div class="card"><h3>Yeni tesis ekle</h3>'+
+     '<input id="ta" placeholder="Örn. Sıvı Yumurta Dolum">'+
+     '<div style="height:10px"></div><button class="b" data-a="tnew">Tesisi ekle</button>'+
+     '<div class="note">Eklenen tesis, iş açma ve çalışma kaydı ekranlarında hemen seçilebilir olur.</div></div>';
+  }
+  else if(V=='kayit'){
+   var mb=pn(ME)[3]||'SI',ls=FT[mb];
+   var bugun=new Date().toISOString().slice(0,10);
+   h='<div class="card"><label>Tarih</label><input type="date" id="kg" value="'+bugun+'">'+
+     '<div class="two" style="gap:8px"><div style="flex:1"><label>Başlangıç</label>'+
+     '<input type="time" id="kb" value="09:00"></div>'+
+     '<div style="flex:1"><label>Bitiş</label><input type="time" id="kbt" value="10:30"></div></div>'+
+     '<label>Tesis</label><select class="n" id="ktz">'+
+     T.map(function(x){return '<option value="'+x.id+'">'+x.ad+'</option>'}).join('')+'</select>'+
+     '<label>Faaliyet</label><select class="n" id="kt">'+
+     ls.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select>'+
+     '<label>Ne yaptın</label><textarea id="ka" placeholder="Kısaca yaz."></textarea>'+
+     '<div style="height:12px"></div><button class="b" data-a="knew">Kaydet</button>'+
+     '<div class="note">Süre, başlangıç ve bitiş saatinden otomatik hesaplanır.</div></div>';
+   var mk=K.filter(function(r){return r.k==ME}).sort(function(a,b){return a.ts<b.ts?1:-1});
+   var tp=0;mk.forEach(function(r){tp+=r.dk});
+   h+='<div class="card"><h3>Kayıtlarım ('+mk.length+' · '+sa(tp)+' saat)</h3>';
+   if(!mk.length)h+='<div style="font-size:13px;color:#8592A0">Kayıt yok.</div>';
+   mk.slice(0,20).forEach(function(r){
+    var sa1=r.ts.slice(11,16),sa2=r.bit||'';
+    h+='<div class="li"><div class="h"><b>'+esc(r.tip)+'</b><i>'+gunAd(r.ts)+' · '+sa(r.dk)+' sa</i></div>'+
+      '<div class="s">🕐 '+sa1+(sa2?'–'+sa2:'')+' · 📍 '+tad(r.ts_)+'</div>'+
+      '<div class="s" style="color:#16202B;font-size:13px">'+esc(r.ac)+'</div></div>';
+   });
+   h+='</div>';
+  }
+  else if(V=='yeni'){
+   var mb2=pn(ME)[3]||'SI',cf=B[mb2];
+   if(!NS){NS=[{a:'',k:ME,t:3,tp:'i'},{a:'1. onay',k:cf.sef,t:1,tp:'o'}];
+    if(cf.ug)NS.push({a:'2. onay',k:cf.ust,t:1,tp:'o'})}
+   h='<div class="card"><label>İş adı</label><input id="ja" placeholder="Örn. Argon norm kadro raporu">'+
+     '<label>Tesis</label><select class="n" id="jt">'+
+     T.map(function(x){return '<option value="'+x.id+'">'+x.ad+'</option>'}).join('')+'</select>'+
+     '<div class="note">Bölüm: '+bad(mb2)+' · onay: '+ad(cf.sef)+(cf.ug?' → '+ad(cf.ust):'')+'</div>'+
+     '<label>Adımlar — sorumlu / termin</label>';
+   NS.forEach(function(s,i){
+    h+='<div class="sr"><input value="'+esc(s.a).replace(/"/g,'&quot;')+'" placeholder="Adım '+(i+1)+'" data-i="'+i+'" data-f="a"></div>'+
+      '<div class="sr"><select class="n" data-i="'+i+'" data-f="k">'+
+      Object.keys(B).map(function(bk){
+       var gg3=P.filter(function(p){return p[3]==bk});
+       if(!gg3.length)return '';
+       return '<optgroup label="'+B[bk].ad+'">'+gg3.map(function(p){
+        return '<option value="'+p[0]+'"'+(p[0]==s.k?' selected':'')+'>'+p[1]+' — '+p[2]+'</option>'}).join('')+'</optgroup>';
+      }).join('')+
+      '</select><input class="d" type="number" min="1" value="'+s.t+'" data-i="'+i+'" data-f="t">'+
+      '<button data-a="del" data-i="'+i+'">×</button></div>'+
+      '<div class="sr" style="margin-bottom:14px"><select class="n" data-i="'+i+'" data-f="tp">'+
+      ['i','k','o'].map(function(x){return '<option value="'+x+'"'+((s.tp||'i')==x?' selected':'')+'>'+
+        (x=='i'?'İş adımı — yapılacak iş':x=='k'?'Kontrol — başkası kontrol edecek':'Onay — imza')+'</option>'}).join('')+
+      '</select></div>';
+   });
+   var tpl=0;NS.forEach(function(x){tpl+=+x.t||0});
+   h+='<div class="note" style="margin:-6px 0 10px">Toplam termin: <b>'+tpl+' iş günü</b>. '+
+     'Kontrol adımı, işi birlikte yürüttüğün kişinin doğrulaması içindir; onay ise imzadır. '+
+     'Kaydederken onay adımları otomatik sona alınır.</div>'+
+     '<button class="b g" data-a="add">+ Adım</button><div style="height:10px"></div>'+
+     '<button class="b" data-a="new">İşi başlat</button></div>';
+  }
+  
+  el.innerHTML=h;
+  
+  if(SIG){
+   var sw=document.getElementById('sw'),sc=document.getElementById('sc');
+   if(sw&&sc){
+    var f=sw.clientWidth/1010;
+    sc.style.transform='scale('+f+')';
+    sw.style.height=(sc.offsetHeight*f)+'px';
+   }
+   SIG=false;
+  }
+ } catch (err) {
+  el.innerHTML = '<div style="padding:15px;background:#FEE;color:#B2402F;border-radius:8px;font-weight:600">Çizim Hatası: ' + err.message + '</div>';
+ }
+}
+
+/* ---------- OLAYLAR ---------- */
+function yak(el,s){while(el&&el!==document){if(el.matches&&el.matches(s))return el;el=el.parentNode}return null}
+document.addEventListener('click',function(e){
+ var t=yak(e.target,'[data-a]');if(!t)return;
+ var a=t.dataset.a;
+ if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
+  d.innerHTML='<button data-a="fsx">Kapat</button><img src="'+t.dataset.src+'">';
+  document.body.appendChild(d);return}
+ if(a=='fsx'){var e2=document.getElementById('fsv');if(e2)e2.parentNode.removeChild(e2);return}
+ if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';ciz();return}
+ if(a=='ana'){V='ana';RED=0;ED=0}
+ else if(a=='bdet'){V='bdet';OB=t.dataset.b}
+ else if(a=='bende'){V='bende'}
+ else if(a=='det'){V='det';OJ=+t.dataset.j;RED=0}
+ else if(a=='org'){V='org'}
+ else if(a=='ekle'){V='ekle';YP={ad:'',unvan:'',br:t.dataset.b||'SI',rol:'c'}}
+ else if(a=='zoom'){ZOOM=!ZOOM}
+ else if(a=='pedit'){V='pedit';OP2=t.dataset.p}
+ else if(a=='psave'){
+  var na2=document.getElementById('ea').value.trim(),nu2=document.getElementById('eu').value.trim();
+  if(na2.length<3||nu2.length<3){say('Ad ve unvan boş olamaz.');return}
+  for(var y=0;y<P.length;y++)if(P[y][0]==t.dataset.p){
+   P[y][1]=na2;P[y][2]=nu2;P[y][3]=document.getElementById('eb').value;P[y][4]=document.getElementById('er').value}
+  say('Güncellendi');V='org';menu();
+ }
+ else if(a=='kayit'){V='kayit'}
+ else if(a=='akis'){V='akis'}
+ else if(a=='veri'){V='veri'}
+ else if(a=='tesis'){V='tesis'}
+ else if(a=='tedit'){ED=t.dataset.i}
+ else if(a=='tcancel'){ED=0}
+ else if(a=='tsave'){
+  var el3=document.getElementById('te'),nv=el3?el3.value.trim():'';
+  if(nv.length<3){say('Tesis adı en az 3 harf olmalı.');return}
+  for(var z=0;z<T.length;z++)if(T[z].id==t.dataset.i)T[z].ad=nv;
+  ED=0;say('Tesis adı güncellendi.');
+ }
+ else if(a=='tdel'){
+  T=T.filter(function(x){return x.id!=t.dataset.i});
+  ED=0;say('Tesis silindi.');
+ }
+ else if(a=='tnew'){
+  var tn=document.getElementById('ta').value.trim();
+  if(tn.length<3){say('Tesis adı yaz.');return}
+  if(T.some(function(x){return x.ad.toLocaleLowerCase('tr')==tn.toLocaleLowerCase('tr')}))
+   {say('Bu tesis zaten var.');return}
+  T.push({id:'t'+Date.now(),ad:tn});say(tn+' eklendi');
+ }
+ else if(a=='yeni'){V='yeni'}
+ else if(a=='red'){RED=+t.dataset.j}
+ else if(a=='tal'){TAL=+t.dataset.j}
+ else if(a=='tno'){TAL=0}
+ else if(a=='gno'){GEC2=0}
+ else if(a=='tgo'){
+  var jt=bul(+t.dataset.j),ct=cur(jt);
+  var eg=+document.getElementById('tg').value,en=document.getElementById('tn').value.trim();
+  if(eg<1){say('Gün sayısı yaz.');return}
+  if(en.length<10){say('Nedenini yaz — en az bir cümle.');return}
+  jt.tal=jt.tal||[];jt.lg=jt.lg||[];
+  jt.tal.push({ts:now(),k:ME,gun:eg,neden:en,adim:ct.a,durum:'b'});
+  jt.lg.push({ts:now(),k:ME,tip:'Ek süre talep etti (+'+eg+' gün)',msg:en});
+  TAL=0;say('Talep gönderildi → '+ad(B[jt.br].sef));
+  işiBuluttaGüncelle(jt);
+ }
+ else if(a=='tkab'||a=='tret'){
+  var jk=bul(+t.dataset.j),xi=+t.dataset.x;
+  var tl=(jk.tal||[]).filter(function(x){return x.durum=='b'})[xi];
+  if(!tl)return;
+  jk.lg=jk.lg||[];
+  if(a=='tkab'){
+   tl.durum='k';
+   jk.a.forEach(function(x){if(x.a==tl.adim){x.t+=tl.gun;x.ekg=(x.ekg||0)+tl.gun}});
+   jk.lg.push({ts:now(),k:ME,tip:'Ek süre onayladı (+'+tl.gun+' gün) — '+tl.adim});
+   say('Ek süre verildi: +'+tl.gun+' gün');
+  }else{
+   tl.durum='r';
+   jk.lg.push({ts:now(),k:ME,tip:'Ek süre talebini reddetti — '+tl.adim});
+   say('Talep reddedildi');
+  }
+  işiBuluttaGüncelle(jk);
+ }
+ else if(a=='rno'){RED=0}
+ else if(a=='ok'&&as(cur(bul(+t.dataset.j)))>0){GEC2=+t.dataset.j}
+ else if(a=='ok'||a=='gok'){
+  var j=bul(+t.dataset.j),c=cur(j),ix=j.a.indexOf(c),ts=now();
+  if(a=='gok'){
+   var gm=document.getElementById('gn').value.trim();
+   if(gm.length<10){say('Gecikme nedenini yaz.');return}
+   j.lg=j.lg||[];j.lg.push({ts:ts,k:ME,tip:'Gecikme nedeni — '+c.a,msg:gm});
+   GEC2=0;
+  }
+  c.d='t';c.b=ts;var n=j.a[ix+1];j.lg=j.lg||[];
+  if(n){n.d='a';n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k))}
+  else{j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı'});say('İş tamamlandı')}
+  V='ana';RED=0;
+  işiBuluttaGüncelle(j);
+ }
+ else if(a=='rgo'){
+  var el2=document.getElementById('rt'),m=el2?el2.value.trim():'';
+  if(m.length<10){say('Nedenini yaz — en az bir cümle.');return}
+  var j2=bul(+t.dataset.j),c2=cur(j2),i2=j2.a.indexOf(c2),p2=j2.a[i2-1],ts2=now();
+  if(!p2){say('Önceki adım yok');return}
+  c2.d='b';c2.g=0;p2.d='a';p2.b=0;p2.g=ts2;j2.lg=j2.lg||[];
+  j2.lg.push({ts:ts2,k:ME,hedef:p2.k,tip:'Geri gönderdi → '+ad(p2.k),msg:m});
+  say('Geri gönderildi → '+ad(p2.k));V='ana';RED=0;
+  işiBuluttaGüncelle(j2);
+ }
+ else if(a=='pnew'){
+  var na=document.getElementById('pa').value.trim(),nu=document.getElementById('pu').value.trim(),
+      nb=document.getElementById('pb').value,nr=document.getElementById('pr').value;
+  if(na.length<3){say('Ad soyad yaz.');return}
+  if(nu.length<3){say('Unvan yaz.');return}
+  var id='p'+Date.now();
+  P.push([id,na,nu,nb,nr]);
+  say(na+' eklendi — '+bad(nb));V='org';menu();
+ }
+ else if(a=='knew'){
+  var ac=document.getElementById('ka').value.trim();
+  var gg2=document.getElementById('kg').value,b1=document.getElementById('kb').value,
+      b2=document.getElementById('kbt').value;
+  if(ac.length<5){say('Ne yaptığını yaz.');return}
+  if(!gg2||!b1||!b2){say('Tarih ve saatleri doldur.');return}
+  var dk=(+b2.slice(0,2)*60+ +b2.slice(3))-(+b1.slice(0,2)*60+ +b1.slice(3));
+  if(dk<15){say('Bitiş saati başlangıçtan en az 15 dk sonra olmalı.');return}
+  K.unshift({id:'k'+Date.now(),k:ME,ts:gg2+'T'+b1,bit:b2,tip:document.getElementById('kt').value,
+   ts_:document.getElementById('ktz').value,ac:ac,dk:dk});
+  say('Kaydedildi — '+sa(dk)+' saat');
+ }
+ else if(a=='add'){NS.push({a:'',k:ME,t:2,tp:'i'})}
+ else if(a=='del'){if(NS.length>1)NS.splice(+t.dataset.i,1);else say('En az bir adım olmalı')}
+ else if(a=='new'){
+  var nm=document.getElementById('ja').value.trim();
+  if(nm.length<4){say('İşe ad ver.');return}
+  if(NS.some(function(s){return !s.a.trim()})){say('Her adımın adı olmalı.');return}
+  var ts3=now();
+  NS.sort(function(x,y){var r={i:0,k:1,o:2};return (r[x.tp||'i'])-(r[y.tp||'i'])});
+  var yeniIs={id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:pn(ME)[3]||'SI',bas:ts3,
+   a:NS.map(function(s,i){return{a:s.a,k:s.k,t:+s.t,tp:s.tp||'i',o:(s.tp=='o')?1:0,d:i?'b':'a',g:i?0:ts3,b:0}}),
+   lg:[{ts:ts3,k:ME,tip:'İş açıldı'}]};
+  NS=null;V='ana';say('İş başlatıldı');
+  işiBulutaKaydet(yeniIs);
+ }
+ else return;
+ ciz();window.scrollTo(0,0);
+});
+
+document.addEventListener('change',function(e){
+ if(e.target.id!='fu')return;
+ var j=bul(+e.target.dataset.j),fs2=e.target.files;
+ if(!j||!fs2.length)return;
+ j.ek=j.ek||[];j.lg=j.lg||[];
+ var kal=fs2.length,ts4=now();
+ for(var i=0;i<fs2.length;i++)(function(f){
+  var mb=f.size/1048576;
+  var tur=/^image\//.test(f.type)?'i':/\.pdf$/i.test(f.name)?'p':/\.(xlsx|xls|csv)$/i.test(f.name)?'x':'d';
+  var boy=mb<1?Math.round(f.size/1024)+' KB':mb.toFixed(1).replace('.',',')+' MB';
+  if(mb>8){say(f.name+' çok büyük (8 MB üstü)');kal--;return}
+  var rd=new FileReader();
+  rd.onload=function(){j.ek.push({ad:f.name,tur:tur,boyut:boy,k:ME,ts:ts4,veri:rd.result});
+   if(!--kal){j.lg.push({ts:ts4,k:ME,tip:fs2.length+' ek yüklendi'});say('Ek eklendi');işiBuluttaGüncelle(j);ciz()}};
+  rd.onerror=function(){if(!--kal)ciz()};
+  rd.readAsDataURL(f);
+ })(fs2[i]);
+});
+
+document.addEventListener('input',function(e){var t=e.target;
+ if(t.dataset&&t.dataset.f&&NS)NS[+t.dataset.i][t.dataset.f]=t.dataset.f=='t'?+t.value:t.value});
+
+document.addEventListener('change',function(e){
+ var q=e.target;
+ if(q.dataset&&q.dataset.a=='sset'){B[q.dataset.b].sef=q.value;say('1. onay güncellendi');ciz();return}
+ if(q.dataset&&q.dataset.a=='uset'){var c3=B[q.dataset.b];
+  if(q.value=='0'){c3.ug=0}else{c3.ug=1;c3.ust=q.value}
+  say('2. onay güncellendi');ciz();return}
+ if(e.target.id=='who'){ME=e.target.value;NS=null;V='ana';RED=0;ciz();window.scrollTo(0,0);say(ad(ME)+' olarak bakıyorsun')}});
+
+function menu(){
+ var sel=document.getElementById('who');
+ if(!sel)return;
+ var h='<optgroup label="Direktörlük">';
+ P.filter(function(p){return !p[3]}).forEach(function(p){
+  h+='<option value="'+p[0]+'"'+(p[0]==ME?' selected':'')+'>'+p[1]+'</option>'});
+ h+='</optgroup>';
+ Object.keys(B).forEach(function(k){
+  var g=P.filter(function(p){return p[3]==k});
+  if(!g.length)return;
+  h+='<optgroup label="'+B[k].ad+'">';
+  g.forEach(function(p){h+='<option value="'+p[0]+'"'+(p[0]==ME?' selected':'')+'>'+p[1]+'</option>'});
+  h+='</optgroup>';
+ });
+ sel.innerHTML=h;
+}
+
+menu();
+ciz();
+verileriGetir();
+</script>
+</body>
+</html>
