@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Operasyonel Mükemmellik</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12315C">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
 body{margin:0;background:#F0F1F3;color:#16202B;
@@ -559,6 +563,23 @@ function onizle(m){
  if(m.tur=='gorsel')return p+'📎 Görsel';
  return p+(m.metin||'').slice(0,42);
 }
+var SW=null;
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('sw.js').then(function(r){SW=r},function(){});
+}
+function bildirimIzni(){
+ if(!('Notification' in window))return;
+ if(Notification.permission==='default')Notification.requestPermission();
+}
+function bildir(baslik,metin){
+ try{
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  if(document.visibilityState==='visible')return;   /* ekranda ise sadece bip */
+  var ayar={body:metin,icon:'icon-192.png',badge:'icon-192.png',tag:'opmuk',renotify:true};
+  if(SW&&SW.showNotification)SW.showNotification(baslik,ayar);
+  else new Notification(baslik,ayar);
+ }catch(e){}
+}
 function bip(){
  if(!SES)return;
  try{
@@ -639,10 +660,40 @@ function mesajGetir(){
   var bana=yeniler.filter(function(m){
    return m.alici=='herkes'||m.alici==ME||(mb&&m.alici=='b:'+mb)});
   if(bana.length){bip();
-   if(V!='mesaj'){var sn=bana[bana.length-1];
-    say(ad(sn.gonderen)+': '+(sn.tur=='ses'?'🎤 sesli mesaj':sn.tur=='gorsel'?'📎 görsel':(sn.metin||'').slice(0,40)))}}
+   var sn=bana[bana.length-1];
+   var oz=(sn.tur=='ses'?'🎤 sesli mesaj':sn.tur=='gorsel'?'📎 görsel':(sn.metin||'').slice(0,60));
+   bildir(ad(sn.gonderen),oz);
+   if(V!='mesaj')say(ad(sn.gonderen)+': '+oz);}
   if(MESAJLAR.length!=MSAYI){MSAYI=MESAJLAR.length;
    if(V=='mesaj'&&MHEDEF)listeYenile(); else if(V=='mesaj'||V=='ana')ciz();}
+ },function(){});
+}
+var ISSAYIM=null;
+function isKontrol(){
+ if(!dbClient||!GIRIS)return;
+ dbClient.from('isler').select('id,ad,veri').then(function(r){
+  if(!r.data)return;
+  var gelen=r.data.map(function(x){return x.veri}).filter(Boolean);
+  if(!gelen.length)return;
+  var eski=J;J=gelen;
+  var bendeYeni=J.filter(function(j){var c=cur(j);
+   if(!c||c.k!=ME)return false;
+   var o=eski.filter(function(x){return x.id==j.id})[0];
+   if(!o)return true;
+   var oc=cur(o);
+   return !oc||oc.k!=ME||oc.a!=c.a;
+  });
+  if(bendeYeni.length){
+   bip();
+   var ilk=bendeYeni[0],ic=cur(ilk);
+   var tip=stip(ic)=='o'?'Onayına düştü':stip(ic)=='k'?'Kontrolüne düştü':'Sana iş düştü';
+   bildir(tip,ilk.ad);
+   if(V=='ana')ciz();
+  }
+  var dst=0;J.forEach(function(j){(j.dst||[]).forEach(function(d){
+   if(d.durum=='b'&&d.kimden==ME)dst++})});
+  if(ISSAYIM!==null&&dst>ISSAYIM){bip();bildir('Veri/destek talebi','Senden bir veri isteniyor')}
+  ISSAYIM=dst;
  },function(){});
 }
 function nabiz(){
@@ -728,7 +779,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s9</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s10</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -794,7 +845,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s9 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s10 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1526,7 +1577,9 @@ document.addEventListener('click',function(e){
    }
    ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
    try{ talepleriGetir();mesajGetir();durumGetir();nabiz();
-    if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);setInterval(mesajGetir,25000);}
+    if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);
+     setInterval(mesajGetir,25000);setInterval(isKontrol,60000);}
+    bildirimIzni();
    }catch(e){console.log('yan islem:',e)}
    try{ ciz();window.scrollTo(0,0);
     say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
@@ -1845,7 +1898,9 @@ function talepleriGetir(){
     if(GIRIS){ZORUNLU=!(u.user_metadata&&u.user_metadata.pw_set);talepleriGetir();
      dbClient.from('kullanici_durum').select('*').eq('id',ME).then(function(r){
       if(r.data&&r.data[0])SON_OKUMA=r.data[0].son_okuma;mesajGetir()},function(){});
-     nabiz();setInterval(nabiz,120000);setInterval(mesajGetir,25000);}
+     nabiz();bildirimIzni();
+     if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);
+      setInterval(mesajGetir,25000);setInterval(isKontrol,60000);}}
    }
   }catch(e){}
   ciz();
