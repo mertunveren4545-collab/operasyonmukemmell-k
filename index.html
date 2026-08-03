@@ -523,6 +523,41 @@ function bildirimler(){
  return b;
 }
 function rz(n){return n>0?'<span class="bdg">'+(n>99?'99+':n)+'</span>':''}
+function drmBul(id){for(var i=0;i<DURUMLAR.length;i++)if(DURUMLAR[i].id==id)return DURUMLAR[i];return null}
+function yaziyorMu(kim){
+ var d=drmBul(kim);if(!d||!d.yaziyor_ts)return false;
+ if((new Date()-new Date(d.yaziyor_ts))>7000)return false;
+ return d.yaziyor_hedef==ME||d.yaziyor_hedef=='herkes'||d.yaziyor_hedef=='b:'+(pn(ME)[3]||'');
+}
+function durumGetir(){
+ if(!dbClient||!GIRIS)return;
+ dbClient.from('kullanici_durum').select('*').then(function(r){
+  if(r.data){DURUMLAR=r.data;if(V=='mesaj'&&!MHEDEF)ciz()}},function(){});
+}
+function sonMesaj(hedef){
+ var l=MESAJLAR.filter(function(m){
+  if(hedef=='herkes')return m.alici=='herkes';
+  if(hedef.slice(0,2)=='b:')return m.alici==hedef;
+  return (m.gonderen==ME&&m.alici==hedef)||(m.gonderen==hedef&&m.alici==ME);
+ });
+ return l.length?l[l.length-1]:null;
+}
+function okunmamisHedef(hedef){
+ if(!SON_OKUMA)return 0;
+ return MESAJLAR.filter(function(m){
+  if(m.gonderen==ME||m.ts<=SON_OKUMA)return false;
+  if(hedef=='herkes')return m.alici=='herkes';
+  if(hedef.slice(0,2)=='b:')return m.alici==hedef;
+  return m.gonderen==hedef&&m.alici==ME;
+ }).length;
+}
+function onizle(m){
+ if(!m)return 'Henüz mesaj yok';
+ var p=(m.gonderen==ME?'Sen: ':'');
+ if(m.tur=='ses')return p+'🎤 Sesli mesaj';
+ if(m.tur=='gorsel')return p+'📎 Görsel';
+ return p+(m.metin||'').slice(0,42);
+}
 function bip(){
  if(!SES)return;
  try{
@@ -675,7 +710,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s5</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s6</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -740,7 +775,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s5 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s6 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1372,11 +1407,14 @@ document.addEventListener('click',function(e){
   if(!ku||!sf){HATA='Kullanıcı adı ve şifre gerekli.';ciz();return}
   if(!dbClient){HATA='Supabase kütüphanesi yüklenmedi — sayfayı yenile (Ctrl+F5).';ciz();return}
   t.textContent='Giriş yapılıyor…';t.disabled=true;
+  var zamanAsimi=setTimeout(function(){
+   HATA='Sunucu yanıt vermedi. Tekrar dene.';GIRIS=false;ciz();},15000);
   var mail=ku+'@opmuk.com';
   var kisiVar=false;for(var i8=0;i8<P.length;i8++)if(P[i8][0]==ku)kisiVar=true;
   if(!kisiVar){HATA='Bu kullanıcı adı personel listesinde yok.';GIRIS=false;ciz();return}
 
   function basarili(u){
+   clearTimeout(zamanAsimi);
    ME=ku;GIRIS=true;HATA='';V='ana';
    if(dbClient){
     var pw=!!(u&&u.user_metadata&&u.user_metadata.pw_set);
@@ -1384,12 +1422,15 @@ document.addEventListener('click',function(e){
       son_giris:new Date().toISOString(),sifre_belirlendi:pw}).then(function(){},function(){});
    }
    ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
-   talepleriGetir();mesajGetir();nabiz();
-   setInterval(nabiz,120000);setInterval(mesajGetir,25000);
-   ciz();window.scrollTo(0,0);
-   say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
+   try{ talepleriGetir();mesajGetir();durumGetir();nabiz();
+    if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);setInterval(mesajGetir,25000);}
+   }catch(e){console.log('yan islem:',e)}
+   try{ ciz();window.scrollTo(0,0);
+    say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
+   }catch(e){ HATA='Ekran hatası: '+e.message;GIRIS=false;ciz(); }
   }
   function hataGoster(e){
+   clearTimeout(zamanAsimi);
    var m=((e&&e.message)||'').toLowerCase();
    if(m.indexOf('confirm')>=0||m.indexOf('not confirmed')>=0)
     HATA='Supabase ayarı eksik: Authentication → Providers → Email → "Confirm email" kapatılmalı.';
@@ -1420,7 +1461,7 @@ document.addEventListener('click',function(e){
     return;
    }
    hataGoster(r.error);
-  });
+  }).catch(function(e){ hataGoster(e); });
   return;
  }
  if(a=='cikis'){
