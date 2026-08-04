@@ -867,7 +867,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s18</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s19</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -939,7 +939,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s18 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s19 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -965,7 +965,7 @@ function ciz(){
  }
  else if(V=='bende'||V=='bdet'){
   var L,kis=[];
-  if(V=='bende'){L=bende();}
+  if(V=='bende'){L=(FILT=='bit')?bittiBenim():bende();}
   else{L=bj(OB).filter(cur);kis=P.filter(function(p){return p[3]==OB});}
   if(V=='bdet'){
    var jb=bj(OB),w=0,b2=0,ia=0;
@@ -978,6 +978,19 @@ function ciz(){
      '<div style="font-size:12px;color:#8592A0">'+pn(B[OB].sef)[2]+'</div></div>';
   }
   /* işler kimde */
+  if(V=='bende'&&FILT=='bit'){
+   h='<div class="card"><h3>Tamamlanan işler ('+L.length+')</h3>';
+   if(!L.length)h+='<div style="font-size:13px;color:#8592A0">Henüz tamamlanan işin yok.</div>';
+   L.forEach(function(j){
+    var son9=j.a[j.a.length-1],pl9=0;j.a.forEach(function(x){pl9+=x.t});
+    var gr9=gn(j.bas,son9.b||TODAY),bl9=bek(j);
+    h+='<button class="sub" data-a="det" data-j="'+j.id+'" style="margin-bottom:8px">'+esc(j.ad)+
+      '<span>📍 '+tad(j.ts_)+' · '+bad(j.br)+'</span>'+
+      '<span>tamamlandı '+fmt(son9.b)+' · '+gr9+'/'+pl9+' gün'+(bl9[1]?' · bekleme '+bl9[1]+' g':'')+'</span>'+
+      '</button>';
+   });
+   h+='</div>';el.innerHTML=h;return;
+  }
   var dg={};L.forEach(function(j){var c=cur(j);(dg[c.k]=dg[c.k]||[]).push(j)});
   var dl=Object.keys(dg).map(function(x){return[x,dg[x]]}).sort(function(a,b){return b[1].length-a[1].length});
   h+='<div class="card"><h3>İşler kimde ('+L.length+')</h3>';
@@ -1860,7 +1873,7 @@ document.addEventListener('click',function(e){
  if(a=='ana'){V='ana';RED=0;ED=0}
  else if(a=='bdet'){V='bdet';OB=t.dataset.b}
  else if(a=='bende'){V='bende';FILT=''}
- if(a=='liste'&&t.dataset.f=='bit'){V='bende';FILT='bit';ciz();window.scrollTo(0,0);return}
+ else if(a=='liste'&&t.dataset.f=='bit'){V='bende';FILT='bit'}
  else if(a=='det'){V='det';OJ=+t.dataset.j;RED=0}
  else if(a=='org'){V='org'}
  else if(a=='ekle'){V='ekle';YP={ad:'',unvan:'',br:t.dataset.b||'SI',rol:'c'}}
