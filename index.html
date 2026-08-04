@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Operasyonel Mükemmellik</title>
 <link rel="manifest" href="manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Operasyonel Mükemmellik">
+<meta property="og:description" content="İş akışı, çalışma kaydı ve mesajlaşma sistemi. Kullanıcı adın ve şifrenle gir.">
+<meta property="og:url" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/">
+<meta property="og:image" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/og-kapak.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Operasyonel Mükemmellik">
+<meta name="twitter:description" content="İş akışı, çalışma kaydı ve mesajlaşma sistemi.">
+<meta name="twitter:image" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/og-kapak.png">
+<link rel="icon" href="icon-192.png">
 <meta name="theme-color" content="#12315C">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -867,7 +879,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s19</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s21</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -939,7 +951,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s19 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s21 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -949,6 +961,7 @@ function ciz(){
   h+='<div class="acts">'+
     '<button data-a="sifre"><i>🔑</i>Şifre</button>'+
     '<button data-a="gorunum"><i>🎨</i>Görünüm</button>'+
+    '<button data-a="paylas"><i>📤</i>Paylaş</button>'+
     (yonetici()?'<button data-a="kullanicilar"><i>👥</i>Kullanıcılar'+rz(BD.sifre)+'</button>':'')+
     (sistemci()?'<button data-a="yedek"><i>💾</i>Yedek</button>':'')+
     (tumBolum()?'<button data-a="ozet"><i>📄</i>Aylık özet</button>':'')+
@@ -1663,6 +1676,18 @@ document.addEventListener('click',function(e){
  }
  if(a=='sifre'){V='sifre';HATA='';ciz();return}
  if(a=='gorunum'){V='gorunum';ciz();return}
+ if(a=='paylas'){
+  var adres=location.href.split('?')[0].split('#')[0];
+  var metin='Operasyonel Mükemmellik sistemi\n\nKullanıcı adın: adının ilk kelimesi (küçük harf, Türkçe karaktersiz)\nİlk giriş şifresi: 123456\nSistem seni kendi şifreni belirlemeye yönlendirecek.\n\n'+adres;
+  if(navigator.share){
+   navigator.share({title:'Operasyonel Mükemmellik',text:metin,url:adres})
+    .then(function(){say('Paylaşıldı')},function(){});
+  }else if(navigator.clipboard){
+   navigator.clipboard.writeText(metin).then(function(){say('Davet metni kopyalandı — yapıştırabilirsin')},
+    function(){say('Kopyalanamadı')});
+  }else say('Adres: '+adres);
+  return;
+ }
  if(a=='tema-sec'){TEMA=t.dataset.v;temaUygula();ciz();say(TEMALAR[TEMA].ad+' teması');return}
  if(a=='kullanicilar'){V='kullanicilar';talepleriGetir();ciz();return}
  if(a=='yedek'){V='yedek';ciz();return}
