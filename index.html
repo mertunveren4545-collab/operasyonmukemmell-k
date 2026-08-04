@@ -469,104 +469,25 @@ body.dk .gozet i{background:#171C23;border-color:#252C35;color:#8592A0}
 
 /* ---------- 2) GENİŞ EKRAN YERLEŞİMİ ---------- */
 @media(min-width:900px){
- main{max-width:1140px;padding:18px 20px}
- #app>.r,#app>.brow{width:calc(50% - 5px);display:inline-flex;vertical-align:top;margin-right:0}
- #app>.r:nth-of-type(odd){margin-right:8px}
- #app>.hero{width:100%}
- #app>.acts{display:grid;grid-template-columns:repeat(6,1fr)}
- #app>.acts button{padding:18px 8px}
- #app>.kv{max-width:none}
- #app>.card,#app>.box,#app>.fl{max-width:none}
- .yazar{max-width:1140px;margin-left:auto;margin-right:auto}
- .bkapak{min-height:190px}
- .bkapak b{font-size:25px}
- h2{margin-top:22px}
+ main{max-width:1160px;padding:20px}
+ #app{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start}
+ #app>*{margin-bottom:0}
+ #app>h2,#app>.hero,#app>.seri,#app>.note,#app>.bkapak,#app>.acts,
+ #app>.kv,#app>.card,#app>.box,#app>.fl,#app>.org,#app>.oamac,#app>.zbtn,
+ #app>.emp,#app>.b,#app>.two,#app>.yazar,#app>.ogrid,#app>.grid,#app>.tabs{grid-column:1/-1}
+ #app>.r,#app>.brow{width:100%;display:flex}
+ #app>.acts{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+ #app>.acts button{padding:20px 8px}
+ .bkapak{min-height:200px}
+ .bkapak b{font-size:26px}
+ .yazar{max-width:1160px;margin-left:auto;margin-right:auto}
+ h2{margin:6px 0 0}
 }
 @media(min-width:1250px){
- main{max-width:1320px}
- #app>.r,#app>.brow{width:calc(33.333% - 6px)}
- #app>.r:nth-of-type(odd){margin-right:0}
- #app>.r{margin-right:8px}
+ main{max-width:1340px}
+ #app{grid-template-columns:repeat(3,1fr)}
+ #app>.card,#app>.box,#app>.fl{grid-column:span 3}
 }
-/* --- canlandırmalar --- */
-@keyframes gir{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
-@keyframes kay{from{width:0}}
-@keyframes nabizat{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-#app>*{animation:gir .28s ease both}
-#app>*:nth-child(2){animation-delay:.03s}
-#app>*:nth-child(3){animation-delay:.06s}
-#app>*:nth-child(4){animation-delay:.09s}
-#app>*:nth-child(5){animation-delay:.12s}
-#app>*:nth-child(6){animation-delay:.15s}
-.bar i{animation:kay .6s cubic-bezier(.2,.8,.3,1) both}
-.bdg{animation:nabizat 1.8s ease-in-out infinite}
-.r,.acts button,.cell{transition:transform .12s ease,box-shadow .15s ease}
-.r:active,.acts button:active{transform:scale(.985)}
-@media(hover:hover){
- .r:hover,.acts button:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(18,49,92,.12)}
- .sub:hover{background:#EDF2EE}
-}
-/* --- ilerleme halkası --- */
-.halka{width:44px;height:44px;flex:none;position:relative}
-.halka svg{transform:rotate(-90deg)}
-.halka span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
- font-size:11px;font-weight:800;color:#12315C}
-body.dk .halka span{color:#8FB6EA}
-/* --- renkli gösterge kartları --- */
-.kv div{position:relative;overflow:hidden}
-.kv div:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#2E7D4B}
-.kv div.bad:before{background:#B2402F}
-.kv div:nth-child(2):before{background:#1E4A85}
-.kv div:nth-child(3):before{background:#C08A1E}
-/* --- konfeti --- */
-#konf{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden;display:none}
-#konf.on{display:block}
-#konf i{position:absolute;width:9px;height:14px;border-radius:2px;opacity:.95;
- animation:dus 2.4s linear forwards}
-@keyframes dus{0%{transform:translateY(-40px) rotate(0)}100%{transform:translateY(105vh) rotate(720deg)}}
-/* --- seri rozeti --- */
-.seri{display:flex;align-items:center;gap:10px;background:linear-gradient(100deg,#2E7D4B,#5FBF87);
- color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:10px}
-.seri .ates{font-size:24px;animation:nabizat 2s ease-in-out infinite}
-.seri b{display:block;font-size:15px}
-.seri span{font-size:12px;opacity:.9}
-/* --- sayfa dokusu --- */
-body{background-image:
- radial-gradient(circle at 12% 8%, rgba(46,125,75,.05) 0, transparent 34%),
- radial-gradient(circle at 88% 22%, rgba(30,74,133,.055) 0, transparent 32%);
- background-attachment:fixed}
-body.dk{background-image:
- radial-gradient(circle at 12% 8%, rgba(95,191,135,.06) 0, transparent 34%),
- radial-gradient(circle at 88% 22%, rgba(143,182,234,.05) 0, transparent 32%)}
-/* --- bölüm başlıkları --- */
-h2{display:flex;align-items:center;gap:8px}
-h2:before{content:'';width:14px;height:3px;border-radius:2px;background:#2E7D4B;flex:none}
-/* --- adım zaman çizelgesi --- */
-.tl{position:relative;padding-left:30px}
-.tl:before{content:'';position:absolute;left:11px;top:8px;bottom:8px;width:2px;background:#E4E9EE}
-body.dk .tl:before{background:#2A323B}
-.tl .adim{position:relative;padding:10px 0}
-.tl .adim:before{content:'';position:absolute;left:-24px;top:15px;width:14px;height:14px;
- border-radius:8px;background:#fff;border:3px solid #C3CAD1;z-index:2}
-body.dk .tl .adim:before{background:#1A1F26;border-color:#3A434E}
-.tl .adim.t:before{border-color:#2E7D4B;background:#2E7D4B;
- box-shadow:0 0 0 4px rgba(46,125,75,.14)}
-.tl .adim.a:before{border-color:#1E4A85;background:#fff;animation:nabizat 2s ease-in-out infinite;
- box-shadow:0 0 0 4px rgba(30,74,133,.14)}
-.tl .adim.a.gec:before{border-color:#B2402F;box-shadow:0 0 0 4px rgba(178,64,47,.16)}
-.tl .adim .bas{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.tl .adim .bas b{font-size:14px}
-.tl .adim .bas i{font-style:normal;font-size:11.5px;color:#8592A0;flex:none}
-.tl .adim.gec .bas i{color:#B2402F;font-weight:700}
-.tl .adim .kisi{font-size:12px;color:#5A6672;margin-top:2px}
-.tl .adim .zmn{font-size:11px;color:#A3ADB8;margin-top:2px}
-body.dk .tl .adim .kisi{color:#9AA6B2}
-/* --- boş durum --- */
-.emp{position:relative}
-.emp .cizim{font-size:34px;display:block;margin-bottom:8px;opacity:.5}
-/* --- sohbet listesi kaydırma --- */
-.mliste{max-height:none}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
 </style>
@@ -951,7 +872,7 @@ function mesajHTML(){
   if(MHEDEF.slice(0,2)=='b:')return m.alici==MHEDEF;
   return (m.gonderen==ME&&m.alici==MHEDEF)||(m.gonderen==MHEDEF&&m.alici==ME);
  });
- if(!liste.length)return '<div class="emp" style="border:0;background:transparent;box-shadow:none"><span class="cizim">💬</span>Henüz mesaj yok — ilk mesajı sen yaz.</div>';
+ if(!liste.length)return '<div class="emp" style="border:0;background:transparent;box-shadow:none"><span class="cizim">📻</span>Telsiz sessiz — ilk mesajı sen yaz.</div>';
  liste.forEach(function(m){
   var ic;
   if(m.tur=='gorsel'&&m.veri) ic='<img src="'+m.veri+'" data-a="fs" data-src="'+m.veri+'">';
@@ -1189,8 +1110,8 @@ function girisEkrani(){
   '<div style="height:18px"></div><button class="b" data-a="girisyap">Giriş yap</button>'+
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
-  '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Mesajlaşma</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s33</div>'+
+  '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Telsiz</i><i>Analiz</i></div>'+
+  '<div class="galt">SÜRÜM s34</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1216,9 +1137,13 @@ function ciz(){
  var t=document.getElementById('top');
  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',kayit:'Çalışma kaydı',
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:(FILT=='bit'?'Tamamlanan işlerim':'Bende bekleyenler'),
-   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ozet:'Aylık özet',kullanicilar:'Kullanıcı durumu',mesaj:'Mesajlar',yedek:'Yedek ve temizlik'};
+   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ozet:'Aylık özet',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik'};
  t.innerHTML=(V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
-   '<div class="tt">'+bl[V]+'</div>'+
+   (V=='ana'
+     ?'<div class="tt marka"><span class="mrk"><i></i><i></i><i></i></span>'+
+       '<span><b style="display:block;line-height:1.05">OPM</b>'+
+       '<span>Operasyonel Mükemmellik</span></span></div>'
+     :'<div class="tt">'+bl[V]+'</div>')+
    '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>'+
    '<button class="cik" data-a="cikis">Çıkış</button>';
   var kk2=document.getElementById('kul');
@@ -1268,11 +1193,11 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s33 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s34 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
-    '<button data-a="mesaj"><i>💬</i>Mesajlar'+rz(BD.mesaj)+'</button>'+
+    '<button data-a="mesaj"><i>📻</i>Telsiz'+rz(BD.mesaj)+'</button>'+
     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
     '<button data-a="yeni"><i>＋</i>Yeni iş</button></div>';
   h+='<div class="acts">'+
