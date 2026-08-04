@@ -503,14 +503,15 @@ body.dk #app.sohbet .mliste::-webkit-scrollbar-thumb{background:#39424C}
  body.dk #app.sohbet .yazar{background:#11151A}
 }
 /* --- kenar süslemeleri (mesleki) --- */
-.dekor{position:fixed;pointer-events:none;z-index:0;opacity:.055}
-body.dk .dekor{opacity:.075}
-.dekor.sol{left:-30px;top:120px;width:230px;height:520px;
- background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 460'><g fill='none' stroke='%2312315C' stroke-width='3'><circle cx='60' cy='70' r='34'/><circle cx='60' cy='70' r='13'/><g stroke-width='11'><path d='M60 28v-12M60 124v12M18 70H6M114 70h12M31 41l-9-9M89 99l9 9M89 41l9-9M31 99l-9 9'/></g><rect x='24' y='190' width='120' height='84' rx='8'/><path d='M40 214h88M40 234h88M40 254h56'/><path d='M20 340h150M40 340v-40M70 340v-70M100 340v-30M130 340v-56'/></g></svg>");
- background-repeat:no-repeat;background-size:contain}
-.dekor.sag{right:-20px;top:220px;width:220px;height:540px;
- background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 480'><g fill='none' stroke='%232E7D4B' stroke-width='3'><path d='M20 80h160M20 80l0 26M60 80l0 26M100 80l0 26M140 80l0 26M180 80l0 26'/><circle cx='40' cy='130' r='16'/><circle cx='100' cy='130' r='16'/><circle cx='160' cy='130' r='16'/><rect x='30' y='220' width='140' height='90' rx='10'/><path d='M50 265l24 22 44-48'/><path d='M30 380l40-34 34 26 52-58'/><circle cx='30' cy='380' r='5'/><circle cx='70' cy='346' r='5'/><circle cx='104' cy='372' r='5'/><circle cx='156' cy='314' r='5'/></g></svg>");
- background-repeat:no-repeat;background-size:contain}
+.dekor{position:fixed;pointer-events:none;z-index:0;opacity:.20;
+ background-repeat:no-repeat;background-size:contain;
+ animation:suz 1.2s ease both}
+body.dk .dekor{opacity:.26}
+@keyframes suz{from{opacity:0;transform:translateY(14px)}}
+.dekor.sol{left:-6px;top:100px;width:300px;height:640px;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 560'><g fill='none' stroke-linecap='round'><g stroke='%232E7D4B' stroke-width='4'><circle cx='78' cy='84' r='42'/><circle cx='78' cy='84' r='16'/><g stroke-width='13'><path d='M78 34V20M78 148v14M28 84H14M142 84h14M43 49l-10-10M113 119l10 10M113 49l10-10M43 119l-10 10'/></g></g><g stroke='%231E4A85' stroke-width='4'><rect x='26' y='216' width='150' height='104' rx='10'/><path d='M46 244h110M46 268h110M46 292h68'/><path d='M196 244l14 14 24-28'/></g><g stroke='%23C08A1E' stroke-width='4'><path d='M24 470h200'/><path d='M52 470v-52M96 470v-96M140 470v-40M184 470v-78'/></g><g stroke='%232E7D4B' stroke-width='3.5'><path d='M24 522h200'/><circle cx='60' cy='522' r='9'/><circle cx='124' cy='522' r='9'/><circle cx='188' cy='522' r='9'/></g></g></svg>")}
+.dekor.sag{right:-6px;top:150px;width:300px;height:660px;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 580'><g fill='none' stroke-linecap='round'><g stroke='%231E4A85' stroke-width='4'><path d='M20 60h220'/><path d='M20 60v30M76 60v30M132 60v30M188 60v30M240 60v30'/><rect x='40' y='96' width='44' height='30' rx='6'/><rect x='108' y='96' width='44' height='30' rx='6'/><rect x='176' y='96' width='44' height='30' rx='6'/></g><g stroke='%232E7D4B' stroke-width='4'><path d='M30 236l52-44 44 34 68-76'/><circle cx='30' cy='236' r='7'/><circle cx='82' cy='192' r='7'/><circle cx='126' cy='226' r='7'/><circle cx='194' cy='150' r='7'/></g><g stroke='%23C08A1E' stroke-width='4'><rect x='34' y='320' width='180' height='120' rx='12'/><path d='M60 372l30 28 58-62'/></g><g stroke='%232E7D4B' stroke-width='4'><circle cx='124' cy='512' r='48'/><path d='M124 470v42l28 18'/></g></g></svg>")}
 @media(max-width:1279px){.dekor{display:none}}
 main{position:relative;z-index:1}
 header{position:relative;z-index:3}
@@ -1138,7 +1139,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Telsiz</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s35</div>'+
+  '<div class="galt">SÜRÜM s36</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1221,7 +1222,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s35 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s36 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
