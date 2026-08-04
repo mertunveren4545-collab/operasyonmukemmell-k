@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Operasyonel Mükemmellik</title>
+<title>OPM — Operasyonel Mükemmellik</title>
 <link rel="manifest" href="manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Operasyonel Mükemmellik">
-<meta property="og:description" content="İş akışı, çalışma kaydı ve mesajlaşma sistemi. Kullanıcı adın ve şifrenle gir.">
+<meta property="og:title" content="OPM — Operasyonel Mükemmellik">
+<meta property="og:description" content="İş akışı, çalışma kaydı ve mesajlaşma.">
 <meta property="og:url" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/">
 <meta property="og:image" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/og-kapak.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Operasyonel Mükemmellik">
-<meta name="twitter:description" content="İş akışı, çalışma kaydı ve mesajlaşma sistemi.">
+<meta name="twitter:title" content="OPM — Operasyonel Mükemmellik">
+<meta name="twitter:description" content="İş akışı, çalışma kaydı ve mesajlaşma.">
 <meta name="twitter:image" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/og-kapak.png">
 <link rel="icon" href="icon-192.png">
 <meta name="theme-color" content="#12315C">
@@ -387,6 +387,107 @@ body.dk .stkr button{background:#1A1F26;border-color:#333C46;color:#8FB6EA}
 .msj .bal.etiket span{font-size:11.5px;color:#5A6672}
 body.dk .msj .bal.etiket{background:#1D2A22;border-color:#31513C}
 body.dk .msj .bal.etiket b{color:#8FD3AC}
+/* --- kişi renkleri ve avatarlar --- */
+.avk{width:34px;height:34px;border-radius:17px;flex:none;display:flex;align-items:center;
+ justify-content:center;font-size:12.5px;font-weight:800;color:#fff;letter-spacing:.02em}
+.msj{flex-direction:row;align-items:flex-end;gap:8px;display:flex;max-width:88%}
+.msj .icerik{min-width:0}
+.msj.ben{margin-left:auto;flex-direction:row-reverse}
+.msj.ben .icerik{align-items:flex-end;display:flex;flex-direction:column}
+/* --- bahsetme --- */
+.bhs{background:rgba(46,125,75,.16);color:#1E5C36;font-weight:700;padding:1px 5px;border-radius:5px}
+body.dk .bhs{background:rgba(143,211,172,.18);color:#8FD3AC}
+.msj .bal.bana{border-left:3px solid #C08A1E;background:#FCF7EC}
+body.dk .msj .bal.bana{background:#2A2416;border-left-color:#C08A1E}
+.kisilistesi{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin-bottom:8px}
+.kisilistesi button{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #CDD3D9;
+ border-radius:9px;padding:7px 8px;font-size:12.5px;font-weight:600;color:#12315C;text-align:left}
+body.dk .kisilistesi button{background:#1A1F26;border-color:#333C46;color:#8FB6EA}
+/* --- ana ekran kahraman kart --- */
+.hero{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px;margin-bottom:12px;color:#fff}
+.hero:before{content:'';position:absolute;inset:0;opacity:.30;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 160'><g fill='none' stroke='white' stroke-width='2'><circle cx='330' cy='50' r='34'/><path d='M330 26v24l18 11'/><path d='M250 130h30l14-24 16 36 12-20h30'/></g></svg>");
+ background-repeat:no-repeat;background-position:right center;background-size:auto 130%}
+.hero .ic3{position:relative;z-index:2;display:flex;align-items:center;gap:12px}
+.hero .ic3 .sol{flex:1;min-width:0}
+.hero .ic3 b{display:block;font-size:16.5px}
+.hero .ic3 span{font-size:12.5px;opacity:.85}
+.hero .ic3 .sy{font-size:34px;font-weight:800;line-height:1}
+.hero .selam{position:relative;z-index:2;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+ opacity:.75;margin-bottom:8px}
+.marka{display:flex;align-items:center;gap:9px}
+.marka .mrk{display:flex;flex-direction:column;gap:2.5px}
+.marka .mrk i{display:block;height:3.5px;border-radius:2px;background:#5FBF87}
+.marka .mrk i:nth-child(1){width:20px;background:#5FBF87}
+.marka .mrk i:nth-child(2){width:14px;background:#2E7D4B}
+.marka .mrk i:nth-child(3){width:8px;background:#E8C34A}
+.marka b{font-size:16px;letter-spacing:.14em;font-weight:800}
+.marka span{font-size:9.5px;letter-spacing:.10em;text-transform:uppercase;opacity:.72;display:block;margin-top:-2px}
+.gr-logo{text-align:center;margin-bottom:18px}
+.gr-logo .cizgi{display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:12px}
+.gr-logo .cizgi i{display:block;height:8px;border-radius:5px}
+.gr-logo .cizgi i:nth-child(1){width:120px;background:#2E7D4B}
+.gr-logo .cizgi i:nth-child(2){width:86px;background:#5FBF87}
+.gr-logo .cizgi i:nth-child(3){width:52px;background:#E8C34A}
+.gr-logo h1{font-size:40px;letter-spacing:.20em;margin:0;font-weight:800;color:#12315C}
+.gr-logo p{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#8592A0;margin:5px 0 0}
+body.dk .gr-logo h1{color:#E4E9EE}
+.gsayfa{position:fixed;inset:0;overflow-y:auto;z-index:20;background:#F7F9FB}
+body.dk .gsayfa{background:#0E1319}
+.gsayfa .icerik{max-width:380px;margin:0 auto;padding:56px 22px 40px;min-height:100%;
+ display:flex;flex-direction:column;justify-content:center}
+.gsayfa .dalga{position:absolute;left:0;right:0;top:0;height:38%;pointer-events:none;opacity:.055;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'><g fill='none' stroke='%2312315C' stroke-width='2'><path d='M0 170 L70 110 L140 170'/><path d='M120 190 L200 120 L280 190'/><path d='M260 160 L330 100 L400 160'/></g></svg>");
+ background-size:70% auto;background-repeat:repeat-x;background-position:center bottom}
+.glogo{text-align:center;margin-bottom:34px;position:relative;z-index:2}
+.glogo .isaret{display:flex;justify-content:center;margin-bottom:18px}
+.glogo h1{font-size:46px;letter-spacing:.20em;margin:0 0 0 .20em;font-weight:800;color:#12315C}
+body.dk .glogo h1{color:#E4E9EE}
+.glogo .cizgi{width:44px;height:3px;background:#E8C34A;margin:14px auto 12px;border-radius:2px}
+.glogo p{font-size:10.5px;letter-spacing:.20em;text-transform:uppercase;color:#8592A0;margin:0}
+.gkart{background:#fff;border:1px solid #E4E9EE;border-radius:16px;padding:26px 22px;
+ position:relative;z-index:2;box-shadow:0 10px 40px rgba(18,49,92,.09)}
+body.dk .gkart{background:#171C23;border-color:#252C35;box-shadow:none}
+.gkart label{color:#5A6672;margin:18px 0 7px;font-size:11.5px;letter-spacing:.05em}
+.gkart label:first-of-type{margin-top:0}
+.gkart input{background:#F7F9FB;border:1.5px solid #DDE3E9;border-radius:10px;padding:14px}
+body.dk .gkart input{background:#1E242C;border-color:#2E3742;color:#E4E9EE}
+.gkart input:focus{border-color:#2E7D4B;background:#fff;outline:none}
+body.dk .gkart input:focus{background:#232A33}
+.gkart .b{padding:15px;border-radius:11px;font-size:15px;letter-spacing:.02em}
+.gkart .b.g{background:transparent;color:#5A6672;border:0;font-weight:600;padding:11px}
+body.dk .gkart .b.g{color:#8592A0}
+.gkart .hata{background:#FCEDEA;border:1px solid #F0CFC7;color:#8E2F21;border-radius:9px;
+ padding:11px 12px;font-size:13px;margin-bottom:16px;line-height:1.4}
+body.dk .gkart .hata{background:#2A1A16;border-color:#5A3229;color:#F0BBB0}
+.galt{text-align:center;margin-top:26px;font-size:10px;letter-spacing:.12em;color:#A9B3BD;
+ position:relative;z-index:2}
+.gozet{display:flex;gap:7px;justify-content:center;margin-top:22px;position:relative;z-index:2;flex-wrap:wrap}
+.gozet i{font-style:normal;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+ color:#7A8794;background:#fff;border:1px solid #E4E9EE;padding:6px 11px;border-radius:13px}
+body.dk .gozet i{background:#171C23;border-color:#252C35;color:#8592A0}
+
+/* ---------- 2) GENİŞ EKRAN YERLEŞİMİ ---------- */
+@media(min-width:900px){
+ main{max-width:1140px;padding:18px 20px}
+ #app>.r,#app>.brow{width:calc(50% - 5px);display:inline-flex;vertical-align:top;margin-right:0}
+ #app>.r:nth-of-type(odd){margin-right:8px}
+ #app>.hero{width:100%}
+ #app>.acts{display:grid;grid-template-columns:repeat(6,1fr)}
+ #app>.acts button{padding:18px 8px}
+ #app>.kv{max-width:none}
+ #app>.card,#app>.box,#app>.fl{max-width:none}
+ .yazar{max-width:1140px;margin-left:auto;margin-right:auto}
+ .bkapak{min-height:190px}
+ .bkapak b{font-size:25px}
+ h2{margin-top:22px}
+}
+@media(min-width:1250px){
+ main{max-width:1320px}
+ #app>.r,#app>.brow{width:calc(33.333% - 6px)}
+ #app>.r:nth-of-type(odd){margin-right:0}
+ #app>.r{margin-right:8px}
+}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
 </style>
@@ -471,6 +572,11 @@ var AY=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara
 
 function pn(i){for(var x=0;x<P.length;x++)if(P[x][0]==i)return P[x];return P[2]}
 function ad(i){return pn(i)[1]}
+var RENKLER=['#1E4A85','#2E7D4B','#8E3247','#5B4B8A','#0E7C86','#B07C16','#3F6D2A','#8E2F21','#2B6CB0','#7A4E9C'];
+function kisiRenk(id){var t=0;for(var i=0;i<String(id).length;i++)t+=String(id).charCodeAt(i);
+ return RENKLER[t%RENKLER.length]}
+function bashrf(id){var p=pn(id)[1].split(' ');
+ return ((p[0]||' ')[0]+((p[1]||p[0]||' ')[0])).toLocaleUpperCase('tr')}
 function ks(i){var p=pn(i)[1].split(' ');return p[0]+' '+p[p.length-1][0]+'.'}
 function bad(k){return (B[k]||{ad:k}).ad}
 function ii(n){return(n<10?'0':'')+n}
@@ -592,7 +698,7 @@ var OP2='mert';
 var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[],DURUMLAR=[];
 var MESAJLAR=[],SON_OKUMA=null,MHEDEF=null,MZAMAN=null;
 var FILT='',ILKCEK=true,MTASLAK='',MSAYI=0,SES=true,KAYITCI=null,KAYITTA=false,KPARCA=[],YZ_SON=0,DZAMAN=null;
-var ETIKET=false;
+var ETIKET=false,BAHSET=false;
 var ETIKETLER=[
  ['♻️','KAİZEN','sürekli iyileştirme'],
  ['🧹','5S','düzen ve standart'],
@@ -745,10 +851,17 @@ function mesajHTML(){
    ic='<em>'+esc(pr[0]||'')+'</em><b>'+esc(pr[1]||'')+'</b><span>'+esc(pr[2]||'')+'</span>';
    snf='bal etiket';
   }
+  var benimAdim='@'+ad(ME);
+  if(m.tur!='etiket'&&m.tur!='gorsel'&&m.tur!='ses'){
+   ic=ic.replace(/@([A-Za-zÇĞİÖŞÜçğıöşü]+(?: [A-Za-zÇĞİÖŞÜçğıöşü]+)?)/g,'<span class="bhs">@$1</span>');
+   if((m.metin||'').indexOf(benimAdim)>=0&&m.gonderen!=ME)snf+=' bana';
+  }
   h+='<div class="msj'+(m.gonderen==ME?' ben':'')+'">'+
+    '<div class="avk" style="background:'+kisiRenk(m.gonderen)+'">'+bashrf(m.gonderen)+'</div>'+
+    '<div class="icerik">'+
     (m.gonderen!=ME?'<div class="kim">'+ad(m.gonderen)+'</div>':'')+
     '<div class="'+snf+'">'+ic+'</div>'+
-    '<div class="mt">'+fmt(m.ts)+'</div></div>';
+    '<div class="mt">'+fmt(m.ts)+'</div></div></div>';
  });
  return h;
 }
@@ -799,6 +912,9 @@ function mesajGetir(){
   var bana=ILKCEK?[]:yeniler.filter(function(m){
    return m.alici=='herkes'||m.alici==ME||(mb&&m.alici=='b:'+mb)});
   ILKCEK=false;
+  var bahs=ILKCEK?[]:yeniler.filter(function(m){
+   return (m.metin||'').indexOf('@'+ad(ME))>=0});
+  if(bahs.length){bip();bildir(ad(bahs[0].gonderen)+' seni etiketledi',(bahs[0].metin||'').slice(0,70))}
   if(bana.length){bip();
    var sn=bana[bana.length-1];
    var oz=(sn.tur=='ses'?'🎤 sesli mesaj':sn.tur=='gorsel'?'📎 görsel':(sn.metin||'').slice(0,60));
@@ -918,31 +1034,49 @@ function hafta(rec){
 }
 /* ---------- ÇİZ ---------- */
 function unutEkrani(){
- document.getElementById('top').innerHTML='<button class="bk" data-a="girisdon">‹ Geri</button>'+
-  '<div class="tt">Şifremi unuttum</div>';
- document.getElementById('who').style.display='none';
+ document.getElementById('top').innerHTML='';
+ var w2=document.getElementById('who');if(w2)w2.style.display='none';
+ var k2=document.getElementById('kul');if(k2)k2.style.display='none';
  document.getElementById('app').innerHTML=
-  '<div class="giris"><div class="kut">'+
-  '<h1>Şifre sıfırlama</h1><p class="alt">Talebin yöneticiye iletilir</p>'+
+  '<div class="gsayfa"><div class="dalga"></div><div class="icerik">'+
+  '<div class="glogo"><div class="isaret">'+apexLogo()+'</div>'+
+  '<h1>OPM</h1><div class="cizgi"></div><p>Şifre sıfırlama</p></div>'+
+  '<div class="gkart">'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adın</label><input id="uk" placeholder="Kullanıcı adın" autocapitalize="off">'+
-  '<div style="height:14px"></div><button class="b" data-a="unutgo">Sıfırlama iste</button>'+
-  '<div class="note">Mert Ünveren veya Mesut Ünver şifreni <b>123456</b> olarak sıfırlar. '+
-  'Sonra bu şifreyle girip kendi şifreni belirlersin.</div></div></div>';
+  '<div style="height:16px"></div><button class="b" data-a="unutgo">Sıfırlama iste</button>'+
+  '<div style="height:9px"></div><button class="b g" data-a="girisdon">Vazgeç</button>'+
+  '<div class="note" style="color:#8FB6D9">Mert Ünveren veya Mesut Ünver şifreni <b>123456</b> yapar. '+
+  'Sonra bu şifreyle girip kendi şifreni belirlersin.</div></div>'+
+  '</div></div>';
+}
+function apexLogo(){
+ return '<svg width="94" height="72" viewBox="0 0 120 92" fill="none">'+
+  '<rect x="12" y="52" width="22" height="26" rx="4" fill="#E8C34A"/>'+
+  '<rect x="49" y="32" width="22" height="46" rx="4" fill="#5FBF87"/>'+
+  '<rect x="86" y="10" width="22" height="68" rx="4" fill="#2E7D4B"/>'+
+  '<rect x="8" y="84" width="104" height="4" rx="2" fill="#A9C4E8" opacity=".7"/></svg>';
 }
 function girisEkrani(){
  if(UNUT){unutEkrani();return}
- document.getElementById('top').innerHTML='<div class="tt">Operasyonel Mükemmellik</div>'+
-  '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>';
- document.getElementById('who').style.display='none';
+ document.getElementById('top').innerHTML='';
+ var w=document.getElementById('who');if(w)w.style.display='none';
+ var k=document.getElementById('kul');if(k)k.style.display='none';
  document.getElementById('app').innerHTML=
-  '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s25</b></p>'+
+  '<div class="gsayfa"><div class="dalga"></div><div class="icerik">'+
+  '<div class="glogo"><div class="isaret">'+apexLogo()+'</div>'+
+  '<h1>OPM</h1><div class="cizgi"></div>'+
+  '<p>Operasyonel Mükemmellik</p></div>'+
+  '<div class="gkart">'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
-  '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
+  '<label>Kullanıcı adı</label>'+
+  '<input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
-  '<div style="height:14px"></div><button class="b" data-a="girisyap">Giriş yap</button>'+
-  '<div style="height:8px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
+  '<div style="height:18px"></div><button class="b" data-a="girisyap">Giriş yap</button>'+
+  '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
+  '</div>'+
+  '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Mesajlaşma</i><i>Analiz</i></div>'+
+  '<div class="galt">SÜRÜM s31</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -980,9 +1114,15 @@ function ciz(){
  if(V=='ana'){
   var mn=bende(),gc=mn.filter(function(j){return as(cur(j))>0}).length;
   var BD=bildirimler();
-  h='<button class="big" data-a="bende"><div><b>Bende bekleyen iş'+rz(BD.gec)+'</b>'+
+  var saat9=new Date().getHours();
+  var selam=saat9<11?'Günaydın':saat9<18?'İyi çalışmalar':'İyi akşamlar';
+  h='<button class="hero" data-a="bende" style="background:'+(TEMALAR[TEMA]||TEMALAR.lacivert).ana+';width:100%;text-align:left;border:0">'+
+    '<div class="selam">'+selam+' · '+ad(ME).split(' ')[0]+'</div>'+
+    '<div class="ic3"><span class="avk" style="width:44px;height:44px;border-radius:22px;font-size:15px;background:'+
+      kisiRenk(ME)+'">'+bashrf(ME)+'</span>'+
+    '<div class="sol"><b>Bende bekleyen iş'+rz(BD.gec)+'</b>'+
     '<span>'+(gc?gc+' tanesi termini aştı':'termin aşımı yok')+'</span></div>'+
-    '<div class="num">'+mn.length+'</div></button>';
+    '<div class="sy">'+mn.length+'</div></div></button>';
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1009,7 +1149,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s25 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s31 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1469,12 +1609,21 @@ function ciz(){
       (MHEDEF=='herkes'?'':pn(MHEDEF)[2])):'grup sohbeti')+'</div></div>'+
      '<button class="b g" style="width:auto;padding:7px 11px;font-size:12px" data-a="ses">'+(SES?'🔔':'🔕')+'</button></div>';
    h+='<div class="card mliste">'+mesajHTML()+'</div>';
+   if(BAHSET){
+    h+='<div class="card" style="margin-bottom:8px"><h3>Kimi etiketleyeceksin?</h3><div class="kisilistesi">'+
+      P.filter(function(p){return p[0]!=ME}).map(function(p){
+       return '<button data-a="bahset" data-p="'+p[0]+'">'+
+        '<span class="avk" style="width:24px;height:24px;border-radius:12px;font-size:10px;background:'+
+        kisiRenk(p[0])+'">'+bashrf(p[0])+'</span>'+ks(p[0])+'</button>'}).join('')+
+      '</div><div class="note">Etiketlenen kişiye bildirim gider, mesaj onun ekranında sarı çizgiyle işaretlenir.</div></div>';
+   }
    if(ETIKET){
     h+='<div class="card" style="margin-bottom:8px"><h3>Yalın etiketleri</h3><div class="stkr">'+
       ETIKETLER.map(function(e,i){return '<button data-a="etgonder" data-i="'+i+'">'+
         '<em>'+e[0]+'</em>'+e[1]+'</button>'}).join('')+'</div></div>';
    }
    h+='<div class="yazar"><div class="mek">'+
+     '<button class="'+(BAHSET?'rec':'')+'" data-a="bahsetac">@ Etiketle</button>'+
      '<button class="'+(ETIKET?'rec':'')+'" data-a="etiket">🏷 Etiket</button>'+
      '<label>📎 Görsel / GIF<input type="file" id="mf" accept="image/*"></label>'+
      '<button class="'+(KAYITTA?'rec':'')+'" data-a="mses">'+(KAYITTA?'⏹ Kaydı bitir':'🎤 Sesli mesaj')+'</button>'+
@@ -1754,7 +1903,7 @@ document.addEventListener('click',function(e){
  if(a=='gorunum'){V='gorunum';ciz();return}
  if(a=='paylas'){
   var adres=location.href.split('?')[0].split('#')[0];
-  var metin='Operasyonel Mükemmellik sistemi\n\nKullanıcı adın: adının ilk kelimesi (küçük harf, Türkçe karaktersiz)\nİlk giriş şifresi: 123456\nSistem seni kendi şifreni belirlemeye yönlendirecek.\n\n'+adres;
+  var metin='OPM — Operasyonel Mükemmellik\n\nKullanıcı adın: adının ilk kelimesi (küçük harf, Türkçe karaktersiz)\nİlk giriş şifresi: 123456\nSistem seni kendi şifreni belirlemeye yönlendirecek.\n\n'+adres;
   if(navigator.share){
    navigator.share({title:'Operasyonel Mükemmellik',text:metin,url:adres})
     .then(function(){say('Paylaşıldı')},function(){});
@@ -1834,7 +1983,15 @@ document.addEventListener('click',function(e){
   if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
     son_okuma:SON_OKUMA,son_gorulme:SON_OKUMA}).then(function(){},function(){});
   durumGetir();ciz();return}
- if(a=='etiket'){ETIKET=!ETIKET;ciz();return}
+ if(a=='etiket'){ETIKET=!ETIKET;BAHSET=false;ciz();return}
+ if(a=='bahsetac'){BAHSET=!BAHSET;ETIKET=false;ciz();return}
+ if(a=='bahset'){
+  var kim=t.dataset.p;
+  MTASLAK=(MTASLAK?MTASLAK.replace(/\s*$/,'')+' ':'')+'@'+ad(kim)+' ';
+  BAHSET=false;ciz();
+  var mmz=document.getElementById('mm');
+  if(mmz){mmz.value=MTASLAK;try{mmz.focus()}catch(e){}}
+  return;}
  if(a=='etgonder'){
   var e5=ETIKETLER[+t.dataset.i];if(!e5)return;
   ETIKET=false;

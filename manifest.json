@@ -1,12 +1,12 @@
 {
-  "name": "Operasyonel Mükemmellik",
-  "short_name": "OpMük",
+  "name": "OPM — Operasyonel Mükemmellik",
+  "short_name": "OPM",
   "description": "İş akışı, çalışma kaydı ve mesajlaşma",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#12315C",
+  "background_color": "#0E2647",
   "theme_color": "#12315C",
   "lang": "tr",
   "icons": [
