@@ -572,6 +572,46 @@ body.dk .disli{opacity:.22}
 }
 main{position:relative;z-index:1}
 header{position:relative;z-index:3}
+/* --- üst bilgi akışı --- */
+.serit{background:#0B2140;color:#DDE7F2;overflow:hidden;position:relative;
+ border-bottom:1px solid rgba(255,255,255,.10)}
+body.dk .serit{background:#080F1A}
+.serit .kayan{display:inline-flex;white-space:nowrap;padding:8px 0;
+ animation:akis 42s linear infinite;will-change:transform}
+.serit:hover .kayan{animation-play-state:paused}
+@keyframes akis{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.serit .oge{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:0 20px;
+ border-right:1px solid rgba(255,255,255,.10)}
+.serit .oge em{font-style:normal;font-size:14px}
+.serit .oge b{font-weight:700;color:#fff}
+.serit .oge.kirmizi b{color:#FF9C8A}
+.serit .oge.sari b{color:#FFD873}
+.serit .oge.yesil b{color:#8FD3AC}
+@media(prefers-reduced-motion:reduce){.serit .kayan{animation:none}}
+/* --- dashboard --- */
+.dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+@media(min-width:900px){.dgrid{grid-template-columns:repeat(4,1fr)}}
+.dkart{background:#fff;border-radius:13px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.06);
+ position:relative;overflow:hidden;border:1px solid #E8ECEF}
+body.dk .dkart{background:#1A1F26;border-color:#262D36}
+.dkart .ikon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;
+ justify-content:center;font-size:18px;margin-bottom:10px}
+.dkart .sayi{font-size:29px;font-weight:800;line-height:1;color:#12315C}
+body.dk .dkart .sayi{color:#E4E9EE}
+.dkart .etiket{font-size:11.5px;color:#7A8794;margin-top:5px;line-height:1.3}
+.dkart .alt{font-size:11px;margin-top:7px;font-weight:600}
+.dkart.iyi .ikon{background:#E4F0E8;color:#1E5C36}
+.dkart.uyari .ikon{background:#FBF4E4;color:#8A6512}
+.dkart.kotu .ikon{background:#F8E6E3;color:#8E2F21}
+.dkart.mavi .ikon{background:#E7EDF6;color:#1E4A85}
+.dkart.iyi .alt{color:#2E7D4B}.dkart.kotu .alt{color:#B2402F}.dkart.uyari .alt{color:#B07C16}
+.dkart .cizgi{position:absolute;left:0;right:0;bottom:0;height:3px;background:#E8ECEF}
+.dkart .cizgi i{display:block;height:100%;background:#2E7D4B;animation:kay .7s ease both}
+.dkart.kotu .cizgi i{background:#B2402F}.dkart.uyari .cizgi i{background:#C08A1E}
+.dbaslik{display:flex;align-items:center;gap:9px;margin:0 0 12px}
+.dbaslik em{font-style:normal;font-size:17px}
+.dbaslik b{font-size:14.5px}
+.dbaslik span{margin-left:auto;font-size:11.5px;color:#8592A0}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
 </style>
@@ -583,6 +623,7 @@ header{position:relative;z-index:3}
  <select class="who" id="who" style="display:none"></select>
  <div class="kul" id="kul"></div>
 </header>
+<div class="serit" id="serit" style="display:none"></div>
 <main id="app"></main>
 <div id="t"></div>
 <div id="konf"></div>
@@ -900,6 +941,35 @@ function gunlukHatirlat(){
   say(p.join(' · '));
  }catch(e){}
 }
+function seritYaz(){
+ var e=document.getElementById('serit');if(!e)return;
+ if(!GIRIS||ZORUNLU){e.style.display='none';return}
+ var o=[],BDx=bildirimler();
+ var mn=bende(),gc=mn.filter(function(j){return as(cur(j))>0});
+ if(gc.length)o.push(['kirmizi','⏰',gc.length+' iş termini aştı','en gecikmişi: '+gc[0].ad.slice(0,34)]);
+ if(mn.length-gc.length>0)o.push(['','📋',(mn.length-gc.length)+' iş sırada','sende bekliyor']);
+ if(BDx.destek)o.push(['sari','🤝',BDx.destek+' veri talebi','senden bekleniyor']);
+ if(BDx.ekSure)o.push(['sari','⏳',BDx.ekSure+' ek süre talebi','onayını bekliyor']);
+ if(BDx.mesaj)o.push(['','📻',BDx.mesaj+' yeni mesaj','telsizde']);
+ var sr=seriGun();
+ if(sr>=2)o.push(['yesil','🔥',sr+' gün üst üste kayıt','seriyi sürdür']);
+ var vis=J.filter(gor),acik=vis.filter(cur);
+ var w=0,b=0;vis.forEach(function(j){var x=bek(j);w+=x[0];b+=x[1]});
+ var or=w+b?Math.round(b/(w+b)*100):0;
+ o.push([or>30?'sari':'yesil','📊','Bekleme oranı %'+or,'toplam sürenin']);
+ o.push(['','🗂️',acik.length+' açık iş',(vis.length-acik.length)+' tamamlandı']);
+ var bugunK=K.filter(function(r){return String(r.ts).slice(0,10)===new Date().toISOString().slice(0,10)});
+ var dk=0;bugunK.forEach(function(r){dk+=r.dk});
+ if(dk)o.push(['yesil','⏱️',sa(dk)+' saat','bugün kayda geçti']);
+ var iad=0;vis.forEach(function(j){iad+=iade(j)});
+ if(iad)o.push(['sari','↩️',iad+' geri gönderme','süreçte tekrar var']);
+ if(!o.length)o.push(['yesil','✅','Her şey yolunda','bekleyen iş yok']);
+ var h='';
+ o.forEach(function(x){h+='<span class="oge '+x[0]+'"><em>'+x[1]+'</em><b>'+esc(x[2])+'</b>'+
+   (x[3]?'<span style="opacity:.7">· '+esc(x[3])+'</span>':'')+'</span>'});
+ e.innerHTML='<div class="kayan">'+h+h+'</div>';
+ e.style.display='block';
+}
 function bildirimIzni(){
  if(!('Notification' in window))return;
  if(Notification.permission==='default')Notification.requestPermission();
@@ -1201,6 +1271,7 @@ function apexLogo(){
   '<rect x="8" y="84" width="104" height="4" rx="2" fill="#A9C4E8" opacity=".7"/></svg>';
 }
 function girisEkrani(){
+ var sr0=document.getElementById('serit');if(sr0)sr0.style.display='none';
  if(UNUT){unutEkrani();return}
  document.getElementById('top').innerHTML='';
  var w=document.getElementById('who');if(w)w.style.display='none';
@@ -1219,7 +1290,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Telsiz</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s38</div>'+
+  '<div class="galt">SÜRÜM s39</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1302,7 +1373,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s38 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s39 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1630,78 +1701,96 @@ function ciz(){
   var vis=J.filter(gor);
   var tw=0,tb=0,ia=0;vis.forEach(function(j){var x=bek(j);tw+=x[0];tb+=x[1];ia+=iade(j)});
   var acc=vis.filter(cur),gcc=acc.filter(function(j){return as(cur(j))>0}).length;
-  h='<div class="kv"><div><b>'+acc.length+'</b><span>Açık iş</span></div>'+
-    '<div class="'+(gcc?'bad':'')+'"><b>'+gcc+'</b><span>Gecikme</span></div>'+
-    '<div class="'+(ia?'bad':'')+'"><b>'+ia+'</b><span>Geri dönen</span></div></div>';
-  h+='<div class="card"><h3>Süre nereye gidiyor</h3>'+donut(tw,tb)+
+  var bitmis=vis.length-acc.length;
+  var oran=tw+tb?Math.round(tb/(tw+tb)*100):0;
+  var kv=K.filter(function(r){return tumBolum()||pn(r.k)[3]==pn(ME)[3]});
+  var dkT=0;kv.forEach(function(r){dkT+=r.dk});
+  var sureler=vis.filter(function(j){return !cur(j)}).map(function(j){return gn(j.bas,j.a[j.a.length-1].b||TODAY)});
+  var ortS=sureler.length?(sureler.reduce(function(a,b){return a+b},0)/sureler.length):0;
+
+  h='<div class="dgrid">'+
+   '<div class="dkart mavi"><div class="ikon">🗂️</div><div class="sayi">'+acc.length+'</div>'+
+     '<div class="etiket">Açık iş</div><div class="alt">'+bitmis+' tamamlandı</div>'+
+     '<div class="cizgi"><i style="width:'+(vis.length?Math.round(acc.length/vis.length*100):0)+'%"></i></div></div>'+
+   '<div class="dkart '+(gcc?'kotu':'iyi')+'"><div class="ikon">⏰</div><div class="sayi">'+gcc+'</div>'+
+     '<div class="etiket">Termin aşımı</div><div class="alt">'+(gcc?'müdahale gerek':'gecikme yok')+'</div>'+
+     '<div class="cizgi"><i style="width:'+(acc.length?Math.round(gcc/acc.length*100):0)+'%"></i></div></div>'+
+   '<div class="dkart '+(oran>30?'uyari':'iyi')+'"><div class="ikon">📊</div><div class="sayi">%'+oran+'</div>'+
+     '<div class="etiket">Sürenin beklemesi</div><div class="alt">'+tb+' gün bekleme</div>'+
+     '<div class="cizgi"><i style="width:'+Math.min(100,oran)+'%"></i></div></div>'+
+   '<div class="dkart iyi"><div class="ikon">⏱️</div><div class="sayi">'+sa(dkT)+'</div>'+
+     '<div class="etiket">Kayıtlı çalışma (saat)</div><div class="alt">'+kv.length+' kayıt</div>'+
+     '<div class="cizgi"><i style="width:70%"></i></div></div>'+
+   '</div>';
+
+  h+='<div class="card"><div class="dbaslik"><em>🍩</em><b>Süre nereye gidiyor</b>'+
+    '<span>'+(tw+tb)+' gün toplam</span></div>'+donut(tw,tb)+
     '<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan '+tw+' gün</span>'+
     '<span><i style="background:#C08A1E"></i>Beklenen '+tb+' gün</span></div></div>';
-  var kv=K.filter(function(r){return tumBolum()||pn(r.k)[3]==pn(ME)[3]});
-  var TUMKAYIT=sistemci();
+
+  h+='<div class="card"><div class="dbaslik"><em>📈</em><b>Haftalık kayda geçen saat</b>'+
+    '<span>son 8 hafta</span></div>'+hafta(kv)+'</div>';
+
   var tt={i:[0,0],k:[0,0],o:[0,0]};
   vis.forEach(function(j){j.a.forEach(function(x){if(!x.g)return;
    var d=x.d=='t'?gn(x.g,x.b):gec(x),tp3=stip(x);tt[tp3][0]+=d;tt[tp3][1]++})});
+  h+='<div class="card"><div class="dbaslik"><em>⚙️</em><b>Adım tipine göre ortalama</b>'+
+    '<span>gün</span></div>';
+  [['i','İş adımı','#1E4A85'],['k','Kontrol','#C08A1E'],['o','Onay','#2E7D4B']].forEach(function(x){
+   var av=tt[x[0]][1]?(tt[x[0]][0]/tt[x[0]][1]):0;
+   h+='<div class="rw"><div class="t"><span>'+x[1]+'</span><i>'+
+     (tt[x[0]][1]?av.toFixed(1).replace('.',',')+' gün · '+tt[x[0]][1]+' adım':'—')+'</i></div>'+
+     '<div class="bar"><i style="background:'+x[2]+';width:'+Math.min(100,av/6*100)+'%"></i></div></div>';
+  });
+  h+='<div class="note">Onay ve kontrol adımları uzuyorsa sorun iş yükünde değil, sıradadır.</div></div>';
+
+  var ft={};kv.forEach(function(r){ft[r.tip]=(ft[r.tip]||0)+r.dk});
+  var fl=Object.keys(ft).map(function(x){return[x,ft[x]]}).sort(function(a,b){return b[1]-a[1]});
+  var mf=fl.length?fl[0][1]:1;
+  h+='<div class="card"><div class="dbaslik"><em>🛠️</em><b>Emek hangi işe gidiyor</b></div>';
+  if(!fl.length)h+='<div class="emp" style="border:0;background:transparent"><span class="cizim">📝</span>Kayıt yok.</div>';
+  fl.slice(0,8).forEach(function(x){
+   h+='<div class="rw"><div class="t"><span>'+esc(x[0])+'</span><i>'+sa(x[1])+' sa</i></div>'+
+     '<div class="bar"><i style="width:'+Math.round(x[1]/mf*100)+'%"></i></div></div>'});
+  h+='</div>';
+
+  var tz={};vis.forEach(function(j){tz[j.ts_]=(tz[j.ts_]||0)+1});
+  var tl=Object.keys(tz).map(function(x){return[x,tz[x]]}).sort(function(a,b){return b[1]-a[1]});
+  var mt=tl.length?tl[0][1]:1;
+  if(tl.length){
+   h+='<div class="card"><div class="dbaslik"><em>📍</em><b>Tesise göre iş dağılımı</b></div>';
+   tl.slice(0,8).forEach(function(x){
+    h+='<div class="rw"><div class="t"><span>'+esc(tad(x[0]))+'</span><i>'+x[1]+' iş</i></div>'+
+      '<div class="bar"><i style="background:#5B4B8A;width:'+Math.round(x[1]/mt*100)+'%"></i></div></div>'});
+   h+='</div>';
+  }
+
+  var st=[],mb3=1;
+  bolumListesi().forEach(function(k){var jb=bj(k),w=0,b4=0;
+   jb.forEach(function(j){var x=bek(j);w+=x[0];b4+=x[1]});
+   if(w+b4)st.push([k,w,b4]);mb3=Math.max(mb3,w+b4)});
+  if(st.length){
+   h+='<div class="card"><div class="dbaslik"><em>🏭</em><b>'+(tumBolum()?'Bölümlerde süre':'Bölümümde süre')+'</b></div>';
+   st.forEach(function(x){
+    h+='<div class="rw"><div class="t"><span>'+B[x[0]].ad+'</span><i>'+(x[1]+x[2])+' gün</i></div>'+
+      '<div class="bar" style="display:flex"><i style="width:'+Math.round(x[1]/mb3*100)+'%"></i>'+
+      '<i class="w" style="width:'+Math.round(x[2]/mb3*100)+'%"></i></div></div>'});
+   h+='<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan</span>'+
+     '<span><i style="background:#C08A1E"></i>Beklenen</span></div></div>';
+  }
+
   var nd=[];
   vis.forEach(function(j){(j.lg||[]).forEach(function(l){
    if(l.msg&&/Gecikme nedeni|Ek süre talep/.test(l.tip))nd.push({j:j,l:l})})});
   if(nd.length){
-   h+='<div class="card"><h3>Bekleme ve gecikme nedenleri</h3>';
-   nd.sort(function(x,y){return x.l.ts<y.l.ts?1:-1}).slice(0,8).forEach(function(x){
+   h+='<div class="card"><div class="dbaslik"><em>🧭</em><b>Gecikme nedenleri</b>'+
+     '<span>son '+Math.min(6,nd.length)+'</span></div>';
+   nd.sort(function(x,y){return x.l.ts<y.l.ts?1:-1}).slice(0,6).forEach(function(x){
     h+='<div class="li"><div class="h"><b>'+esc(x.l.tip)+'</b><i>'+fmt(x.l.ts)+'</i></div>'+
       '<div class="s">'+ad(x.l.k)+' · '+esc(x.j.ad)+'</div>'+
-      '<div class="msg">'+esc(x.l.msg)+'</div></div>';
-   });
+      '<div class="msg">'+esc(x.l.msg)+'</div></div>'});
    h+='<div class="note">Tekrar eden nedenler süreç sorunudur — kişisel değil.</div></div>';
   }
-  var ds={},dt=0;
-  vis.forEach(function(j){(j.dst||[]).forEach(function(d){
-   var b6=d.durum=='b'?gn(d.ts,TODAY):gn(d.ts,d.bit);dt+=b6;
-   ds[d.kimden]=(ds[d.kimden]||0)+b6})});
-  var dsl=Object.keys(ds).map(function(x){return[x,ds[x]]}).sort(function(a,b){return b[1]-a[1]});
-  if(dsl.length){
-   var mxd=dsl[0][1]||1;
-   h+='<div class="card"><h3>Veri/destek beklemesi ('+dt+' gün)</h3>';
-   dsl.forEach(function(x){
-    h+='<div class="rw"><div class="t"><span>'+ad(x[0])+'</span><i>'+x[1]+' gün</i></div>'+
-      '<div class="bar"><i class="w" style="width:'+Math.round(x[1]/mxd*100)+'%"></i></div></div>';
-   });
-   h+='<div class="note">Bu süre işi yapanın değil, veriyi verenin hanesine yazılır.</div></div>';
-  }
-  h+='<div class="card"><h3>Adım tipine göre ortalama süre</h3>';
-  ['i','k','o'].forEach(function(x){
-   var av=tt[x][1]?(tt[x][0]/tt[x][1]):0,mx2=6;
-   h+='<div class="rw"><div class="t"><span>'+tipAd(x)+' adımları</span><i>'+
-     (tt[x][1]?av.toFixed(1).replace('.',',')+' gün · '+tt[x][1]+' adım':'—')+'</i></div>'+
-     '<div class="bar"><i class="'+(x=='o'?'w':'')+'" style="width:'+Math.min(100,av/mx2*100)+'%"></i></div></div>';
-  });
-  h+='<div class="note">Kontrol adımları uzuyorsa iş birlikte yürütülen kişide bekliyor demektir — '+
-    'onay gecikmesinden farklı bir sorundur, farklı çözülür.</div></div>';
-  h+='<div class="card"><h3>Haftalık kayda geçen saat</h3>'+hafta(kv)+'</div>';
-  var ft={};kv.forEach(function(r){ft[r.tip]=(ft[r.tip]||0)+r.dk});
-  var fl=Object.keys(ft).map(function(x){return[x,ft[x]]}).sort(function(a,b){return b[1]-a[1]});
-  var mf=fl.length?fl[0][1]:1;
-  h+='<div class="card"><h3>Emek hangi işe gidiyor</h3>';
-  if(!fl.length)h+='<div style="font-size:13px;color:#8592A0">Kayıt yok.</div>';
-  fl.forEach(function(x){h+='<div class="rw"><div class="t"><span>'+esc(x[0])+'</span><i>'+sa(x[1])+' sa</i></div>'+
-    '<div class="bar"><i style="width:'+Math.round(x[1]/mf*100)+'%"></i></div></div>'});
-  h+='</div>';
-  var mb3=1,st=[];
-  bolumListesi().forEach(function(k){var jb=bj(k),w=0,b4=0;
-   jb.forEach(function(j){var x=bek(j);w+=x[0];b4+=x[1]});
-   if(w+b4)st.push([k,w,b4]);mb3=Math.max(mb3,w+b4)});
-  var tz={};vis.forEach(function(j){tz[j.ts_]=(tz[j.ts_]||0)+1});
-  var tl=Object.keys(tz).map(function(x){return[x,tz[x]]}).sort(function(a,b){return b[1]-a[1]});
-  var mt=tl.length?tl[0][1]:1;
-  if(tl.length){h+='<div class="card"><h3>Tesise göre iş dağılımı</h3>';
-   tl.forEach(function(x){h+='<div class="rw"><div class="t"><span>'+esc(tad(x[0]))+'</span><i>'+x[1]+' iş</i></div>'+
-    '<div class="bar"><i style="width:'+Math.round(x[1]/mt*100)+'%"></i></div></div>'});
-   h+='</div>'}
-  if(st.length){h+='<div class="card"><h3>'+(tumBolum()?'Bölümlerde süre':'Bölümümde süre')+'</h3>';
-   st.forEach(function(x){h+='<div class="rw"><div class="t"><span>'+B[x[0]].ad+'</span><i>'+(x[1]+x[2])+' gün</i></div>'+
-    '<div class="bar" style="display:flex"><i style="width:'+Math.round(x[1]/mb3*100)+'%"></i>'+
-    '<i class="w" style="width:'+Math.round(x[2]/mb3*100)+'%"></i></div></div>'});
-   h+='<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan</span>'+
-     '<span><i style="background:#C08A1E"></i>Beklenen</span></div></div>'}
  }
  else if(V=='tesis'){
   var vj=J.filter(gor);
@@ -2031,6 +2120,7 @@ function ciz(){
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
  }
  el.innerHTML=h;
+ try{seritYaz()}catch(e){console.log('serit:',e.message)}
  if(SIG){
   var sw=document.getElementById('sw'),sc=document.getElementById('sc');
   if(sw&&sc){
