@@ -488,6 +488,32 @@ body.dk .gozet i{background:#171C23;border-color:#252C35;color:#8592A0}
  #app{grid-template-columns:repeat(3,1fr)}
  #app>.card,#app>.box,#app>.fl{grid-column:span 3}
 }
+/* --- sohbet kendi düzeninde --- */
+#app.sohbet{display:block!important;max-width:780px;margin:0 auto}
+#app.sohbet .mliste{max-height:calc(100vh - 320px);overflow-y:auto;
+ scroll-behavior:smooth;padding-right:4px}
+#app.sohbet .mliste::-webkit-scrollbar{width:6px}
+#app.sohbet .mliste::-webkit-scrollbar-thumb{background:#C9D1D9;border-radius:3px}
+body.dk #app.sohbet .mliste::-webkit-scrollbar-thumb{background:#39424C}
+#app.sohbet .yazar{position:static;margin:0;padding:0;box-shadow:none;background:transparent}
+@media(max-width:899px){
+ #app.sohbet .mliste{max-height:calc(100vh - 300px)}
+ #app.sohbet .yazar{position:sticky;bottom:0;background:#F0F1F3;margin:0 -12px;
+  padding:6px 12px;box-shadow:0 -3px 10px rgba(0,0,0,.07)}
+ body.dk #app.sohbet .yazar{background:#11151A}
+}
+/* --- kenar süslemeleri (mesleki) --- */
+.dekor{position:fixed;pointer-events:none;z-index:0;opacity:.055}
+body.dk .dekor{opacity:.075}
+.dekor.sol{left:-30px;top:120px;width:230px;height:520px;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 460'><g fill='none' stroke='%2312315C' stroke-width='3'><circle cx='60' cy='70' r='34'/><circle cx='60' cy='70' r='13'/><g stroke-width='11'><path d='M60 28v-12M60 124v12M18 70H6M114 70h12M31 41l-9-9M89 99l9 9M89 41l9-9M31 99l-9 9'/></g><rect x='24' y='190' width='120' height='84' rx='8'/><path d='M40 214h88M40 234h88M40 254h56'/><path d='M20 340h150M40 340v-40M70 340v-70M100 340v-30M130 340v-56'/></g></svg>");
+ background-repeat:no-repeat;background-size:contain}
+.dekor.sag{right:-20px;top:220px;width:220px;height:540px;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 480'><g fill='none' stroke='%232E7D4B' stroke-width='3'><path d='M20 80h160M20 80l0 26M60 80l0 26M100 80l0 26M140 80l0 26M180 80l0 26'/><circle cx='40' cy='130' r='16'/><circle cx='100' cy='130' r='16'/><circle cx='160' cy='130' r='16'/><rect x='30' y='220' width='140' height='90' rx='10'/><path d='M50 265l24 22 44-48'/><path d='M30 380l40-34 34 26 52-58'/><circle cx='30' cy='380' r='5'/><circle cx='70' cy='346' r='5'/><circle cx='104' cy='372' r='5'/><circle cx='156' cy='314' r='5'/></g></svg>");
+ background-repeat:no-repeat;background-size:contain}
+@media(max-width:1279px){.dekor{display:none}}
+main{position:relative;z-index:1}
+header{position:relative;z-index:3}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
 </style>
@@ -502,6 +528,7 @@ body.dk .gozet i{background:#171C23;border-color:#252C35;color:#8592A0}
 <main id="app"></main>
 <div id="t"></div>
 <div id="konf"></div>
+<div class="dekor sol"></div><div class="dekor sag"></div>
 
 <script>
 /* ---------- SUPABASE ---------- */
@@ -918,9 +945,9 @@ function medyaGetir(){
 function listeYenile(){
  var lst=document.querySelector('.mliste');
  if(!lst){ciz();return}
- var dip=(window.innerHeight+window.scrollY)>=(document.body.scrollHeight-160);
+ var dip=(lst.scrollTop+lst.clientHeight)>=(lst.scrollHeight-140);
  lst.innerHTML=mesajHTML();
- if(dip)setTimeout(function(){window.scrollTo(0,document.body.scrollHeight)},40);
+ if(dip)setTimeout(function(){lst.scrollTop=lst.scrollHeight},40);
 }
 function mesajYolla(o){
  var yeni={id:'m'+Date.now()+Math.floor(Math.random()*99),gonderen:ME,alici:MHEDEF,
@@ -1111,7 +1138,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Telsiz</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s34</div>'+
+  '<div class="galt">SÜRÜM s35</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1149,6 +1176,7 @@ function ciz(){
   var kk2=document.getElementById('kul');
   if(kk2)kk2.innerHTML='<b>'+ad(ME)+'</b><span>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</span>';
  var el=document.getElementById('app'),h='';
+ try{el.className=(V=='mesaj'&&MHEDEF)?'sohbet':''}catch(e){}
 
  if(V=='ana'){
   var mn=bende(),gc=mn.filter(function(j){return as(cur(j))>0}).length;
@@ -1193,7 +1221,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s34 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s35 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
