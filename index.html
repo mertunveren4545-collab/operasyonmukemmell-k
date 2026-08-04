@@ -444,6 +444,7 @@ function zmn(t){
  return new Date(x);
 }
 function gn(a,b){return Math.max(0,Math.round((zmn(b)-zmn(a))/864e5))}
+function isoYaz(t){var d=zmn(t);return isNaN(d)?null:d.toISOString()}
 function fmt(t){if(!t)return'';var d=zmn(t);if(isNaN(d))return'';
  return d.getDate()+' '+AY[d.getMonth()]+' '+ii(d.getHours())+':'+ii(d.getMinutes())}
 function gunAd(t){var d=zmn(t),b=new Date();b.setHours(0,0,0,0);
@@ -866,7 +867,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s16</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s17</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -889,6 +890,22 @@ function sifreEkrani(zorunlu){
   '<div class="note">Kolay hatırlayacağın ama başkasının tahmin edemeyeceği bir şey seç.</div>'+
   '</div></div>';
 }
+var GECMIS=[];
+function gecmiseEkle(){
+ try{
+  var durum={V:V,OB:OB,OJ:OJ,MHEDEF:MHEDEF,FILT:FILT};
+  if(GECMIS.length&&JSON.stringify(GECMIS[GECMIS.length-1])===JSON.stringify(durum))return;
+  GECMIS.push(durum);
+  history.pushState({i:GECMIS.length},'','');
+ }catch(e){}
+}
+window.addEventListener('popstate',function(){
+ if(!GIRIS)return;
+ if(V=='mesaj'&&MHEDEF){MHEDEF=null;MTASLAK='';ciz();gecmiseEkle();return}
+ if(V!='ana'){V='ana';RED=0;FILT='';ciz();gecmiseEkle();return}
+ /* ana ekrandayken geri: uygulamada kal */
+ gecmiseEkle();
+});
 function ciz(){
  if(!GIRIS){girisEkrani();return}
  if(ZORUNLU){sifreEkrani(true);return}
@@ -938,7 +955,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s16 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s17 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -2012,7 +2029,7 @@ document.addEventListener('click',function(e){
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
  }
  else return;
- ciz();window.scrollTo(0,0);
+ ciz();gecmiseEkle();window.scrollTo(0,0);
 });
 document.addEventListener('change',function(e){
  if(e.target.id=='mf'){
@@ -2107,7 +2124,7 @@ function talepleriGetir(){
    if(yeni.length){
     var ok2=await guvenliYaz('kayitlar',yeni.map(function(r){
       return {id:String(r.id),personel:r.k,bolum:pn(r.k)[3],tesis:r.ts_,faaliyet:r.tip,
-              aciklama:r.ac,baslangic:r.ts,bitis:r.bit||null,dakika:r.dk}}),'Çalışma kayıtları');
+              aciklama:r.ac,baslangic:isoYaz(r.ts),bitis:r.bit||null,dakika:r.dk}}),'Çalışma kayıtları');
     if(ok2)yeni.forEach(function(r){yazilan[r.id]=1});
    }
   }catch(e){ console.log('Senkron hatasi:',e.message||e);say('Kaydetme hatası: '+(e.message||e)); }
