@@ -1357,7 +1357,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Telsiz</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s40</div>'+
+  '<div class="galt">SÜRÜM s41</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1433,6 +1433,7 @@ function ciz(){
      '<b>Tamamlanan işlerim</b><span>son: '+esc(bit9[0].ad.slice(0,38))+'</span></div>'+
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
+  if(!sistemci()){
   h+='<h2>'+(tumBolum()?'Bölümler':'Bölümüm')+'</h2>';
   bolumListesi().forEach(function(k){
    var jb=bj(k),ac=jb.filter(cur);
@@ -1442,14 +1443,19 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s40 · '+
+  }
+  h+='<div class="note" style="margin:10px 0 0">sürüm s41 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
     '<button data-a="mesaj"><i>📻</i>Telsiz'+rz(BD.mesaj)+'</button>'+
     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
-    '<button data-a="yeni"><i>＋</i>Yeni iş</button>'+
-    '<button data-a="veri"><i>📊</i>Veriler</button></div>';
+    '<button data-a="yeni"><i>＋</i>Yeni iş</button></div>';
+  h+='<div class="acts">'+
+    '<button data-a="akis"><i>⇉</i>Onay akışı</button>'+
+    '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
+    '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
+    '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1472,6 +1478,7 @@ function ciz(){
      '<b>Tamamlanan işlerim</b><span>son: '+esc(bit9[0].ad.slice(0,38))+'</span></div>'+
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
+  if(!sistemci()){
   h+='<h2>'+(tumBolum()?'Bölümler':'Bölümüm')+'</h2>';
   bolumListesi().forEach(function(k){
    var jb=bj(k),ac=jb.filter(cur);
@@ -1481,7 +1488,8 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s40 · '+
+  }
+  h+='<div class="note" style="margin:10px 0 0">sürüm s41 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1996,23 +2004,23 @@ function ciz(){
   }
  }
  else if(V=='ayarlar'){
-  h='<div class="acts" style="flex-wrap:wrap">'+
+  h='<h2>Raporlama</h2><div class="acts">'+
+    '<button data-a="veri"><i>📊</i>Veriler</button>'+
+    (tumBolum()?'<button data-a="ozet"><i>📄</i>Aylık özet</button>':'')+
+    (sistemci()?'<button data-a="yedek"><i>💾</i>Yedek</button>':'')+
+    '</div>';
+  h+='<h2>Hesabım</h2><div class="acts">'+
     '<button data-a="sifre"><i>🔑</i>Şifre</button>'+
     '<button data-a="gorunum"><i>🎨</i>Görünüm</button>'+
-    '<button data-a="paylas"><i>📤</i>Paylaş</button></div>';
-  h+='<div class="acts" style="flex-wrap:wrap">'+
-    '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
-    '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
-    '<button data-a="akis"><i>⇉</i>Onay akışı</button></div>';
-  if(tumBolum()||yonetici()||sistemci()){
-   h+='<h2>Yönetim</h2><div class="acts" style="flex-wrap:wrap">'+
-     (yonetici()?'<button data-a="kullanicilar"><i>👥</i>Kullanıcılar'+rz(BD2.sifre)+'</button>':'')+
-     (tumBolum()?'<button data-a="ozet"><i>📄</i>Aylık özet</button>':'')+
-     (sistemci()?'<button data-a="yedek"><i>💾</i>Yedek</button>':'')+
+    '<button data-a="paylas"><i>📤</i>Paylaş</button>'+
+    '</div>';
+  if(yonetici()){
+   h+='<h2>Yönetim</h2><div class="acts">'+
+     '<button data-a="kullanicilar"><i>👥</i>Kullanıcılar'+rz(BD2.sifre)+'</button>'+
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s40</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s41</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
