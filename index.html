@@ -526,7 +526,7 @@ function bekleyenDestek(){var r=[];
 var OP2='mert';
 var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[],DURUMLAR=[];
 var MESAJLAR=[],SON_OKUMA=null,MHEDEF=null,MZAMAN=null;
-var MTASLAK='',MSAYI=0,SES=true,KAYITCI=null,KAYITTA=false,KPARCA=[],YZ_SON=0,DZAMAN=null;
+var ILKCEK=true,MTASLAK='',MSAYI=0,SES=true,KAYITCI=null,KAYITTA=false,KPARCA=[],YZ_SON=0,DZAMAN=null;
 function yonetici(){return ME=='mert'||ME=='mesut'}
 function bYetkiTum(){return sistemci()}
 function cevrimici(t){ if(!t)return false; return (new Date()-zmn(t))<180000 }
@@ -693,8 +693,9 @@ function mesajGetir(){
    return m.gonderen!=ME && !MESAJLAR.some(function(x){return x.id==m.id})});
   MESAJLAR=r.data;
   var mb=pn(ME)[3];
-  var bana=yeniler.filter(function(m){
+  var bana=ILKCEK?[]:yeniler.filter(function(m){
    return m.alici=='herkes'||m.alici==ME||(mb&&m.alici=='b:'+mb)});
+  ILKCEK=false;
   if(bana.length){bip();
    var sn=bana[bana.length-1];
    var oz=(sn.tur=='ses'?'🎤 sesli mesaj':sn.tur=='gorsel'?'📎 görsel':(sn.metin||'').slice(0,60));
@@ -815,7 +816,7 @@ function girisEkrani(){
  document.getElementById('who').style.display='none';
  document.getElementById('app').innerHTML=
   '<div class="giris"><div class="kut">'+
-  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s12</b></p>'+
+  '<h1>Giriş</h1><p class="alt">Kullanıcı adın ve şifrenle gir · <b>s13</b></p>'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adı</label><input id="gk" placeholder="Kullanıcı adın" autocapitalize="off" autocomplete="username">'+
   '<label>Şifre</label><input id="gs" type="password" autocomplete="current-password">'+
@@ -881,7 +882,7 @@ function ciz(){
      '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
      '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  h+='<div class="note" style="margin:10px 0 0">sürüm s12 · '+
+  h+='<div class="note" style="margin:10px 0 0">sürüm s13 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   h+='<div class="acts">'+
@@ -1538,7 +1539,7 @@ document.addEventListener('click',function(e){
     function(e){say('Silinemedi: '+(e.message||''))});
   return;
  }
- if(a=='mesaj'){V='mesaj';MHEDEF=null;mesajGetir();durumGetir();
+ if(a=='mesaj'){V='mesaj';MHEDEF=null;durumGetir();
   if(!DZAMAN)DZAMAN=setInterval(function(){if(V=='mesaj'){durumGetir();mesajGetir()}},5000);
   SON_OKUMA=new Date().toISOString();
   if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
@@ -1549,7 +1550,11 @@ document.addEventListener('click',function(e){
   if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
     son_okuma:SON_OKUMA,son_gorulme:SON_OKUMA}).then(function(){},function(){});
   durumGetir();ciz();return}
- if(a=='mliste'){MHEDEF=null;MTASLAK='';ciz();return}
+ if(a=='mliste'){
+  SON_OKUMA=new Date().toISOString();
+  if(dbClient)dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
+    son_okuma:SON_OKUMA,son_gorulme:SON_OKUMA}).then(function(){},function(){});
+  MHEDEF=null;MTASLAK='';ciz();return}
  if(a=='ses'){SES=!SES;if(SES)bip();ciz();return}
  if(a=='mses'){
   if(KAYITTA){try{KAYITCI.stop()}catch(e){}KAYITTA=false;ciz();return}
@@ -1629,7 +1634,11 @@ document.addEventListener('click',function(e){
       son_giris:new Date().toISOString(),sifre_belirlendi:pw}).then(function(){},function(){});
    }
    ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
-   try{ talepleriGetir();mesajGetir();durumGetir();nabiz();
+   try{
+    if(dbClient)dbClient.from('kullanici_durum').select('son_okuma').eq('id',ME).then(function(rr){
+     if(rr.data&&rr.data[0]&&rr.data[0].son_okuma)SON_OKUMA=rr.data[0].son_okuma;
+     mesajGetir();},function(){mesajGetir()});
+    talepleriGetir();durumGetir();nabiz();
     if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);
      setInterval(mesajGetir,25000);setInterval(isKontrol,60000);}
     bildirimIzni();
