@@ -1166,13 +1166,22 @@ function yaziyorBildir(){
    yaziyor_hedef:MHEDEF,yaziyor_ts:new Date().toISOString(),
    son_gorulme:new Date().toISOString()}).then(function(){},function(){});
 }
+var SON_TS=null;
 function mesajGetir(){
  if(!dbClient||!GIRIS)return;
- dbClient.from('mesajlar').select('id,gonderen,alici,metin,tur,ts').order('ts',{ascending:true}).limit(300).then(function(r){
+ var q=dbClient.from('mesajlar').select('id,gonderen,alici,metin,tur,ts');
+ if(SON_TS)q=q.gt('ts',SON_TS).order('ts',{ascending:true}).limit(100);
+ else q=q.order('ts',{ascending:false}).limit(120);
+ q.then(function(r){
   if(!r.data)return;
-  var yeniler=r.data.filter(function(m){
+  var gelen=r.data.slice();
+  if(!SON_TS)gelen.reverse();          /* ilk yükleme ters sırada gelir */
+  var yeniler=gelen.filter(function(m){
    return m.gonderen!=ME && !MESAJLAR.some(function(x){return x.id==m.id})});
-  MESAJLAR=r.data;
+  gelen.forEach(function(m){
+   if(!MESAJLAR.some(function(x){return x.id==m.id}))MESAJLAR.push(m)});
+  MESAJLAR.sort(function(a,b){return a.ts<b.ts?-1:1});
+  if(MESAJLAR.length)SON_TS=MESAJLAR[MESAJLAR.length-1].ts;
   var mb=pn(ME)[3];
   var bana=ILKCEK?[]:yeniler.filter(function(m){
    return m.alici=='herkes'||m.alici==ME||(mb&&m.alici=='b:'+mb)});
@@ -1190,13 +1199,26 @@ function mesajGetir(){
  },function(){});
 }
 var ISSAYIM=null;
+var IS_TS=null;
 function isKontrol(){
  if(!dbClient||!GIRIS)return;
- dbClient.from('isler').select('id,ad,veri').then(function(r){
+ var qq=dbClient.from('isler').select('id,ad,veri,guncelleme');
+ if(IS_TS)qq=qq.gt('guncelleme',IS_TS);
+ qq.then(function(r){
+  if(r.data&&r.data.length){
+   var enSon=IS_TS;
+   r.data.forEach(function(x){if(!enSon||x.guncelleme>enSon)enSon=x.guncelleme});
+   IS_TS=enSon;
+  }else if(IS_TS){return}
   if(!r.data)return;
   var gelen=r.data.map(function(x){return x.veri}).filter(Boolean);
   if(!gelen.length)return;
-  var eski=J;J=gelen;
+  var eski=J.slice();
+  gelen.forEach(function(y){
+   var v=false;
+   for(var i=0;i<J.length;i++)if(String(J[i].id)==String(y.id)){J[i]=y;v=true}
+   if(!v)J.unshift(y);
+  });
   var bendeYeni=J.filter(function(j){var c=cur(j);
    if(!c||c.k!=ME)return false;
    var o=eski.filter(function(x){return x.id==j.id})[0];
@@ -1265,6 +1287,38 @@ function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return 
 function bj(k){return J.filter(gor).filter(function(j){return j.br==k})}
 function say(m){var e=document.getElementById('t');e.textContent=m;e.style.display='block';
  clearTimeout(say.h);say.h=setTimeout(function(){e.style.display='none'},2300)}
+var KOTA=null,KOTA_BUYUK=[],KOTA_YUK=false;
+function boyutYaz(b){
+ b=+b||0;
+ if(b<1024)return b+' B';
+ if(b<1048576)return (b/1024).toFixed(0)+' KB';
+ return (b/1048576).toFixed(1).replace('.',',')+' MB';
+}
+function kotaGetir(){
+ if(!dbClient||KOTA_YUK)return;KOTA_YUK=true;
+ dbClient.rpc('opm_kota').then(function(r){
+  if(r.data)KOTA=r.data;
+  if(V=='kota')ciz();
+ },function(){KOTA_YUK=false});
+ dbClient.rpc('opm_buyuk_dosyalar').then(function(r){
+  if(r.data)KOTA_BUYUK=r.data;
+  if(V=='kota')ciz();
+ },function(){});
+}
+var EKLER={};        /* is_id -> [ek] */
+var EKYUK={};        /* yüklendi işareti */
+function ekGetir(jid){
+ if(!dbClient||EKYUK[jid])return;
+ EKYUK[jid]=1;
+ dbClient.from('ekler').select('*').eq('is_id',String(jid)).then(function(r){
+  if(r.data){EKLER[jid]=r.data;if(V=='det'&&OJ==jid)ciz()}
+ },function(){EKYUK[jid]=0});
+}
+function ekListe(j){
+ var d=EKLER[j.id]||[];
+ var eski=(j.ek||[]);       /* eski sürümden kalan gömülü ekler */
+ return d.concat(eski);
+}
 function bul(id){for(var i=0;i<J.length;i++)if(J[i].id==id)return J[i];return null}
 
 function donut(w,b){
@@ -1357,7 +1411,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>Telsiz</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s42</div>'+
+  '<div class="galt">SÜRÜM s44</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1383,7 +1437,7 @@ function ciz(){
  var t=document.getElementById('top');
  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',kayit:'Çalışma kaydı',
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:(FILT=='bit'?'Tamamlanan işlerim':'Bende bekleyenler'),
-   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',ozet:'Aylık özet',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik'};
+   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik'};
  t.innerHTML='<button class="mnb" data-a="cekmeceac">☰</button>'+
    (V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
    (V=='ana'
@@ -1453,7 +1507,7 @@ function ciz(){
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s42 · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s44 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
   var bd=bekleyenDestek();
@@ -1598,7 +1652,8 @@ function ciz(){
        :s.d=='a'?'gönderildi '+fmt(s.g)+' → bekliyor':'sırada')+'</div></div>';
   });
   h+='</div></div>';
-  var ek=j.ek||[],ims=ek.filter(function(x){return x.tur=='i'}),dcs=ek.filter(function(x){return x.tur!='i'});
+  ekGetir(j.id);
+  var ek=ekListe(j),ims=ek.filter(function(x){return x.tur=='i'}),dcs=ek.filter(function(x){return x.tur!='i'});
   h+='<div class="card"><h3>Ekler ('+ek.length+')</h3>';
   if(ims.length){h+='<div class="thm">';
    ims.forEach(function(x){h+='<img src="'+x.veri+'" data-a="fs" data-src="'+x.veri+'">'});
@@ -1989,6 +2044,7 @@ function ciz(){
     '<button data-a="veri"><i>📊</i>Veriler</button>'+
     (tumBolum()?'<button data-a="ozet"><i>📄</i>Aylık özet</button>':'')+
     (sistemci()?'<button data-a="yedek"><i>💾</i>Yedek</button>':'')+
+    (sistemci()?'<button data-a="kota"><i>🗄️</i>Depolama</button>':'')+
     '</div>';
   h+='<h2>Hesabım</h2><div class="acts">'+
     '<button data-a="sifre"><i>🔑</i>Şifre</button>'+
@@ -2001,7 +2057,7 @@ function ciz(){
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s42</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s44</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2119,6 +2175,49 @@ function ciz(){
     '<button class="b" data-a="ozetkopya">Kopyala</button>'+
     '<button class="b g" data-a="ozetindir">Metni indir</button></div>'+
     '<div class="note">Sunum ya da e-posta için doğrudan yapıştırabilirsin.</div></div>';
+ }
+ else if(V=='kota'){
+  if(!sistemci()){h='<div class="emp">Bu ekran için yetkin yok.</div>';el.innerHTML=h;return}
+  kotaGetir();
+  var toplam=0;
+  (KOTA||[]).forEach(function(x){toplam+=(+x.boyut||0)});
+  var sinir=500*1048576, yuzde=Math.min(100,Math.round(toplam/sinir*100));
+  h='<div class="dgrid">'+
+   '<div class="dkart '+(yuzde>70?'kotu':yuzde>40?'uyari':'iyi')+'">'+
+     '<div class="ikon">🗄️</div><div class="sayi">%'+yuzde+'</div>'+
+     '<div class="etiket">Kullanılan alan</div>'+
+     '<div class="alt">'+boyutYaz(toplam)+' / 500 MB</div>'+
+     '<div class="cizgi"><i style="width:'+yuzde+'%"></i></div></div>'+
+   '<div class="dkart mavi"><div class="ikon">📎</div><div class="sayi">'+KOTA_BUYUK.length+'</div>'+
+     '<div class="etiket">Listelenen dosya</div><div class="alt">en büyükten sıralı</div>'+
+     '<div class="cizgi"><i style="width:60%"></i></div></div>'+
+   '</div>';
+
+  h+='<div class="card"><div class="dbaslik"><em>📊</em><b>Tablolara göre</b>'+
+    '<span>'+(KOTA?'':'yükleniyor…')+'</span></div>';
+  if(!KOTA)h+='<div class="emp" style="border:0;background:transparent"><span class="cizim">⏳</span>Veriler alınıyor…</div>';
+  var enb=1;(KOTA||[]).forEach(function(x){enb=Math.max(enb,+x.boyut||0)});
+  (KOTA||[]).forEach(function(x){
+   h+='<div class="rw"><div class="t"><span>'+esc(x.tablo)+'</span><i>'+boyutYaz(x.boyut)+' · '+x.satir+' kayıt</i></div>'+
+     '<div class="bar"><i class="'+((+x.boyut)>enb*0.5?'w':'')+'" style="width:'+
+     Math.round((+x.boyut||0)/enb*100)+'%"></i></div></div>';
+  });
+  h+='<div class="note">Ücretsiz katman sınırı 500 MB. Yazı ve iş verisi yıllarca yeter; '+
+    'yer kaplayan asıl şey ekler ve sesli mesajlardır.</div></div>';
+
+  h+='<div class="card"><div class="dbaslik"><em>⬇️</em><b>En çok yer kaplayanlar</b>'+
+    '<span>indir, sonra sil</span></div>';
+  if(!KOTA_BUYUK.length)h+='<div class="emp" style="border:0;background:transparent"><span class="cizim">✅</span>Büyük dosya yok.</div>';
+  KOTA_BUYUK.forEach(function(x){
+   h+='<div class="li"><div class="h"><b>'+esc(x.ad||'(adsız)')+'</b><i>'+boyutYaz(x.boyut)+'</i></div>'+
+     '<div class="s">'+esc(x.kaynak)+' · '+(x.kisi?ad(x.kisi):'—')+' · '+fmt(x.ts)+'</div>'+
+     '<div class="two" style="margin-top:8px">'+
+     '<button class="b g" data-a="kindir" data-k="'+x.kaynak+'" data-i="'+x.id+'" data-n="'+esc(x.ad||'dosya')+'">İndir</button>'+
+     '<button class="b r" data-a="ksil" data-k="'+x.kaynak+'" data-i="'+x.id+'">Sil</button>'+
+     '</div></div>';
+  });
+  h+='<div class="note">Silmeden önce indir. Silinen dosya geri gelmez; ilgili iş ya da mesaj kalır, '+
+    'yalnızca dosya içeriği boşalır.</div></div>';
  }
  else if(V=='yedek'){
   if(!sistemci()){h='<div class="emp">Bu ekran için yetkin yok.</div>';el.innerHTML=h;return}
@@ -2291,6 +2390,33 @@ document.addEventListener('click',function(e){
  if(a=='tema-sec'){TEMA=t.dataset.v;temaUygula();ciz();say(TEMALAR[TEMA].ad+' teması');return}
  if(a=='kullanicilar'){V='kullanicilar';talepleriGetir();ciz();return}
  if(a=='yedek'){V='yedek';ciz();return}
+ if(a=='kota'){V='kota';KOTA_YUK=false;kotaGetir();ciz();window.scrollTo(0,0);return}
+ if(a=='kindir'){
+  var kk=t.dataset.k,ki=t.dataset.i,kn=t.dataset.n||'dosya';
+  say('İndiriliyor…');
+  dbClient.from(kk=='ek'?'ekler':'mesajlar').select('veri').eq('id',ki).then(function(r){
+   var v=r.data&&r.data[0]&&r.data[0].veri;
+   if(!v){say('Dosya bulunamadı');return}
+   var a4=document.createElement('a');a4.href=v;a4.download=kn;a4.click();
+   say('İndirildi');
+  },function(e){say('İndirilemedi')});
+  return;}
+ if(a=='ksil'){
+  var sk=t.dataset.k,si=t.dataset.i;
+  if(sk=='ek'){
+   dbClient.from('ekler').delete().eq('id',si).then(function(r){
+    if(r&&r.error){say('Silinemedi: '+r.error.message);return}
+    KOTA_BUYUK=KOTA_BUYUK.filter(function(x){return x.id!=si});
+    EKYUK={};EKLER={};KOTA_YUK=false;kotaGetir();ciz();say('Ek silindi');
+   },function(){say('Silinemedi')});
+  }else{
+   dbClient.from('mesajlar').update({veri:null,metin:'(dosya silindi)'}).eq('id',si).then(function(r){
+    if(r&&r.error){say('Silinemedi: '+r.error.message);return}
+    KOTA_BUYUK=KOTA_BUYUK.filter(function(x){return x.id!=si});
+    KOTA_YUK=false;kotaGetir();ciz();say('Dosya silindi');
+   },function(){say('Silinemedi')});
+  }
+  return;}
  if(a=='ozet'){V='ozet';ciz();return}
  if(a=='ozetkopya'){
   var ta=document.getElementById('ozetmetin');
@@ -2685,15 +2811,20 @@ document.addEventListener('change',function(e){
  if(e.target.id!='fu')return;
  var j=bul(+e.target.dataset.j),fs2=e.target.files;
  if(!j||!fs2.length)return;
- j.ek=j.ek||[];j.lg=j.lg||[];
+ j.lg=j.lg||[];EKLER[j.id]=EKLER[j.id]||[];
  var kal=fs2.length,ts4=now();
  for(var i=0;i<fs2.length;i++)(function(f){
   var mb=f.size/1048576;
   var tur=/^image\//.test(f.type)?'i':/\.pdf$/i.test(f.name)?'p':/\.(xlsx|xls|csv)$/i.test(f.name)?'x':'d';
   var boy=mb<1?Math.round(f.size/1024)+' KB':mb.toFixed(1).replace('.',',')+' MB';
-  if(mb>8){say(f.name+' çok büyük (8 MB üstü)');kal--;return}
+  if(mb>10){say(f.name+' çok büyük (10 MB üstü)');kal--;return}
   var rd=new FileReader();
-  rd.onload=function(){j.ek.push({ad:f.name,tur:tur,boyut:boy,k:ME,ts:ts4,veri:rd.result});
+  rd.onload=function(){
+   var kayit={id:'e'+Date.now()+Math.floor(Math.random()*999),is_id:String(j.id),
+     ad:f.name,tur:tur,boyut:boy,kisi:ME,ts:ts4,veri:rd.result};
+   EKLER[j.id].push({ad:kayit.ad,tur:kayit.tur,boyut:kayit.boyut,k:ME,ts:ts4,veri:kayit.veri});
+   if(dbClient)dbClient.from('ekler').insert(kayit).then(function(r){
+     if(r&&r.error)say('Ek kaydedilemedi: '+r.error.message)},function(){});
    if(!--kal){j.lg.push({ts:ts4,k:ME,tip:fs2.length+' ek yüklendi'});say('Ek eklendi');ciz()}};
   rd.onerror=function(){if(!--kal)ciz()};
   rd.readAsDataURL(f);
@@ -2743,7 +2874,10 @@ function talepleriGetir(){
  if(!dbClient){console.log('Cevrimdisi mod — veriler kaydedilmeyecek');return}
  var yazilan={},zaman=null,ilk=true;
 
- function isSatiri(j){ return {id:String(j.id),ad:j.ad,veri:j}; }
+ function isSatiri(j){
+  var kopya={};for(var k in j)if(k!=='ek')kopya[k]=j[k];
+  return {id:String(j.id),ad:j.ad,veri:kopya};
+ }
  async function guvenliYaz(tablo,satirlar,adi){
   if(!satirlar.length)return true;
   var r=await dbClient.from(tablo).upsert(satirlar);
