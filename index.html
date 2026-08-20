@@ -1289,6 +1289,37 @@ function bj(k){return J.filter(gor).filter(function(j){return j.br==k})}
 function say(m){var e=document.getElementById('t');e.textContent=m;e.style.display='block';
  clearTimeout(say.h);say.h=setTimeout(function(){e.style.display='none'},2300)}
 var KOTA=null,KOTA_BUYUK=[],KOTA_YUK=false;
+var GH=null,GH_YUK=false;
+var GH_REPO='mertunveren4545-collab/operasyonmukemmell-k';
+function ghGetir(){
+  if(GH_YUK)return;GH_YUK=true;
+  fetch('https://api.github.com/repos/'+GH_REPO).then(function(r){return r.json()}).then(function(d){
+    GH={boyut:(d.size||0)*1024,guncelleme:d.pushed_at||d.updated_at||null,ad:d.full_name||GH_REPO};
+    if(V=='kota')ciz();
+  }).catch(function(){GH_YUK=false});
+}
+function gorselSikistir(file,cb){
+  if(!/^image\//.test(file.type||'')){cb(null);return}
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var mx=1600,w=img.width,h=img.height;
+      if(w>mx||h>mx){var o=Math.min(mx/w,mx/h);w=Math.round(w*o);h=Math.round(h*o)}
+      try{
+        var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        var cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,w,h);cx.drawImage(img,0,0,w,h);
+        var q=0.72,out=cv.toDataURL('image/jpeg',q);
+        while(out.length>560000&&q>0.4){q-=0.1;out=cv.toDataURL('image/jpeg',q)}
+        cb(out);
+      }catch(e){cb(rd.result)}
+    };
+    img.onerror=function(){cb(null)};
+    img.src=rd.result;
+  };
+  rd.onerror=function(){cb(null)};
+  rd.readAsDataURL(file);
+}
 function boyutYaz(b){
  b=+b||0;
  if(b<1024)return b+' B';
@@ -2205,6 +2236,18 @@ function ciz(){
   });
   h+='<div class="note">Ücretsiz katman sınırı 500 MB. Yazı ve iş verisi yıllarca yeter; '+
     'yer kaplayan asıl şey ekler ve sesli mesajlardır.</div></div>';
+  ghGetir();
+  h+='<div class="card"><div class="dbaslik"><em>⌥</em><b>GitHub — kod deposu</b>'+
+    '<span>'+(GH?'':'yükleniyor')+'</span></div>';
+  if(GH){
+    h+='<div class="rw"><div class="t"><span>Depo boyutu</span><i>'+boyutYaz(GH.boyut)+'</i></div></div>';
+    h+='<div class="rw"><div class="t"><span>Son güncelleme</span><i>'+
+      (GH.guncelleme?new Date(GH.guncelleme).toLocaleString('tr-TR'):'-')+'</i></div></div>';
+    h+='<div class="note">GitHub Pages ücretsiz bant genişliği aylık ~100 GB. Kod deposu çok küçük; bu sınır çok uzak.</div>';
+  }else{
+    h+='<div class="emp" style="border:0;background:transparent">GitHub verisi alınıyor…</div>';
+  }
+  h+='</div>';
 
   h+='<div class="card"><div class="dbaslik"><em>⬇️</em><b>En çok yer kaplayanlar</b>'+
     '<span>indir, sonra sil</span></div>';
@@ -2811,10 +2854,12 @@ document.addEventListener('click',function(e){
 document.addEventListener('change',function(e){
  if(e.target.id=='mf'){
   var f=e.target.files&&e.target.files[0];if(!f)return;
-  if(f.size>2*1048576){say('Görsel 2 MB üstünde olamaz.');e.target.value='';return}
-  var rd=new FileReader();
-  rd.onload=function(){mesajYolla({tur:'gorsel',veri:rd.result,metin:f.name});say('Görsel gönderildi')};
-  rd.readAsDataURL(f);e.target.value='';return;
+  if(f.size>15*1048576){say('Görsel çok büyük (15 MB üstü).');e.target.value='';return}
+  gorselSikistir(f,function(veri){
+    if(!veri){say('Görsel işlenemedi.');return}
+    mesajYolla({tur:'gorsel',veri:veri,metin:f.name});say('Görsel gönderildi');
+  });
+  e.target.value='';return;
  }
  if(e.target.id!='fu')return;
  var j=bul(+e.target.dataset.j),fs2=e.target.files;
@@ -2824,18 +2869,26 @@ document.addEventListener('change',function(e){
  for(var i=0;i<fs2.length;i++)(function(f){
   var mb=f.size/1048576;
   var tur=/^image\//.test(f.type)?'i':/\.pdf$/i.test(f.name)?'p':/\.(xlsx|xls|csv)$/i.test(f.name)?'x':'d';
-  var boy=mb<1?Math.round(f.size/1024)+' KB':mb.toFixed(1).replace('.',',')+' MB';
-  if(mb>10){say(f.name+' çok büyük (10 MB üstü)');kal--;return}
-  var rd=new FileReader();
-  rd.onload=function(){
+  function kaydet(veri){
+   var by=Math.round((veri.length||0)*0.75);
+   var boy=by<1048576?Math.round(by/1024)+' KB':(by/1048576).toFixed(1).replace('.',',')+' MB';
    var kayit={id:'e'+Date.now()+Math.floor(Math.random()*999),is_id:String(j.id),
-     ad:f.name,tur:tur,boyut:boy,kisi:ME,ts:ts4,veri:rd.result};
+     ad:f.name,tur:tur,boyut:boy,kisi:ME,ts:ts4,veri:veri};
    EKLER[j.id].push({ad:kayit.ad,tur:kayit.tur,boyut:kayit.boyut,k:ME,ts:ts4,veri:kayit.veri});
    if(dbClient)dbClient.from('ekler').insert(kayit).then(function(r){
      if(r&&r.error)say('Ek kaydedilemedi: '+r.error.message)},function(){});
-   if(!--kal){j.lg.push({ts:ts4,k:ME,tip:fs2.length+' ek yüklendi'});say('Ek eklendi');ciz()}};
-  rd.onerror=function(){if(!--kal)ciz()};
-  rd.readAsDataURL(f);
+   if(!--kal){j.lg.push({ts:ts4,k:ME,tip:fs2.length+' ek yüklendi'});say('Ek eklendi');ciz()}
+  }
+  if(tur=='i'){
+   if(mb>15){say(f.name+' çok büyük (15 MB üstü)');kal--;return}
+   gorselSikistir(f,function(veri){if(!veri){say(f.name+' işlenemedi');kal--;return}kaydet(veri)});
+  }else{
+   if(mb>5){say(f.name+' çok büyük (5 MB üstü)');kal--;return}
+   var rd=new FileReader();
+   rd.onload=function(){kaydet(rd.result)};
+   rd.onerror=function(){if(!--kal)ciz()};
+   rd.readAsDataURL(f);
+  }
  })(fs2[i]);
 });
 document.addEventListener('input',function(e){var t=e.target;
