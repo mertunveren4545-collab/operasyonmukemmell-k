@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>OPM — Operasyonel Mükemmellik</title>
+<title>OPEX — Operasyonel Mükemmellik</title>
 <link rel="manifest" href="manifest.json">
 <meta property="og:type" content="website">
-<meta property="og:title" content="OPM — Operasyonel Mükemmellik">
+<meta property="og:title" content="OPEX — Operasyonel Mükemmellik">
 <meta property="og:description" content="İş akışı, çalışma kaydı ve mesajlaşma.">
 <meta property="og:url" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/">
 <meta property="og:image" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/og-kapak.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OPM — Operasyonel Mükemmellik">
+<meta name="twitter:title" content="OPEX — Operasyonel Mükemmellik">
 <meta name="twitter:description" content="İş akışı, çalışma kaydı ve mesajlaşma.">
 <meta name="twitter:image" content="https://mertunveren4545-collab.github.io/operasyonmukemmell-k/og-kapak.png">
 <link rel="icon" href="icon-192.png">
@@ -879,6 +879,7 @@ var ETIKETLER=[
  ['✅','STANDART','standartlaştıralım'],
  ['🎯','HEDEF','termine odak']];
 function yonetici(){return ME=='mert'||ME=='mesut'}
+function atamaYetkisi(){if(sistemci())return true;if(pn(ME)[4]=='ust')return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function bYetkiTum(){return sistemci()}
 function cevrimici(t){ if(!t)return false; return (new Date()-zmn(t))<180000 }
 function gecenSure(t){
@@ -975,7 +976,7 @@ function gunlukHatirlat(){
 function cekmeceYaz(){
  var c=document.getElementById('cekmece');if(!c)return;
  var vis=J.filter(gor);
- var h='<div class="ust2"><b>OPM</b><span>Operasyonel Mükemmellik</span>'+
+ var h='<div class="ust2"><b>OPEX</b><span>Operasyonel Mükemmellik</span>'+
   '<div class="kisi2"><span class="avk" style="width:30px;height:30px;border-radius:15px;font-size:11px;'+
   'background:'+kisiRenk(ME)+'">'+bashrf(ME)+'</span>'+
   '<span><b style="display:block">'+ad(ME)+'</b><span>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</span></span>'+
@@ -1359,7 +1360,7 @@ function unutEkrani(){
  document.getElementById('app').innerHTML=
   '<div class="gsayfa"><div class="dalga"></div><div class="icerik">'+
   '<div class="glogo"><div class="isaret">'+opmLogo()+'</div>'+
-  '<h1>OPM</h1><div class="cizgi"></div><p>Şifre sıfırlama</p></div>'+
+  '<h1>OPEX</h1><div class="cizgi"></div><p>Şifre sıfırlama</p></div>'+
   '<div class="gkart">'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
   '<label>Kullanıcı adın</label><input id="uk" placeholder="Kullanıcı adın" autocapitalize="off">'+
@@ -1400,7 +1401,7 @@ function girisEkrani(){
  document.getElementById('app').innerHTML=
   '<div class="gsayfa"><div class="dalga"></div><div class="icerik">'+
   '<div class="glogo"><div class="isaret">'+opmLogo()+'</div>'+
-  '<h1>OPM</h1><div class="cizgi"></div>'+
+  '<h1>OPEX</h1><div class="cizgi"></div>'+
   '<p>Operasyonel Mükemmellik</p></div>'+
   '<div class="gkart">'+
   (HATA?'<div class="hata">'+esc(HATA)+'</div>':'')+
@@ -1442,7 +1443,7 @@ function ciz(){
    (V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
    (V=='ana'
      ?'<div class="tt marka"><span class="mrk"><i></i><i></i><i></i></span>'+
-       '<span><b style="display:block;line-height:1.05">OPM</b>'+
+       '<span><b style="display:block;line-height:1.05">OPEX</b>'+
        '<span>Operasyonel Mükemmellik</span></span></div>'
      :'<div class="tt">'+bl[V]+'</div>')+
    '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>'+
@@ -2329,12 +2330,12 @@ function ciz(){
   h='<div class="card"><label>İş adı</label><input id="ja" placeholder="Örn. Argon atölyesi norm kadro raporu">'+
     '<label>Tesis</label><select class="n" id="jt">'+
     T.map(function(x){return '<option value="'+x.id+'">'+x.ad+'</option>'}).join('')+'</select>'+
-    '<label>İşi kim yapacak</label><select class="n" id="jk">'+
+    '<label>İşi kim yapacak</label><select class="n" id="jk"'+(atamaYetkisi()?'':' disabled')+'>'+
     Object.keys(B).map(function(bk){var g5=P.filter(function(p){return p[3]==bk});
      return g5.length?'<optgroup label="'+B[bk].ad+'">'+g5.map(function(p){
       return '<option value="'+p[0]+'"'+(p[0]==ME?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</optgroup>':''}).join('')+
     '</select>'+
-    '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
+    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.</div>')+    '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
     '<div style="height:14px"></div><button class="b" data-a="new">İşi başlat</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
@@ -2377,7 +2378,7 @@ document.addEventListener('click',function(e){
  if(a=='gorunum'){V='gorunum';ciz();return}
  if(a=='paylas'){
   var adres=location.href.split('?')[0].split('#')[0];
-  var metin='OPM — Operasyonel Mükemmellik\n\nKullanıcı adın: adının ilk kelimesi (küçük harf, Türkçe karaktersiz)\nİlk giriş şifresi: 123456\nSistem seni kendi şifreni belirlemeye yönlendirecek.\n\n'+adres;
+  var metin='OPEX — Operasyonel Mükemmellik\n\nKullanıcı adın: adının ilk kelimesi (küçük harf, Türkçe karaktersiz)\nİlk giriş şifresi: 123456\nSistem seni kendi şifreni belirlemeye yönlendirecek.\n\n'+adres;
   if(navigator.share){
    navigator.share({title:'Operasyonel Mükemmellik',text:metin,url:adres})
     .then(function(){say('Paylaşıldı')},function(){});
@@ -2787,13 +2788,20 @@ document.addEventListener('click',function(e){
   var nm=document.getElementById('ja').value.trim();
   if(nm.length<4){say('İşe ad ver.');return}
   var ts3=now(),kk=document.getElementById('jk').value,gg9=+document.getElementById('jg').value||5;
-  var brr=pn(kk)[3]||'SI',cf2=B[brr];
-  var adm=[{a:nm,k:kk,t:gg9,tp:'i',o:0,d:'a',g:ts3,b:0},
-           {a:'Bölüm onayı',k:cf2.sef,t:1,tp:'o',o:1,d:'b',g:0,b:0}];
+  var anaK=kk, ekK=[];
+  var _cbs=document.querySelectorAll('.ekk:checked');
+  for(var _c=0;_c<_cbs.length;_c++)ekK.push(_cbs[_c].value);
+  if(!atamaYetkisi()){anaK=ME;ekK=[];}
+  var _hep=[anaK].concat(ekK), _gr={}, kisiler=[];
+  for(var _h=0;_h<_hep.length;_h++){if(!_gr[_hep[_h]]){_gr[_hep[_h]]=1;kisiler.push(_hep[_h])}}
+  var brr=pn(anaK)[3]||'SI',cf2=B[brr];
+  var adm=[];
+  for(var _pk=0;_pk<kisiler.length;_pk++)adm.push({a:nm,k:kisiler[_pk],t:gg9,tp:'i',o:0,d:'a',g:ts3,b:0});
+  adm.push({a:'Bölüm onayı',k:cf2.sef,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   J.unshift({id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:ts3,a:adm,
-   lg:[{ts:ts3,k:ME,tip:'İş açıldı'}]});
-  V='ana';say('İş başlatıldı — sorumlu '+ad(kk));
+   lg:[{ts:ts3,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'}]});
+  V='ana';say(kisiler.length>1?('İş başlatıldı — '+kisiler.length+' kişiye'):('İş başlatıldı — sorumlu '+ad(anaK)));
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
  }
  else return;
