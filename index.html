@@ -1687,11 +1687,14 @@ function ciz(){try{gozBanner()}catch(e){}
      '<b>'+B[OB].ad+'</b>'+
      '<span>'+kis.length+' personel · '+L.length+' açık iş · onay: '+ks(B[OB].sef)+'</span>'+
      '<div class="araclar">'+(ARAC[OB]||[]).map(function(x){return '<i>'+x+'</i>'}).join('')+'</div></div>';
-   h+='<div class="kv"><div><b>'+L.length+'</b><span>Açık iş</span></div>'+
-     '<div class="'+(gg?'bad':'')+'"><b>'+gg+'</b><span>Gecikme</span></div>'+
-     '<div class="'+(ia?'bad':'')+'"><b>'+ia+'</b><span>Geri dönen</span></div></div>';
-   h+='<div class="card"><h3>Onay mercii</h3><div style="font-size:14px">'+ad(B[OB].sef)+'</div>'+
-     '<div style="font-size:12px;color:#8592A0">'+pn(B[OB].sef)[2]+'</div></div>';
+   var _bs=bolStat(OB);
+   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 14px">'+
+     dkart('Açık iş',_bs.acik,'#1B5E3F','#E8F3EC')+
+     dkart('Onayda',_bs.onay,'#B9770E','#FFF8E1')+
+     dkart('Geciken',_bs.gec,_bs.gec?'#C0392B':'#7A8A83',_bs.gec?'#FBE9E7':'#F4F6F5')+
+     dkart('Tamamlanan',_bs.tamam,'#1B5E3F','#E8F3EC')+
+   '</div>';
+
   }
   /* işler kimde */
   if(V=='bende'&&FILT=='bit'){
