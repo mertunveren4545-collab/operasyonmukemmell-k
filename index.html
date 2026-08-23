@@ -1291,7 +1291,7 @@ function anlikBildirimKur(){
   setInterval(nabiz,120000);
   setInterval(function(){try{isKontrol()}catch(e){}},15000);   /* yedek yoklama */
   /* sekmeye/pencereye donunce ANINDA kontrol */
-  document.addEventListener('visibilitychange',function(){if(!document.hidden){try{nabiz();isKontrol()}catch(e){}}});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){try{nabiz();isKontrol();if(yonetici()||sistemci())talepleriGetir()}catch(e){}}});
   window.addEventListener('focus',function(){try{isKontrol()}catch(e){}});
   window.addEventListener('online',function(){try{isKontrol()}catch(e){}});
   /* Supabase Realtime: is tablosu degisince aninda tetikle */
@@ -1300,6 +1300,14 @@ function anlikBildirimKur(){
       dbClient.channel('opex-isler-rt')
         .on('postgres_changes',{event:'*',schema:'public',table:'isler'},function(){rtTetik()})
         .subscribe();
+      if(yonetici()||sistemci()){
+        dbClient.channel('opex-sifre-rt')
+          .on('postgres_changes',{event:'INSERT',schema:'public',table:'sifre_talep'},function(payload){
+            try{talepleriGetir();}catch(e){}
+            try{bip();var kim=payload&&payload.new&&payload.new.kisi;
+              bildir('Şifre sıfırlama talebi',(kim?ad(kim):'Bir kullanıcı')+' şifresini unuttu, sıfırlama bekliyor');}catch(e){}
+          }).subscribe();
+      }
     }
   }catch(e){}
 }
