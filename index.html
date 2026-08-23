@@ -1295,6 +1295,34 @@ function gor(j){var p=pn(ME);
  return j.br==p[3]||j.a.some(function(s){return s.k==ME})}
 var SISTEM=['mert'];                       /* sistem sorumlusu — tam yetki */
 function sistemci(){return SISTEM.indexOf(ME)>=0}
+var GERCEK_ME=null;
+function gozAktif(){return !!GERCEK_ME}
+window.kullaniciGozu=function(kim){
+  if(GERCEK_ME)return;
+  if(SISTEM.indexOf(ME)<0)return;
+  if(!kim||kim==ME)return;
+  GERCEK_ME=ME; ME=kim; V='ana';
+  try{ciz()}catch(e){}
+};
+window.kullaniciGozuCik=function(){
+  if(!GERCEK_ME)return;
+  ME=GERCEK_ME; GERCEK_ME=null; V='ana';
+  try{ciz()}catch(e){}
+};
+function gozBanner(){
+  var b=document.getElementById('gozbanner');
+  if(GERCEK_ME){
+    if(!b){b=document.createElement('div');b.id='gozbanner';
+      b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#C0392B;color:#fff;padding:9px 14px;text-align:center;font-size:13px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.35);line-height:1.5';
+      document.body.appendChild(b);}
+    b.innerHTML='\uD83D\uDC41 '+esc(ad(ME))+' \u00B7 '+esc(pn(ME)[2]||'')+' g\u00f6z\u00fcnden g\u00f6r\u00fcyorsun (salt g\u00f6r\u00fcnt\u00fcleme, de\u011fi\u015fiklik kaydedilmez) '+
+      '<button onclick="kullaniciGozuCik()" style="background:#fff;color:#C0392B;border:0;padding:5px 13px;border-radius:7px;font-weight:700;cursor:pointer;margin-left:10px">Kendi g\u00f6r\u00fcn\u00fcm\u00fcme d\u00f6n</button>';
+    try{document.body.style.paddingTop='42px'}catch(e){}
+  }else{
+    if(b&&b.parentNode)b.parentNode.removeChild(b);
+    try{document.body.style.paddingTop=''}catch(e){}
+  }
+}
 function tumBolum(){return pn(ME)[4]=='ust'||sistemci()}
 function bolumListesi(){
  if(tumBolum())return Object.keys(B);
@@ -1490,7 +1518,7 @@ function sifreEkrani(zorunlu){
   '<div class="note">Kolay hatırlayacağın ama başkasının tahmin edemeyeceği bir şey seç.</div>'+
   '</div></div>';
 }
-function ciz(){
+function ciz(){try{gozBanner()}catch(e){}
  if(!GIRIS){girisEkrani();return}
  if(ZORUNLU){sifreEkrani(true);return}
  if(V=='sifre'){sifreEkrani(false);return}
@@ -2107,6 +2135,15 @@ function ciz(){
     (sistemci()?'<button data-a="yedek"><i>💾</i>Yedek</button>':'')+
     (sistemci()?'<button data-a="kota"><i>🗄️</i>Depolama</button>':'')+
     '</div>';
+  if(sistemci()&&!GERCEK_ME){
+   h+='<h2>Yönetici Araçları</h2><div class="card">'+
+     '<h3>👁 Kullanıcı gözünden gör</h3>'+
+     '<div class="note">Seçtiğin kişinin gördüğü ekranı görürsün. Salt görüntüleme — değişiklik yapılamaz. Acil müdahale ve kontrol için.</div>'+
+     '<select class="n" id="gozsec" style="margin-bottom:8px">'+
+     P.filter(function(pp){return pp[0]!=ME}).map(function(pp){return '<option value="'+pp[0]+'">'+esc(pp[1])+' — '+esc(pp[2])+'</option>'}).join('')+
+     '</select>'+
+     '<button class="b" data-a="gozu-git">Bu kişinin gözünden gör</button></div>';
+  }
   h+='<h2>Hesabım</h2><div class="acts">'+
     '<button data-a="sifre"><i>🔑</i>Şifre</button>'+
     '<button data-a="gorunum"><i>🎨</i>Görünüm</button>'+
@@ -2451,6 +2488,12 @@ function yak(el,s){while(el&&el!==document){if(el.matches&&el.matches(s))return 
 document.addEventListener('click',function(e){
  var t=yak(e.target,'[data-a]');if(!t)return;
  var a=t.dataset.a;
+ if(a=='gozu-cik'){window.kullaniciGozuCik();return}
+ if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
+ if(GERCEK_ME){
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1};
+  if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
+ }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
   d.innerHTML='<button data-a="fsx">Kapat</button><img src="'+t.dataset.src+'">';
   document.body.appendChild(d);return}
@@ -3006,6 +3049,7 @@ function talepleriGetir(){
   return true;
  }
  async function senkron(){
+  if(GERCEK_ME)return;
   try{
    var ok=await guvenliYaz('isler',J.map(isSatiri),'İşler');
    if(ok&&ilk){ilk=false;console.log('Bulut baglantisi tamam')}
