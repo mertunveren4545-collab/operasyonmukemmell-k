@@ -1601,17 +1601,6 @@ function ciz(){try{gozBanner()}catch(e){}
     dkart('Toplam iş',_GS.toplam,'#1B3A2A','#F4F6F5')+
     dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
   '</div>';
-  var _yk=yaklasanIsler();
-  if(_yk.length){
-    h+='<h2>\u23F0 Yaklaşan / geciken terminler</h2>';
-    _yk.slice(0,6).forEach(function(j){
-      var c=cur(j),kk=as(c);
-      var et=kk>0?(kk+' gün geçti'):kk===0?'bugün son gün':((-kk)+' gün kaldı');
-      h+='<button class="r '+(kk>0?'lt':'wt')+'" data-a="det" data-j="'+j.id+'">'+
-        '<div class="ml"><b>'+esc(j.ad)+'</b><span>'+B[j.br].ad+' \u00b7 '+esc(ad(c.k))+'</span></div>'+
-        '<div class="rt"><b>'+et+'</b><span>plan '+c.t+' gün</span></div><div class="ar">\u203a</div></button>';
-    });
-  }
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1635,13 +1624,23 @@ function ciz(){try{gozBanner()}catch(e){}
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
   h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
+  h+='<div style="overflow-x:auto;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
+    '<thead><tr style="color:#7A8A83;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px">'+
+    '<th style="text-align:left;padding:7px 6px;font-weight:600">Bölüm</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Açık</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Geciken</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Tamam</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Toplam</th></tr></thead><tbody>';
   bolumListesi().forEach(function(k){
    var vv=bolStat(k);
-   var np=P.filter(function(p){return p[3]==k}).length;
-   h+='<button class="r '+(vv.gec?'lt':vv.acik?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
-     '<div class="ml"><b>'+B[k].ad+'</b><span>'+vv.tamam+' tamamlandı · '+vv.toplam+' toplam · '+np+' personel'+(vv.gec?' · '+vv.gec+' gecikme':'')+'</span></div>'+
-     '<div class="rt"><b>'+vv.acik+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
+   h+='<tr data-a="bdet" data-b="'+k+'" style="cursor:pointer;border-top:1px solid #EAEEEC">'+
+     '<td style="padding:11px 6px;font-weight:600">'+B[k].ad+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;font-weight:700">'+vv.acik+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;font-weight:700;color:'+(vv.gec?'#C0392B':'#B7C0BB')+'">'+vv.gec+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;color:#1B5E3F;font-weight:600">'+vv.tamam+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;color:#7A8A83">'+vv.toplam+'</td></tr>';
   });
+  h+='</tbody></table></div>';
   h+='<div class="acts">'+
     ''+
     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
@@ -1661,17 +1660,6 @@ function ciz(){try{gozBanner()}catch(e){}
     dkart('Toplam iş',_GS.toplam,'#1B3A2A','#F4F6F5')+
     dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
   '</div>';
-  var _yk=yaklasanIsler();
-  if(_yk.length){
-    h+='<h2>\u23F0 Yaklaşan / geciken terminler</h2>';
-    _yk.slice(0,6).forEach(function(j){
-      var c=cur(j),kk=as(c);
-      var et=kk>0?(kk+' gün geçti'):kk===0?'bugün son gün':((-kk)+' gün kaldı');
-      h+='<button class="r '+(kk>0?'lt':'wt')+'" data-a="det" data-j="'+j.id+'">'+
-        '<div class="ml"><b>'+esc(j.ad)+'</b><span>'+B[j.br].ad+' \u00b7 '+esc(ad(c.k))+'</span></div>'+
-        '<div class="rt"><b>'+et+'</b><span>plan '+c.t+' gün</span></div><div class="ar">\u203a</div></button>';
-    });
-  }
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1695,13 +1683,23 @@ function ciz(){try{gozBanner()}catch(e){}
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
   h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
+  h+='<div style="overflow-x:auto;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
+    '<thead><tr style="color:#7A8A83;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px">'+
+    '<th style="text-align:left;padding:7px 6px;font-weight:600">Bölüm</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Açık</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Geciken</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Tamam</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Toplam</th></tr></thead><tbody>';
   bolumListesi().forEach(function(k){
    var vv=bolStat(k);
-   var np=P.filter(function(p){return p[3]==k}).length;
-   h+='<button class="r '+(vv.gec?'lt':vv.acik?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
-     '<div class="ml"><b>'+B[k].ad+'</b><span>'+vv.tamam+' tamamlandı · '+vv.toplam+' toplam · '+np+' personel'+(vv.gec?' · '+vv.gec+' gecikme':'')+'</span></div>'+
-     '<div class="rt"><b>'+vv.acik+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
+   h+='<tr data-a="bdet" data-b="'+k+'" style="cursor:pointer;border-top:1px solid #EAEEEC">'+
+     '<td style="padding:11px 6px;font-weight:600">'+B[k].ad+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;font-weight:700">'+vv.acik+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;font-weight:700;color:'+(vv.gec?'#C0392B':'#B7C0BB')+'">'+vv.gec+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;color:#1B5E3F;font-weight:600">'+vv.tamam+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;color:#7A8A83">'+vv.toplam+'</td></tr>';
   });
+  h+='</tbody></table></div>';
  }
 
  else if(V=='bdet'&&bolumListesi().indexOf(OB)<0){
