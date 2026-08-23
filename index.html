@@ -1763,19 +1763,34 @@ function ciz(){try{gozBanner()}catch(e){}
     halka(Math.round(bts/j.a.length*100),c&&as(c)>0?'#B2402F':'#2E7D4B')+
     '<span>Adımlar <span style="font-weight:400;color:#8592A0;font-size:12px">('+bts+'/'+j.a.length+' tamam)</span></span></h3>';
   h+='<div class="tl">';
-  j.a.forEach(function(s){
+  j.a.forEach(function(s,si){
    var lt=(s.d=='a'&&as(s)>0);
    var tp2=stip(s),bl2=pn(s.k)[3];
-   var snf=(s.d=='t'?'t':s.d=='a'?'a':'')+(lt?' gec':'');
-   h+='<div class="adim '+snf+'">'+
-     '<div class="bas"><b>'+s.a+'<span class="tip '+tp2+'">'+tipAd(tp2)+'</span></b>'+
-     '<i>'+(s.d=='t'?gn(s.g,s.b)+'/'+s.t+' g':s.d=='a'?gec(s)+'/'+s.t+' g':s.t+' g')+
-     (s.ekg?' <b style="color:#8A6512">+'+s.ekg+'</b>':'')+'</i></div>'+
-     '<div class="kisi"><span class="avk" style="width:18px;height:18px;border-radius:9px;font-size:8.5px;'+
-     'display:inline-flex;vertical-align:middle;margin-right:5px;background:'+kisiRenk(s.k)+'">'+
-     bashrf(s.k)+'</span>'+ad(s.k)+(bl2?' · '+bad(bl2):'')+'</div>'+
-     '<div class="zmn">'+(s.d=='t'?'gönderildi '+fmt(s.g)+' → tamamlandı '+fmt(s.b)
-       :s.d=='a'?'gönderildi '+fmt(s.g)+' → bekliyor':'sırada')+'</div></div>';
+   var durum,ikon,renk;
+   if(s.d=='t'){durum='tamamlandı';ikon='\u2713';renk='#2E7D4B'}
+   else if(s.d=='a'){durum=lt?'gecikmede':'sürüyor';ikon='\u25CF';renk=lt?'#C0392B':'#B9770E'}
+   else {durum='sırada';ikon='\u25CB';renk='#B7C0BB'}
+   var son=(si==j.a.length-1);
+   var tprnk=tp2=='o'?'#B9770E':tp2=='k'?'#7A5AA8':'#2E7D4B';
+   h+='<div style="display:flex;gap:11px">'+
+     '<div style="display:flex;flex-direction:column;align-items:center;flex:none">'+
+       '<div style="width:22px;height:22px;border-radius:11px;background:'+renk+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;line-height:1">'+ikon+'</div>'+
+       (son?'':'<div style="width:2px;flex:1;background:#EAEEEC;margin:3px 0"></div>')+
+     '</div>'+
+     '<div style="flex:1;min-width:0;padding-bottom:'+(son?'2':'16')+'px">'+
+       '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">'+
+         '<b style="font-size:13.5px">'+esc(s.a)+' <span style="font-size:9.5px;font-weight:700;color:#fff;background:'+tprnk+';padding:1px 6px;border-radius:5px;vertical-align:middle">'+tipAd(tp2)+'</span></b>'+
+         '<span style="font-size:11px;font-weight:600;color:'+renk+';white-space:nowrap">'+durum+'</span>'+
+       '</div>'+
+       '<div style="font-size:12px;color:#5A6A63;margin-top:3px">'+ad(s.k)+(bl2?' · '+bad(bl2):'')+'</div>'+
+       '<div style="font-size:11px;color:#8592A0;margin-top:2px">'+
+         (s.d=='t'? fmt(s.g)+' \u2192 '+fmt(s.b)+' · '+gn(s.g,s.b)+'/'+s.t+' gün'
+          : s.d=='a'? fmt(s.g)+' gönderildi · '+gec(s)+'/'+s.t+' gün'+(lt?' · +'+as(s)+' aşım':'')
+          : 'plan '+s.t+' gün')+
+         (s.ekg?' · +'+s.ekg+' ek':'')+
+       '</div>'+
+     '</div>'+
+   '</div>';
   });
   h+='</div></div>';
    if(c&&as(c)>0){
