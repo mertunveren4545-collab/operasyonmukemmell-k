@@ -2412,7 +2412,7 @@ function ciz(){try{gozBanner()}catch(e){}
    TALEPLER.forEach(function(x){
     h+='<div class="li"><div class="h"><b>'+ad(x.kisi)+'</b><i>'+fmt(x.ts)+'</i></div>'+
       '<div class="s">Supabase → Authentication → Users → '+x.kisi+'@opmuk.com → şifresini 123456 yap</div>'+
-      '<div style="height:8px"></div><button class="b g" data-a="talepkapat" data-i="'+x.id+'">Yapıldı</button></div>';
+      '<div style="height:8px"></div><button class="b" data-a="sifresifirla" data-i="'+x.id+'" data-k="'+x.kisi+'">Şifreyi sıfırla → 123456</button><button class="b g" data-a="talepkapat" data-i="'+x.id+'" style="margin-top:6px">Elle yaptım, kapat</button></div>';
    });
    h+='</div>';
   }
@@ -2707,6 +2707,19 @@ document.addEventListener('click',function(e){
    }).catch(function(e){HATA='Doğrulama hatası: '+(e.message||e);ciz()});
   }).catch(function(e){console.log('SIFRE:',e);
    HATA='Şifre değiştirilemedi: '+(e.message||e);ciz()});
+  return;
+ }
+ if(a=='sifresifirla'){
+  var tid=t.dataset.i, uk=t.dataset.k;
+  if(!dbClient){say('Supabase bağlı değil.');return}
+  t.textContent='Sıfırlanıyor…';t.disabled=true;
+  dbClient.functions.invoke('sifre-sifirla',{body:{kisi:uk}}).then(function(r){
+    var hata=(r&&r.error)||(r&&r.data&&r.data.error);
+    if(hata){say('Sıfırlama başarısız: '+(hata.message||hata));ciz();return}
+    TALEPLER=TALEPLER.filter(function(x){return x.id!=tid});
+    if(dbClient)dbClient.from('sifre_talep').update({durum:'t'}).eq('id',tid).then(function(){},function(){});
+    say(ad(uk)+' şifresi 123456 yapıldı. Kişi bununla girip kendi şifresini belirleyecek.');ciz();
+  }).catch(function(e){say('Hata: '+(e.message||e));ciz()});
   return;
  }
  if(a=='talepkapat'){
