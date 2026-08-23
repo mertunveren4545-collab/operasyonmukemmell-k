@@ -1366,13 +1366,14 @@ function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return 
 function bj(k){return J.filter(gor).filter(function(j){return j.br==k})}
 function bolStat(k){
   var jb=bj(k),ac=jb.filter(cur);
-  return {toplam:jb.length,acik:ac.length,tamam:jb.length-ac.length,
+  var onay=ac.filter(function(j){var st=stip(cur(j));return st=='o'||st=='k'}).length;
+  return {toplam:jb.length,acik:ac.length,tamam:jb.length-ac.length,onay:onay,
     gec:ac.filter(function(j){return as(cur(j))>0}).length};
 }
 function genelStat(){
-  var t=0,a=0,tm=0,g=0;
-  bolumListesi().forEach(function(k){var v=bolStat(k);t+=v.toplam;a+=v.acik;tm+=v.tamam;g+=v.gec});
-  return {toplam:t,acik:a,tamam:tm,gec:g};
+  var t=0,a=0,tm=0,o=0,g=0;
+  bolumListesi().forEach(function(k){var v=bolStat(k);t+=v.toplam;a+=v.acik;tm+=v.tamam;o+=v.onay;g+=v.gec});
+  return {toplam:t,acik:a,tamam:tm,onay:o,gec:g};
 }
 function yaklasanIsler(){
   return J.filter(gor).filter(function(j){var c=cur(j);if(!c)return false;var k=as(c);return k>=-2&&k<=3})
@@ -1597,8 +1598,8 @@ function ciz(){try{gozBanner()}catch(e){}
   var _GS=genelStat();
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px">'+
     dkart('Aç\u0131k iş',_GS.acik,'#1B5E3F','#E8F3EC')+
+    dkart('Onayda',_GS.onay,'#B9770E','#FFF8E1')+
     dkart('Tamamlanan',_GS.tamam,'#1B5E3F','#E8F3EC')+
-    dkart('Toplam iş',_GS.toplam,'#1B3A2A','#F4F6F5')+
     dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
   '</div>';
   var bd=bekleyenDestek();
@@ -1628,6 +1629,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<thead><tr style="color:#7A8A83;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px">'+
     '<th style="text-align:left;padding:7px 6px;font-weight:600">Bölüm</th>'+
     '<th style="text-align:center;padding:7px 4px;font-weight:600">Açık</th>'+
+    '<th style="text-align:center;padding:7px 4px;font-weight:600">Onayda</th>'+
     '<th style="text-align:center;padding:7px 4px;font-weight:600">Geciken</th>'+
     '<th style="text-align:center;padding:7px 4px;font-weight:600">Tamam</th>'+
     '<th style="text-align:center;padding:7px 4px;font-weight:600">Toplam</th></tr></thead><tbody>';
@@ -1636,6 +1638,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<tr data-a="bdet" data-b="'+k+'" style="cursor:pointer;border-top:1px solid #EAEEEC">'+
      '<td style="padding:11px 6px;font-weight:600">'+B[k].ad+'</td>'+
      '<td style="text-align:center;padding:11px 4px;font-weight:700">'+vv.acik+'</td>'+
+     '<td style="text-align:center;padding:11px 4px;font-weight:600;color:#B9770E">'+vv.onay+'</td>'+
      '<td style="text-align:center;padding:11px 4px;font-weight:700;color:'+(vv.gec?'#C0392B':'#B7C0BB')+'">'+vv.gec+'</td>'+
      '<td style="text-align:center;padding:11px 4px;color:#1B5E3F;font-weight:600">'+vv.tamam+'</td>'+
      '<td style="text-align:center;padding:11px 4px;color:#7A8A83">'+vv.toplam+'</td></tr>';
@@ -1653,53 +1656,6 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<div class="note" style="margin:12px 0 0">sürüm s44 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
-  var _GS=genelStat();
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px">'+
-    dkart('Aç\u0131k iş',_GS.acik,'#1B5E3F','#E8F3EC')+
-    dkart('Tamamlanan',_GS.tamam,'#1B5E3F','#E8F3EC')+
-    dkart('Toplam iş',_GS.toplam,'#1B3A2A','#F4F6F5')+
-    dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
-  '</div>';
-  var bd=bekleyenDestek();
-  if(bd.length){
-   h+='<h2>Benden istenen veri / destek</h2>';
-   bd.forEach(function(x){
-    var bg=gn(x.d.ts,TODAY);
-    h+='<button class="r '+(bg>x.d.gun?'lt':'wt')+'" data-a="det" data-j="'+x.j.id+'">'+
-      '<div class="ml"><b>'+ad(x.d.isteyen)+' bekliyor</b><span>'+esc(x.j.ad)+'</span>'+
-      '<span>'+esc(x.d.ne.slice(0,60))+(x.d.ne.length>60?'…':'')+'</span></div>'+
-      '<div class="rt"><b>'+bg+'</b><span>/'+x.d.gun+' gün</span></div><div class="ar">›</div></button>';
-   });
-  }
-  var sr9=seriGun();
-  if(sr9>=2){
-   h+='<div class="seri"><span class="ates">🔥</span><div>'+
-     '<b>'+sr9+' gün üst üste kayıt</b><span>Seriyi bozma — bugün de gir</span></div></div>';
-  }
-  var bit9=bittiBenim();
-  if(bit9.length){
-   h+='<button class="r ok" data-a="liste" data-f="bit"><div class="ml">'+
-     '<b>Tamamlanan işlerim</b><span>son: '+esc(bit9[0].ad.slice(0,38))+'</span></div>'+
-     '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
-  }
-  h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
-  h+='<div style="overflow-x:auto;margin-bottom:8px"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
-    '<thead><tr style="color:#7A8A83;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px">'+
-    '<th style="text-align:left;padding:7px 6px;font-weight:600">Bölüm</th>'+
-    '<th style="text-align:center;padding:7px 4px;font-weight:600">Açık</th>'+
-    '<th style="text-align:center;padding:7px 4px;font-weight:600">Geciken</th>'+
-    '<th style="text-align:center;padding:7px 4px;font-weight:600">Tamam</th>'+
-    '<th style="text-align:center;padding:7px 4px;font-weight:600">Toplam</th></tr></thead><tbody>';
-  bolumListesi().forEach(function(k){
-   var vv=bolStat(k);
-   h+='<tr data-a="bdet" data-b="'+k+'" style="cursor:pointer;border-top:1px solid #EAEEEC">'+
-     '<td style="padding:11px 6px;font-weight:600">'+B[k].ad+'</td>'+
-     '<td style="text-align:center;padding:11px 4px;font-weight:700">'+vv.acik+'</td>'+
-     '<td style="text-align:center;padding:11px 4px;font-weight:700;color:'+(vv.gec?'#C0392B':'#B7C0BB')+'">'+vv.gec+'</td>'+
-     '<td style="text-align:center;padding:11px 4px;color:#1B5E3F;font-weight:600">'+vv.tamam+'</td>'+
-     '<td style="text-align:center;padding:11px 4px;color:#7A8A83">'+vv.toplam+'</td></tr>';
-  });
-  h+='</tbody></table></div>';
  }
 
  else if(V=='bdet'&&bolumListesi().indexOf(OB)<0){
