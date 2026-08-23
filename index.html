@@ -968,6 +968,8 @@ function gunlukHatirlat(){
   localStorage.setItem('opmuk_hatirlatma',bugun);
   var p=[];
   if(gc.length)p.push(gc.length+' iş termini aştı');
+   var _yak=mn.filter(function(j){var kk=as(cur(j));return kk<=0&&kk>=-2}).length;
+   if(_yak)p.push(_yak+' iş termini yaklaşıyor');
   if(mn.length-gc.length>0)p.push((mn.length-gc.length)+' iş sırada');
   if(dst)p.push(dst+' veri talebi bekliyor');
   bip();bildir('Günaydın '+ks(ME).split(' ')[0],p.join(' · '));
@@ -1282,6 +1284,25 @@ function nabiz(){
  dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
    son_gorulme:new Date().toISOString()}).then(function(){},function(){});
 }
+var _rtT=null;
+function rtTetik(){clearTimeout(_rtT);_rtT=setTimeout(function(){try{isKontrol()}catch(e){}},700)}
+function anlikBildirimKur(){
+  if(window.__zam)return; window.__zam=1;
+  setInterval(nabiz,120000);
+  setInterval(function(){try{isKontrol()}catch(e){}},15000);   /* yedek yoklama */
+  /* sekmeye/pencereye donunce ANINDA kontrol */
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){try{nabiz();isKontrol()}catch(e){}}});
+  window.addEventListener('focus',function(){try{isKontrol()}catch(e){}});
+  window.addEventListener('online',function(){try{isKontrol()}catch(e){}});
+  /* Supabase Realtime: is tablosu degisince aninda tetikle */
+  try{
+    if(dbClient&&dbClient.channel){
+      dbClient.channel('opex-isler-rt')
+        .on('postgres_changes',{event:'*',schema:'public',table:'isler'},function(){rtTetik()})
+        .subscribe();
+    }
+  }catch(e){}
+}
 var ME='mert',V='ana',OB='SI',OJ=0,NS=null,RED=0,ED=0,YP={ad:'',unvan:'',br:'SI',rol:'c'};
 
 /* ---------- HESAP ---------- */
@@ -1343,6 +1364,25 @@ function bek(j){var w=0,b=0;j.a.forEach(function(s){if(!s.g)return;
  var d=s.d=='t'?gn(s.g,s.b):gec(s);w+=Math.min(d,s.t);b+=Math.max(0,d-s.t)});return[w,b]}
 function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return n}
 function bj(k){return J.filter(gor).filter(function(j){return j.br==k})}
+function bolStat(k){
+  var jb=bj(k),ac=jb.filter(cur);
+  return {toplam:jb.length,acik:ac.length,tamam:jb.length-ac.length,
+    gec:ac.filter(function(j){return as(cur(j))>0}).length};
+}
+function genelStat(){
+  var t=0,a=0,tm=0,g=0;
+  bolumListesi().forEach(function(k){var v=bolStat(k);t+=v.toplam;a+=v.acik;tm+=v.tamam;g+=v.gec});
+  return {toplam:t,acik:a,tamam:tm,gec:g};
+}
+function yaklasanIsler(){
+  return J.filter(gor).filter(function(j){var c=cur(j);if(!c)return false;var k=as(c);return k>=-2&&k<=3})
+    .sort(function(a,b){return as(cur(b))-as(cur(a))});
+}
+function dkart(et,sy,rnk,arka){
+  return '<div style="background:'+(arka||'#F4F6F5')+';border-radius:14px;padding:13px 15px">'+
+    '<div style="font-size:27px;font-weight:800;line-height:1;color:'+(rnk||'#1B3A2A')+'">'+sy+'</div>'+
+    '<div style="font-size:12px;color:#7A8A83;margin-top:4px">'+et+'</div></div>';
+}
 function say(m){var e=document.getElementById('t');e.textContent=m;e.style.display='block';
  clearTimeout(say.h);say.h=setTimeout(function(){e.style.display='none'},2300)}
 var KOTA=null,KOTA_BUYUK=[],KOTA_YUK=false;
@@ -1554,6 +1594,24 @@ function ciz(){try{gozBanner()}catch(e){}
     '<div class="sol"><b>Bende bekleyen iş'+rz(BD.gec)+'</b>'+
     '<span>'+(gc?gc+' tanesi termini aştı':'termin aşımı yok')+'</span></div>'+
     '<div class="sy">'+mn.length+'</div></div></button>';
+  var _GS=genelStat();
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px">'+
+    dkart('Aç\u0131k iş',_GS.acik,'#1B5E3F','#E8F3EC')+
+    dkart('Tamamlanan',_GS.tamam,'#1B5E3F','#E8F3EC')+
+    dkart('Toplam iş',_GS.toplam,'#1B3A2A','#F4F6F5')+
+    dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
+  '</div>';
+  var _yk=yaklasanIsler();
+  if(_yk.length){
+    h+='<h2>\u23F0 Yaklaşan / geciken terminler</h2>';
+    _yk.slice(0,6).forEach(function(j){
+      var c=cur(j),kk=as(c);
+      var et=kk>0?(kk+' gün geçti'):kk===0?'bugün son gün':((-kk)+' gün kaldı');
+      h+='<button class="r '+(kk>0?'lt':'wt')+'" data-a="det" data-j="'+j.id+'">'+
+        '<div class="ml"><b>'+esc(j.ad)+'</b><span>'+B[j.br].ad+' \u00b7 '+esc(ad(c.k))+'</span></div>'+
+        '<div class="rt"><b>'+et+'</b><span>plan '+c.t+' gün</span></div><div class="ar">\u203a</div></button>';
+    });
+  }
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1576,17 +1634,14 @@ function ciz(){try{gozBanner()}catch(e){}
      '<b>Tamamlanan işlerim</b><span>son: '+esc(bit9[0].ad.slice(0,38))+'</span></div>'+
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
-  if(!sistemci()){
-  h+='<h2>'+(tumBolum()?'Bölümler':'Bölümüm')+'</h2>';
+  h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
   bolumListesi().forEach(function(k){
-   var jb=bj(k),ac=jb.filter(cur);
-   var g=ac.filter(function(j){return as(cur(j))>0}).length;
+   var vv=bolStat(k);
    var np=P.filter(function(p){return p[3]==k}).length;
-   h+='<button class="r '+(g?'lt':ac.length?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
-     '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
-     '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
+   h+='<button class="r '+(vv.gec?'lt':vv.acik?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
+     '<div class="ml"><b>'+B[k].ad+'</b><span>'+vv.tamam+' tamamlandı · '+vv.toplam+' toplam · '+np+' personel'+(vv.gec?' · '+vv.gec+' gecikme':'')+'</span></div>'+
+     '<div class="rt"><b>'+vv.acik+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  }
   h+='<div class="acts">'+
     ''+
     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
@@ -1599,6 +1654,24 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<div class="note" style="margin:12px 0 0">sürüm s44 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
+  var _GS=genelStat();
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px">'+
+    dkart('Aç\u0131k iş',_GS.acik,'#1B5E3F','#E8F3EC')+
+    dkart('Tamamlanan',_GS.tamam,'#1B5E3F','#E8F3EC')+
+    dkart('Toplam iş',_GS.toplam,'#1B3A2A','#F4F6F5')+
+    dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
+  '</div>';
+  var _yk=yaklasanIsler();
+  if(_yk.length){
+    h+='<h2>\u23F0 Yaklaşan / geciken terminler</h2>';
+    _yk.slice(0,6).forEach(function(j){
+      var c=cur(j),kk=as(c);
+      var et=kk>0?(kk+' gün geçti'):kk===0?'bugün son gün':((-kk)+' gün kaldı');
+      h+='<button class="r '+(kk>0?'lt':'wt')+'" data-a="det" data-j="'+j.id+'">'+
+        '<div class="ml"><b>'+esc(j.ad)+'</b><span>'+B[j.br].ad+' \u00b7 '+esc(ad(c.k))+'</span></div>'+
+        '<div class="rt"><b>'+et+'</b><span>plan '+c.t+' gün</span></div><div class="ar">\u203a</div></button>';
+    });
+  }
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1621,17 +1694,14 @@ function ciz(){try{gozBanner()}catch(e){}
      '<b>Tamamlanan işlerim</b><span>son: '+esc(bit9[0].ad.slice(0,38))+'</span></div>'+
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
-  if(!sistemci()){
-  h+='<h2>'+(tumBolum()?'Bölümler':'Bölümüm')+'</h2>';
+  h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
   bolumListesi().forEach(function(k){
-   var jb=bj(k),ac=jb.filter(cur);
-   var g=ac.filter(function(j){return as(cur(j))>0}).length;
+   var vv=bolStat(k);
    var np=P.filter(function(p){return p[3]==k}).length;
-   h+='<button class="r '+(g?'lt':ac.length?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
-     '<div class="ml"><b>'+B[k].ad+'</b><span>'+np+' personel'+(g?' · '+g+' gecikme':'')+'</span></div>'+
-     '<div class="rt"><b>'+ac.length+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
+   h+='<button class="r '+(vv.gec?'lt':vv.acik?'ok':'')+'" data-a="bdet" data-b="'+k+'">'+
+     '<div class="ml"><b>'+B[k].ad+'</b><span>'+vv.tamam+' tamamlandı · '+vv.toplam+' toplam · '+np+' personel'+(vv.gec?' · '+vv.gec+' gecikme':'')+'</span></div>'+
+     '<div class="rt"><b>'+vv.acik+'</b><span>açık iş</span></div><div class="ar">›</div></button>';
   });
-  }
  }
 
  else if(V=='bdet'&&bolumListesi().indexOf(OB)<0){
@@ -2718,8 +2788,7 @@ document.addEventListener('click',function(e){
    ZORUNLU=!(u&&u.user_metadata&&u.user_metadata.pw_set);
    try{
     talepleriGetir();durumGetir();nabiz();
-    if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);
-     setInterval(isKontrol,30000);}
+    anlikBildirimKur();
     bildirimIzni();setTimeout(gunlukHatirlat,4000);
    }catch(e){console.log('yan islem:',e)}
    try{ ciz();window.scrollTo(0,0);
@@ -3101,8 +3170,7 @@ function talepleriGetir(){
      dbClient.from('kullanici_durum').select('*').eq('id',ME).then(function(r){
       if(r.data&&r.data[0])SON_OKUMA=r.data[0].son_okuma;},function(){});
      nabiz();bildirimIzni();setTimeout(gunlukHatirlat,4000);
-     if(!window.__zam){window.__zam=1;setInterval(nabiz,120000);
-      setInterval(isKontrol,30000);}}
+     anlikBildirimKur();}
    }
   }catch(e){}
   ciz();
