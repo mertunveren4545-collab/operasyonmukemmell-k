@@ -2532,10 +2532,14 @@ document.addEventListener('click',function(e){
   var uk=(document.getElementById('uk').value||'').trim().toLowerCase();
   var varmi=false;for(var i9=0;i9<P.length;i9++)if(P[i9][0]==uk)varmi=true;
   if(!varmi){HATA='Bu kullanıcı adı bulunamadı.';ciz();return}
-  if(dbClient)dbClient.from('sifre_talep').insert({id:'st'+Date.now(),kisi:uk,ts:now(),durum:'b'})
-   .then(function(){},function(){});
-  UNUT=false;HATA='';ciz();
-  say('Talebin iletildi. Yönetici şifreni 123456 yapacak.');
+  if(!dbClient){HATA='Supabase bağlı değil, sayfayı yenile.';ciz();return}
+  t.disabled=true;t.textContent='Gönderiliyor…';
+  dbClient.from('sifre_talep').insert({id:'st'+Date.now(),kisi:uk,ts:now(),durum:'b'})
+   .then(function(r){
+     if(r&&r.error){HATA='Talep gönderilemedi: '+r.error.message;ciz();return}
+     UNUT=false;HATA='';ciz();
+     say('Talebin iletildi. Yönetici şifreni 123456 yapacak.');
+   },function(e){HATA='Talep gönderilemedi: '+((e&&e.message)||e);ciz()});
   return;
  }
  if(a=='sifre'){V='sifre';HATA='';ciz();return}
