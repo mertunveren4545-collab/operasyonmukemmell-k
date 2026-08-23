@@ -643,6 +643,7 @@ body.dk .cekmece button.mn:active{background:#1E252E}
 body.dk .cekmece .ayirac{background:#242B33}
 #t{position:fixed;left:12px;right:12px;bottom:12px;background:#0B2140;color:#fff;padding:12px 14px;
  border-radius:7px;font-size:13.5px;display:none;z-index:9;max-width:600px;margin:0 auto}
+details.kisi>summary{list-style:none}details.kisi>summary::-webkit-details-marker{display:none}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1715,15 +1716,20 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<div class="card"><h3>İşler kimde ('+L.length+')</h3>';
   if(!dl.length)h+='<div style="font-size:13px;color:#8592A0">Açık iş yok.</div>';
   dl.forEach(function(x){
-   h+='<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:13.5px">'+ad(x[0])+'</b><span style="font-size:12px;color:#7A8A83">'+x[1].length+' iş</span></div>';
+   var gck=x[1].filter(function(j){return as(cur(j))>0}).length;
+   h+='<details class="kisi" style="margin-bottom:8px;background:#fff;border:1px solid #EEF1EF;border-radius:11px;overflow:hidden">'+
+     '<summary style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;font-weight:600;font-size:13.5px">'+
+     '<span>'+ad(x[0])+'</span>'+
+     '<span style="font-size:12px;font-weight:500;color:'+(gck?'#C0392B':'#7A8A83')+'">'+x[1].length+' iş'+(gck?' · '+gck+' geciken':'')+'</span>'+
+     '</summary><div style="padding:2px 12px 8px">';
    x[1].forEach(function(j){var c=cur(j),a2=as(c);
-    h+='<button data-a="det" data-j="'+j.id+'" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:#F7F9F8;border-radius:9px;padding:9px 11px;margin-bottom:5px;cursor:pointer">'+
+    h+='<button data-a="det" data-j="'+j.id+'" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:transparent;border-top:1px solid #F2F4F3;padding:9px 2px;cursor:pointer">'+
       '<span style="width:8px;height:8px;border-radius:4px;flex:none;background:'+(a2>0?'#C0392B':'#2E7D4B')+'"></span>'+
-      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600">'+esc(j.ad)+'</span>'+
+      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">'+esc(j.ad)+'</span>'+
       '<span style="font-size:11px;color:'+(a2>0?'#C0392B':'#7A8A83')+';white-space:nowrap">'+gec(c)+'/'+c.t+' gün'+(a2>0?' · +'+a2:'')+'</span>'+
       '</button>';
    });
-   h+='</div>';
+   h+='</div></details>';
   });
   h+='</div>';
   if(V=='bdet'){
@@ -1772,6 +1778,21 @@ function ciz(){try{gozBanner()}catch(e){}
        :s.d=='a'?'gönderildi '+fmt(s.g)+' → bekliyor':'sırada')+'</div></div>';
   });
   h+='</div></div>';
+   if(c&&as(c)>0){
+    var _srm=c.k;
+    var _dk=K.filter(function(kk){return kk.k==_srm&&(!j.bas||String(kk.ts)>=String(j.bas))}).sort(function(a,b){return (String(b.ts)>String(a.ts))?1:-1});
+    if(_dk.length){
+     h+='<div class="card" style="border-left:4px solid #C0392B">'+
+       '<h3 style="color:#C0392B">\u26A0 Gecikme sebebi</h3>'+
+       '<div style="font-size:12px;color:#8592A0;margin-bottom:6px">'+ad(_srm)+' bu iş açıkken şu çalışmalara zaman ayırdı:</div>';
+     _dk.slice(0,8).forEach(function(kk){
+      h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #F2F4F3;font-size:13px">'+
+        '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(kk.ac||kk.tip||'çalışma')+(kk.ts_?'<span style="color:#8592A0;font-size:11px"> · '+tad(kk.ts_)+'</span>':'')+'</span>'+
+        '<span style="color:#8592A0;font-size:11px;white-space:nowrap">'+fmt(kk.ts)+(kk.dk?' · '+kk.dk+' dk':'')+'</span></div>';
+     });
+     h+='</div>';
+    }
+   }
   ekGetir(j.id);
   var ek=ekListe(j),ims=ek.filter(function(x){return x.tur=='i'}),dcs=ek.filter(function(x){return x.tur!='i'});
   h+='<div class="card"><h3>Ekler ('+ek.length+')</h3>';
