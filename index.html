@@ -1607,6 +1607,20 @@ function ciz(){try{gozBanner()}catch(e){}
     dkart('Tamamlanan',_GS.tamam,'#1B5E3F','#E8F3EC')+
     dkart('Geciken',_GS.gec,_GS.gec?'#C0392B':'#7A8A83',_GS.gec?'#FBE9E7':'#F4F6F5')+
   '</div>';
+  h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
+  bolumListesi().forEach(function(k){
+   var vv=bolStat(k);
+   h+='<div class="r" data-a="bdet" data-b="'+k+'" style="display:block;cursor:pointer;padding:13px 14px;margin-bottom:9px">'+
+     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">'+
+       '<b style="font-size:14px">'+B[k].ad+'</b><span style="color:#B7C0BB;font-size:18px">\u203a</span></div>'+
+     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">'+
+       minik('Açık',vv.acik,'#1B5E3F','#E8F3EC')+
+       minik('Onayda',vv.onay,'#B9770E','#FFF8E1')+
+       minik('Geciken',vv.gec,vv.gec?'#C0392B':'#7A8A83',vv.gec?'#FBE9E7':'#F4F6F5')+
+       minik('Tamam',vv.tamam,'#1B5E3F','#E8F3EC')+
+     '</div></div>';
+  });
+
   var bd=bekleyenDestek();
   if(bd.length){
    h+='<h2>Benden istenen veri / destek</h2>';
@@ -1629,19 +1643,6 @@ function ciz(){try{gozBanner()}catch(e){}
      '<b>Tamamlanan işlerim</b><span>son: '+esc(bit9[0].ad.slice(0,38))+'</span></div>'+
      '<div class="rt"><b>'+bit9.length+'</b><span>iş</span></div><div class="ar">›</div></button>';
   }
-  h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
-  bolumListesi().forEach(function(k){
-   var vv=bolStat(k);
-   h+='<div class="r" data-a="bdet" data-b="'+k+'" style="display:block;cursor:pointer;padding:13px 14px;margin-bottom:9px">'+
-     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">'+
-       '<b style="font-size:14px">'+B[k].ad+'</b><span style="color:#B7C0BB;font-size:18px">\u203a</span></div>'+
-     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">'+
-       minik('Açık',vv.acik,'#1B5E3F','#E8F3EC')+
-       minik('Onayda',vv.onay,'#B9770E','#FFF8E1')+
-       minik('Geciken',vv.gec,vv.gec?'#C0392B':'#7A8A83',vv.gec?'#FBE9E7':'#F4F6F5')+
-       minik('Tamam',vv.tamam,'#1B5E3F','#E8F3EC')+
-     '</div></div>';
-  });
   h+='<div class="acts">'+
     ''+
     '<button data-a="kayit"><i>✎</i>Çalışma kaydı</button>'+
@@ -1703,16 +1704,13 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<div class="card"><h3>İşler kimde ('+L.length+')</h3>';
   if(!dl.length)h+='<div style="font-size:13px;color:#8592A0">Açık iş yok.</div>';
   dl.forEach(function(x){
-   h+='<div class="li"><div class="h"><b>'+ad(x[0])+'</b><i>'+x[1].length+' iş</i></div>';
+   h+='<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:13.5px">'+ad(x[0])+'</b><span style="font-size:12px;color:#7A8A83">'+x[1].length+' iş</span></div>';
    x[1].forEach(function(j){var c=cur(j),a2=as(c);
-    var bt9=0;j.a.forEach(function(z){if(z.d=='t')bt9++});
-    var yz9=Math.round(bt9/j.a.length*100);
-    h+='<button class="sub" data-a="det" data-j="'+j.id+'" style="display:flex;align-items:center;gap:11px">'+
-      halka(yz9,a2>0?'#B2402F':'#2E7D4B')+
-      '<span style="flex:1;min-width:0">'+esc(j.ad)+
-      '<span>📍 '+tad(j.ts_)+'</span>'+
-      '<span class="'+(a2>0?'l':'')+'">['+tipAd(stip(c))+'] '+c.a+' · '+gec(c)+'/'+c.t+' gün'+
-      (a2>0?' · +'+a2+' aşım':'')+'</span></span></button>';
+    h+='<button data-a="det" data-j="'+j.id+'" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:#F7F9F8;border-radius:9px;padding:9px 11px;margin-bottom:5px;cursor:pointer">'+
+      '<span style="width:8px;height:8px;border-radius:4px;flex:none;background:'+(a2>0?'#C0392B':'#2E7D4B')+'"></span>'+
+      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600">'+esc(j.ad)+'</span>'+
+      '<span style="font-size:11px;color:'+(a2>0?'#C0392B':'#7A8A83')+';white-space:nowrap">'+gec(c)+'/'+c.t+' gün'+(a2>0?' · +'+a2:'')+'</span>'+
+      '</button>';
    });
    h+='</div>';
   });
