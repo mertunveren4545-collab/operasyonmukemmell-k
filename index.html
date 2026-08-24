@@ -880,7 +880,7 @@ var ETIKETLER=[
  ['✅','STANDART','standartlaştıralım'],
  ['🎯','HEDEF','termine odak']];
 function yonetici(){return ME=='mert'||ME=='mesut'}
-function atamaYetkisi(){if(sistemci())return true;if(pn(ME)[4]=='ust')return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
+function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if(pn(ME)[4]=='ust')return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function bYetkiTum(){return sistemci()}
 function cevrimici(t){ if(!t)return false; return (new Date()-zmn(t))<180000 }
 function gecenSure(t){
@@ -1939,6 +1939,7 @@ function ciz(){try{gozBanner()}catch(e){}
     h+='<div style="height:8px"></div><button class="b g" data-a="tal" data-j="'+j.id+'">Ek süre talep et</button>';
    }
   }else if(c)h+='<div class="emp">Şu an '+ad(c.k)+' üzerinde — '+fmt(c.g)+' tarihinden beri.</div>';
+  if(sistemci())h+='<div class="card" style="border:1px solid #F3D2CD;background:#FDF5F4;margin-top:14px">'+'<h3 style="color:#B2402F">\u26A0 Yönetici — Tehlikeli bölge</h3>'+'<div style="font-size:12px;color:#8592A0;margin-bottom:10px">Bu işi ekrandan ve veritabanından kalıcı olarak siler. Geri alınamaz.</div>'+'<button class="b r" data-a="issil" data-j="'+j.id+'">Bu işi kalıcı sil</button></div>';
  }
 
  else if(V=='org'){
@@ -3009,6 +3010,20 @@ document.addEventListener('click',function(e){
   c2.d='b';c2.g=0;p2.d='a';p2.b=0;p2.g=ts2;j2.lg=j2.lg||[];
   j2.lg.push({ts:ts2,k:ME,hedef:p2.k,tip:'Geri gönderdi → '+ad(p2.k),msg:m});
   say('Geri gönderildi → '+ad(p2.k));V='ana';RED=0;
+ }
+ else if(a=='issil'){
+  if(!sistemci()){say('Bu işlem için yetkin yok.');return}
+  var _js=bul(+t.dataset.j); if(!_js)return;
+  if(!confirm('"'+_js.ad+'" işini KALICI olarak silmek istiyor musun?\n\nBu geri alınamaz.'))return;
+  var _sid=_js.id;
+  if(dbClient){
+   dbClient.from('isler').delete().eq('id',String(_sid)).then(function(r){
+    if(r&&r.error)say('Silinemedi (yetki/RLS): '+r.error.message);
+   },function(){say('Silme sırasında bağlantı hatası.')});
+  }
+  try{if(typeof _isHash!=='undefined')delete _isHash[_sid]}catch(e){}
+  J=J.filter(function(x){return x.id!=_sid});
+  say('İş silindi: '+_js.ad);V='ana';RED=0;
  }
  else if(a=='pnew'){
   var na=document.getElementById('pa').value.trim(),nu=document.getElementById('pu').value.trim(),
