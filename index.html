@@ -957,6 +957,17 @@ function onizle(m){
 var SW=null;
 if('serviceWorker' in navigator){
  navigator.serviceWorker.register('sw.js').then(function(r){SW=r},function(){});
+ navigator.serviceWorker.ready.then(function(r){SW=r}).catch(function(){});
+}
+function swReg(){
+ if('serviceWorker' in navigator && navigator.serviceWorker.ready) return navigator.serviceWorker.ready;
+ return Promise.resolve(SW);
+}
+function gosterBildirim(baslik,ayar){
+ return swReg().then(function(r){
+  if(r && r.showNotification) return r.showNotification(baslik,ayar);
+  try{new Notification(baslik,ayar)}catch(e){}
+ }).catch(function(){try{new Notification(baslik,ayar)}catch(e){}});
 }
 function gunlukHatirlat(){
  try{
@@ -1051,11 +1062,11 @@ function bildirimIzni(){
 }
 function bildirimAc(){
  if(!('Notification' in window)){say('Bu cihaz/tarayıcı bildirim desteklemiyor.');return}
- if(Notification.permission==='granted'){say('Bildirimler zaten açık \u2713');try{bip()}catch(e){}return}
+ if(Notification.permission==='granted'){say('Bildirimler zaten açık \u2713');try{bip()}catch(e){}gosterBildirim('OPEX',{body:'Bildirimler zaten açık \u2713',icon:'icon-192.png'});return}
  if(Notification.permission==='denied'){say('Bildirim izni daha önce engellenmiş. Tarayıcı adres çubuğundaki kilit/ayar simgesinden bu siteye bildirim izni ver.');return}
  Notification.requestPermission().then(function(pp){
   if(pp==='granted'){say('Bildirimler açıldı \u2713');try{bip()}catch(e){}
-   try{if(SW&&SW.showNotification)SW.showNotification('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'});else new Notification('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'})}catch(e){}
+   gosterBildirim('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'});
    ciz();
   }else say('Bildirim izni verilmedi.');
  }).catch(function(){});
@@ -1065,8 +1076,7 @@ function bildir(baslik,metin){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(document.visibilityState==='visible')return;   /* ekranda ise sadece bip */
   var ayar={body:metin,icon:'icon-192.png',badge:'icon-192.png',tag:'opmuk',renotify:true};
-  if(SW&&SW.showNotification)SW.showNotification(baslik,ayar);
-  else new Notification(baslik,ayar);
+  gosterBildirim(baslik,ayar);
  }catch(e){}
 }
 function konfeti(){
