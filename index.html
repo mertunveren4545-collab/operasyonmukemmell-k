@@ -3140,6 +3140,7 @@ function talepleriGetir(){
  if(!dbClient){console.log('Cevrimdisi mod — veriler kaydedilmeyecek');return}
  var yazilan={},zaman=null,ilk=true;
 
+ var _isHash={};
  function isSatiri(j){
   var kopya={};for(var k in j)if(k!=='ek')kopya[k]=j[k];
   return {id:String(j.id),ad:j.ad,veri:kopya};
@@ -3157,7 +3158,12 @@ function talepleriGetir(){
  async function senkron(){
   if(GERCEK_ME)return;
   try{
-   var ok=await guvenliYaz('isler',J.map(isSatiri),'İşler');
+   var _dg=[];
+    J.forEach(function(j){var sat=isSatiri(j);var str=JSON.stringify(sat);
+      if(_isHash[j.id]!==str){_isHash[j.id]=str;_dg.push(sat)}});
+    var ok=true;
+    if(_dg.length){ok=await guvenliYaz('isler',_dg,'İşler');
+      if(ok===false)_dg.forEach(function(sat){delete _isHash[sat.id]});}
    if(ok&&ilk){ilk=false;console.log('Bulut baglantisi tamam')}
    await guvenliYaz('tesisler',T.map(function(x){return {id:x.id,ad:x.ad}}));
    await guvenliYaz('personel',P.map(function(p){
