@@ -969,6 +969,25 @@ function gosterBildirim(baslik,ayar){
   try{new Notification(baslik,ayar)}catch(e){}
  }).catch(function(){try{new Notification(baslik,ayar)}catch(e){}});
 }
+var VAPID_PUB='BEKEZnaDhk-HkQ72EnGP3eKsJP-ORjebmB0P91LfStP4-seykVa1kPi2QF72aW2qNesqOd8sh2PlBHDQvqw7aIM';
+function _b64u(b){var pad='='.repeat((4-b.length%4)%4);var x=(b+pad).replace(/-/g,'+').replace(/_/g,'/');var raw=atob(x),arr=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);return arr}
+async function pushAbone(){
+ try{
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  if(!dbClient||!ME)return;
+  var reg=await navigator.serviceWorker.ready;
+  var sub=await reg.pushManager.getSubscription();
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_b64u(VAPID_PUB)});
+  if(sub){await dbClient.from('push_subs').upsert({endpoint:sub.endpoint,kullanici:ME,sub:sub.toJSON(),guncelleme:new Date().toISOString()});}
+ }catch(e){console.log('pushAbone hata:',e.message||e)}
+}
+async function pushGonder(hedefler,baslik,govde){
+ try{
+  if(!dbClient||!hedefler||!hedefler.length)return;
+  await dbClient.functions.invoke('push-gonder',{body:{hedef:hedefler,baslik:baslik,govde:govde}});
+ }catch(e){console.log('pushGonder hata:',e.message||e)}
+}
 function gunlukHatirlat(){
  try{
   var bugun=new Date().toISOString().slice(0,10);
@@ -1067,6 +1086,7 @@ function bildirimAc(){
  Notification.requestPermission().then(function(pp){
   if(pp==='granted'){say('Bildirimler açıldı \u2713');try{bip()}catch(e){}
    gosterBildirim('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'});
+   pushAbone();
    ciz();
   }else say('Bildirim izni verilmedi.');
  }).catch(function(){});
@@ -2840,7 +2860,7 @@ document.addEventListener('click',function(e){
    try{
     talepleriGetir();durumGetir();nabiz();
     anlikBildirimKur();
-    bildirimIzni();setTimeout(gunlukHatirlat,4000);
+    bildirimIzni();pushAbone();setTimeout(gunlukHatirlat,4000);
    }catch(e){console.log('yan islem:',e)}
    try{ ciz();window.scrollTo(0,0);
     say(ZORUNLU?'İlk giriş — şifreni belirle':'Hoş geldin, '+ad(ME));
@@ -2997,7 +3017,7 @@ document.addEventListener('click',function(e){
    GEC2=0;
   }
   c.d='t';c.b=ts;var n=j.a[ix+1];j.lg=j.lg||[];
-  if(n){n.d='a';n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k))}
+  if(n){n.d='a';n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k));try{if(n.k!=ME)pushGonder([n.k],'Sana iş düştü',j.ad)}catch(e){}}
   else{j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı — kapandı'});
    konfeti();bip();say('🎉 İş tamamlandı — katılan herkese düştü')}
   V='ana';RED=0;
@@ -3067,6 +3087,7 @@ document.addEventListener('click',function(e){
    lg:[{ts:ts3,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'}]});
   V='ana';say(kisiler.length>1?('İş başlatıldı — '+kisiler.length+' kişiye'):('İş başlatıldı — sorumlu '+ad(anaK)));
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
+  try{var _hd=kisiler.filter(function(x){return x!=ME});if(_hd.length)pushGonder(_hd,'Sana yeni iş düştü',nm);}catch(e){}
  }
  else return;
  try{cekmece(false)}catch(e){}
@@ -3240,7 +3261,7 @@ function talepleriGetir(){
     if(GIRIS){ZORUNLU=!(u.user_metadata&&u.user_metadata.pw_set);talepleriGetir();
      dbClient.from('kullanici_durum').select('*').eq('id',ME).then(function(r){
       if(r.data&&r.data[0])SON_OKUMA=r.data[0].son_okuma;},function(){});
-     nabiz();bildirimIzni();setTimeout(gunlukHatirlat,4000);
+     nabiz();bildirimIzni();pushAbone();setTimeout(gunlukHatirlat,4000);
      anlikBildirimKur();}
    }
   }catch(e){}
