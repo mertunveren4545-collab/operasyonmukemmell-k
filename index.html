@@ -989,9 +989,12 @@ function cekmeceYaz(){
  bolumListesi().forEach(function(k){
   var jb=bj(k),ac=jb.filter(cur);
   var g=ac.filter(function(j){return as(cur(j))>0}).length;
-  h+='<button class="mn '+(g?'kirmizi':'')+'" data-a="bdet" data-b="'+k+'">'+
-    '<em>🏭</em><span>'+B[k].ad+'</span>'+
-    '<span class="sy2">'+ac.length+(g?' · '+g+'⏰':'')+'</span></button>';
+  h+='<button class="mn" data-a="bdet" data-b="'+k+'" style="align-items:center">'+
+    '<em>🏭</em><span style="flex:1;min-width:0">'+B[k].ad+'</span>'+
+    '<span style="display:inline-flex;gap:5px;align-items:center;flex:none">'+
+      '<span style="background:#E8F3EC;color:#1B5E3F;font-size:11px;font-weight:700;padding:2px 9px;border-radius:9px;min-width:14px;text-align:center">'+ac.length+'</span>'+
+      (g?'<span style="background:#FBE9E7;color:#C0392B;font-size:11px;font-weight:700;padding:2px 9px;border-radius:9px;min-width:14px;text-align:center">'+g+'</span>':'')+
+    '</span></button>';
  });
  h+='<div class="ayirac"></div><h4>Menü</h4>'+
   '<button class="mn" data-a="ana"><em>🏠</em>Ana ekran</button>'+
