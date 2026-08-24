@@ -1046,6 +1046,17 @@ function bildirimIzni(){
  if(!('Notification' in window))return;
  if(Notification.permission==='default')Notification.requestPermission();
 }
+function bildirimAc(){
+ if(!('Notification' in window)){say('Bu cihaz/tarayıcı bildirim desteklemiyor.');return}
+ if(Notification.permission==='granted'){say('Bildirimler zaten açık \u2713');try{bip()}catch(e){}return}
+ if(Notification.permission==='denied'){say('Bildirim izni daha önce engellenmiş. Tarayıcı adres çubuğundaki kilit/ayar simgesinden bu siteye bildirim izni ver.');return}
+ Notification.requestPermission().then(function(pp){
+  if(pp==='granted'){say('Bildirimler açıldı \u2713');try{bip()}catch(e){}
+   try{if(SW&&SW.showNotification)SW.showNotification('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'});else new Notification('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'})}catch(e){}
+   ciz();
+  }else say('Bildirim izni verilmedi.');
+ }).catch(function(){});
+}
 function bildir(baslik,metin){
  try{
   if(!('Notification' in window)||Notification.permission!=='granted')return;
@@ -1290,6 +1301,13 @@ function rtTetik(){clearTimeout(_rtT);_rtT=setTimeout(function(){try{isKontrol()
 function anlikBildirimKur(){
   if(window.__zam)return; window.__zam=1;
   setInterval(nabiz,120000);
+  setInterval(function(){
+   try{
+    var mn=bende(),gc=mn.filter(function(j){return as(cur(j))>0});
+    if(gc.length){bip();bildir('Hatırlatma',gc.length+' işin termini geçti, bekliyor');say(gc.length+' işin termini geçti \u2014 kontrol et');}
+    else if(mn.length){bip();bildir('Hatırlatma',mn.length+' işin sırada bekliyor');}
+   }catch(e){}
+  },3*3600*1000);   /* 3 saatte bir hatırlatma */
   setInterval(function(){try{isKontrol()}catch(e){}},15000);   /* yedek yoklama */
   /* sekmeye/pencereye donunce ANINDA kontrol */
   document.addEventListener('visibilitychange',function(){if(!document.hidden){try{nabiz();isKontrol();if(yonetici()||sistemci())talepleriGetir()}catch(e){}}});
@@ -1609,6 +1627,9 @@ function ciz(){try{gozBanner()}catch(e){}
     '<div class="sol"><b>Bende bekleyen iş'+rz(BD.gec)+'</b>'+
     '<span>'+(gc?gc+' tanesi termini aştı':'termin aşımı yok')+'</span></div>'+
     '<div class="sy">'+mn.length+'</div></div></button>';
+  if(('Notification' in window)&&Notification.permission!=='granted'){
+   h+='<button data-a="bildirimac" style="display:block;width:100%;text-align:left;border:0;background:#FFF8E1;color:#8A6512;border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:13px;cursor:pointer;font-weight:600">\uD83D\uDD14 Bildirimler kapalı \u2014 açmak için dokun</button>';
+  }
   var _GS=genelStat();
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px">'+
     dkart('Aç\u0131k iş',_GS.acik,'#1B5E3F','#E8F3EC')+
@@ -2214,6 +2235,7 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<h2>Hesabım</h2><div class="acts">'+
     '<button data-a="sifre"><i>🔑</i>Şifre</button>'+
     '<button data-a="gorunum"><i>🎨</i>Görünüm</button>'+
+    '<button data-a="bildirimac"><i>🔔</i>Bildirimler</button>'+
     '<button data-a="paylas"><i>📤</i>Paylaş</button>'+
     '</div>';
   if(yonetici()){
@@ -2581,6 +2603,7 @@ document.addEventListener('click',function(e){
    },function(e){HATA='Talep gönderilemedi: '+((e&&e.message)||e);ciz()});
   return;
  }
+ if(a=='bildirimac'){bildirimAc();return}
  if(a=='sifre'){V='sifre';HATA='';ciz();return}
  if(a=='gorunum'){V='gorunum';ciz();return}
  if(a=='paylas'){
