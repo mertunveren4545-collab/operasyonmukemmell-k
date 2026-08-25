@@ -137,6 +137,22 @@ textarea{min-height:76px;resize:vertical}
 .sr button{width:42px;flex:none;border:1px solid #CDD3D9;background:#fff;border-radius:7px;color:#B2402F;font-size:18px}
 .emp{background:#fff;border-radius:9px;padding:24px 16px;text-align:center;color:#8592A0;font-size:13.5px}
 .note{font-size:11.5px;color:#8592A0;margin-top:8px;line-height:1.45}
+.atkart{border:2px solid #C0392B;background:#FEF6F5}
+.atkart h3{color:#B2402F}
+.atkart .an{font-size:13.5px;font-weight:600;margin-bottom:3px;color:#16202B}
+.atkart .am{font-size:11px;color:#8592A0;margin-bottom:8px}
+.atkart .arow{border-top:1px solid #F3D2CD;padding:10px 0}
+.tehlike{border:1px solid #F3D2CD;background:#FDF5F4}
+.tehlike h3{color:#B2402F}
+.tehlike .td{font-size:12px;color:#8592A0;margin-bottom:10px}
+body.dk .atkart{background:#2A1614;border-color:#7A2A20}
+body.dk .atkart h3{color:#F0A99E}
+body.dk .atkart .an{color:#E4E9EE}
+body.dk .atkart .am{color:#9AA4AE}
+body.dk .atkart .arow{border-top-color:#5A2019}
+body.dk .tehlike{background:#2A1614;border-color:#5A2019}
+body.dk .tehlike h3{color:#F0A99E}
+body.dk .tehlike .td{color:#9AA4AE}
 /* ---- yatay şema ---- */
 .ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:stretch}
 .ogrid>div{display:flex}
@@ -1608,7 +1624,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s51-ATAMAONAY</div>'+
+  '<div class="galt">SÜRÜM s52-KONTRAST</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1667,11 +1683,11 @@ function ciz(){try{gozBanner()}catch(e){}
   }
   var _atn=bekleyenAtama();
   if(_atn.length){
-   h+='<div class="card" style="border:2px solid #C0392B;background:#FEF6F5"><h3 style="color:#B2402F">\U0001F4E5 Sana atanan işler — kabul bekliyor ('+_atn.length+')</h3>';
+   h+='<div class="card atkart"><h3>\U0001F4E5 Sana atanan işler — kabul bekliyor ('+_atn.length+')</h3>';
    _atn.forEach(function(j){
-    h+='<div style="border-top:1px solid #F3D2CD;padding:10px 0">'+
-      '<div style="font-size:13.5px;font-weight:600;margin-bottom:3px">'+esc(j.ad)+oncEt(j.oncelik)+'</div>'+
-      '<div style="font-size:11px;color:#8592A0;margin-bottom:8px">'+ad(j.atayan||'')+' atadı · '+tad(j.ts_)+'</div>'+
+    h+='<div class="arow">'+
+      '<div class="an">'+esc(j.ad)+oncEt(j.oncelik)+'</div>'+
+      '<div class="am">'+ad(j.atayan||'')+' atadı · '+tad(j.ts_)+'</div>'+
       '<div style="display:flex;gap:8px">'+
         '<button class="b r" data-a="kabul" data-j="'+j.id+'" style="margin:0;flex:1">Kabul et ve başla</button>'+
         '<button class="b g" data-a="det" data-j="'+j.id+'" style="margin:0">Gör</button>'+
@@ -1739,7 +1755,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s51-ATAMAONAY · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s52-KONTRAST · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -1983,7 +1999,7 @@ function ciz(){try{gozBanner()}catch(e){}
     h+='<div style="height:8px"></div><button class="b g" data-a="tal" data-j="'+j.id+'">Ek süre talep et</button>';
    }
   }else if(c)h+='<div class="emp">Şu an '+ad(c.k)+' üzerinde — '+fmt(c.g)+' tarihinden beri.</div>';
-  if(sistemci())h+='<div class="card" style="border:1px solid #F3D2CD;background:#FDF5F4;margin-top:14px">'+'<h3 style="color:#B2402F">\u26A0 Yönetici — Tehlikeli bölge</h3>'+'<div style="font-size:12px;color:#8592A0;margin-bottom:10px">Bu işi ekrandan ve veritabanından kalıcı olarak siler. Geri alınamaz.</div>'+'<button class="b r" data-a="issil" data-j="'+j.id+'">Bu işi kalıcı sil</button></div>';
+  if(sistemci())h+='<div class="card tehlike" style="margin-top:14px">'+'<h3>\u26A0 Yönetici — Tehlikeli bölge</h3>'+'<div class="td">Bu işi ekrandan ve veritabanından kalıcı olarak siler. Geri alınamaz.</div>'+'<button class="b r" data-a="issil" data-j="'+j.id+'">Bu işi kalıcı sil</button></div>';
  }
 
  else if(V=='org'){
@@ -2302,7 +2318,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s51-ATAMAONAY</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s52-KONTRAST</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
