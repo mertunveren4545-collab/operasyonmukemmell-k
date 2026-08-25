@@ -880,7 +880,7 @@ var ETIKETLER=[
  ['✅','STANDART','standartlaştıralım'],
  ['🎯','HEDEF','termine odak']];
 function yonetici(){return ME=='mert'||ME=='mesut'}
-function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if(pn(ME)[4]=='ust')return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
+function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if((pn(ME)[4]||'')=='ust')return true;var _u=(pn(ME)[2]||'').toLocaleLowerCase('tr');if(_u.indexOf('müdür')>=0||_u.indexOf('mudur')>=0||_u.indexOf('direktör')>=0||_u.indexOf('direktor')>=0||_u.indexOf('şef')>=0||_u.indexOf('sef')>=0||_u.indexOf('yönetici')>=0||_u.indexOf('yonetici')>=0)return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function bYetkiTum(){return sistemci()}
 function cevrimici(t){ if(!t)return false; return (new Date()-zmn(t))<180000 }
 function gecenSure(t){
@@ -2588,7 +2588,7 @@ function ciz(){try{gozBanner()}catch(e){}
      return g5.length?'<optgroup label="'+B[bk].ad+'">'+g5.map(function(p){
       return '<option value="'+p[0]+'"'+(p[0]==ME?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</optgroup>':''}).join('')+
     '</select>'+
-    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.</div>')+    '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
+    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
     '<div style="height:14px"></div><button class="b" data-a="new">İşi başlat</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
