@@ -1625,7 +1625,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s53-KARTLAR</div>'+
+  '<div class="galt">SÜRÜM s54-LISTE</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1756,7 +1756,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s53-KARTLAR · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s54-LISTE · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -1806,26 +1806,21 @@ function ciz(){try{gozBanner()}catch(e){}
    });
    h+='</div>';el.innerHTML=h;return;
   }
-  var dg={};L.forEach(function(j){var c=cur(j);(dg[c.k]=dg[c.k]||[]).push(j)});
-  var dl=Object.keys(dg).map(function(x){return[x,dg[x]]}).sort(function(a,b){return b[1].length-a[1].length});
-  h+='<div class="card"><h3>İşler kimde ('+L.length+')</h3>';
-  if(!dl.length)h+='<div style="font-size:13px;color:#8592A0">Açık iş yok.</div>';
-  dl.forEach(function(x){
-   var gck=x[1].filter(function(j){return as(cur(j))>0}).length;
-   h+='<details class="kisi" style="margin-bottom:8px;background:#fff;border:1px solid #EEF1EF;border-radius:11px;overflow:hidden">'+
-     '<summary style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;font-weight:600;font-size:13.5px">'+
-     '<span>'+ad(x[0])+'</span>'+
-     '<span style="font-size:12px;font-weight:500;color:'+(gck?'#C0392B':'#7A8A83')+'">'+x[1].length+' iş'+(gck?' · '+gck+' geciken':'')+'</span>'+
-     '</summary><div style="padding:2px 12px 8px">';
-   x[1].forEach(function(j){var c=cur(j),a2=as(c);
-    h+='<button data-a="det" data-j="'+j.id+'" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:transparent;border-top:1px solid #F2F4F3;padding:9px 2px;cursor:pointer">'+
-      '<span style="width:8px;height:8px;border-radius:4px;flex:none;background:'+(a2>0?'#C0392B':'#2E7D4B')+'"></span>'+
-      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">'+esc(j.ad)+'</span>'+oncEt(j.oncelik)+
-      '<span style="font-size:11px;color:'+(a2>0?'#C0392B':'#7A8A83')+';white-space:nowrap">'+gec(c)+'/'+c.t+' gün'+(a2>0?' · +'+a2:'')+'</span>'+
-      '</button>';
-   });
-   h+='</div></details>';
-  });
+  var _w={acil:0,yuksek:1,normal:2};
+  L=L.slice().sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});
+  h+='<div class="card"><h3>İşler ('+L.length+')</h3>';
+  if(!L.length)h+='<div style="font-size:13px;color:#8592A0">Açık iş yok.</div>';
+  L.forEach(function(j){var c=cur(j),a2=as(c);
+   var kimde=(j.kabul===false)?'Kabul bekliyor':ad(c.k);
+   var acilis=j.bas?fmt(j.bas):'';
+   h+='<button data-a="det" data-j="'+j.id+'" style="display:block;width:100%;text-align:left;border:0;background:transparent;border-top:1px solid #F2F4F3;padding:11px 2px;cursor:pointer">'+
+     '<div style="display:flex;align-items:center;gap:9px">'+
+       '<span style="width:9px;height:9px;border-radius:5px;flex:none;background:'+(a2>0?'#C0392B':'#2E7D4B')+'"></span>'+
+       '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:13.5px">'+esc(j.ad)+'</span>'+oncEt(j.oncelik)+
+       '<span style="font-size:11px;flex:none;color:'+(a2>0?'#C0392B':'#7A8A83')+';white-space:nowrap">'+gec(c)+'/'+c.t+' gün'+(a2>0?' · +'+a2:'')+'</span>'+
+     '</div>'+
+     '<div style="font-size:11px;color:#8592A0;margin:3px 0 0 18px">'+tad(j.ts_)+' · süreç: '+kimde+' · açılış '+acilis+'</div>'+
+   '</button>';});
   h+='</div>';
   if(V=='bdet'){
    var h7=ago(7);
@@ -1939,9 +1934,15 @@ function ciz(){try{gozBanner()}catch(e){}
   if(!ek.length)h+='<div style="font-size:13px;color:#8592A0;margin-bottom:9px">Henüz ek yok.</div>';
   h+='<div style="height:8px"></div><label class="upl">Excel, PDF veya fotoğraf ekle'+
     '<input type="file" id="fu" data-j="'+j.id+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label></div>';
-  h+='<div class="card"><h3>Geçmiş</h3>';
-  (j.lg||[]).slice().reverse().forEach(function(l){
-   h+='<div class="li"><div class="h"><b>'+esc(l.tip)+'</b><i>'+fmt(l.ts)+'</i></div>'+
+  h+='<div class="card"><h3>Gün gün hareket</h3>';
+  var _lg=(j.lg||[]).slice().sort(function(a,b){return zmn(a.ts)-zmn(b.ts)});
+  if(!_lg.length)h+='<div style="font-size:13px;color:#8592A0">Henüz hareket yok.</div>';
+  var _gun='';
+  _lg.forEach(function(l){
+   var g=gunAd(l.ts);
+   if(g!=_gun){_gun=g;h+='<div style="font-weight:700;font-size:12px;color:#1B5E3F;margin:12px 0 5px;border-bottom:1px solid #EEF1EF;padding-bottom:4px">'+g+'</div>';}
+   var _st=fmt(l.ts).slice(-5);
+   h+='<div class="li"><div class="h"><b>'+esc(l.tip)+'</b><i>'+_st+'</i></div>'+
      '<div class="s">'+ad(l.k)+'</div>'+(l.msg?'<div class="msg">'+esc(l.msg)+'</div>':'')+'</div>';
   });
   h+='</div>';
@@ -2339,7 +2340,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s53-KARTLAR</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s54-LISTE</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
