@@ -1420,7 +1420,8 @@ function bittiBenim(){
    var sa=a.a[a.a.length-1].b||'',sb=b.a[b.a.length-1].b||'';
    return sa<sb?1:-1});
 }
-function bende(){var _r=J.filter(function(j){var c=cur(j);return c&&c.k==ME});var _w={acil:0,yuksek:1,normal:2};return _r.sort(function(a,b){return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])})}
+function bende(){var _r=J.filter(function(j){var c=cur(j);return c&&c.k==ME&&j.kabul!==false});var _w={acil:0,yuksek:1,normal:2};return _r.sort(function(a,b){return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])})}
+function bekleyenAtama(){return J.filter(function(j){var c=cur(j);return c&&c.k==ME&&j.kabul===false})}
 function bek(j){var w=0,b=0;j.a.forEach(function(s){if(!s.g)return;
  var d=s.d=='t'?gn(s.g,s.b):gec(s);w+=Math.min(d,s.t);b+=Math.max(0,d-s.t)});return[w,b]}
 function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return n}
@@ -1607,7 +1608,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s46-ONCELIK</div>'+
+  '<div class="galt">SÜRÜM s48-KABUL</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1664,6 +1665,27 @@ function ciz(){try{gozBanner()}catch(e){}
   if(('Notification' in window)&&Notification.permission!=='granted'){
    h+='<button data-a="bildirimac" style="display:block;width:100%;text-align:left;border:0;background:#FFF8E1;color:#8A6512;border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:13px;cursor:pointer;font-weight:600">\uD83D\uDD14 Bildirimler kapalı \u2014 açmak için dokun</button>';
   }
+  var _atn=bekleyenAtama();
+  if(_atn.length){
+   h+='<div class="card" style="border:2px solid #C0392B;background:#FEF6F5"><h3 style="color:#B2402F">\U0001F4E5 Sana atanan işler — kabul bekliyor ('+_atn.length+')</h3>';
+   _atn.forEach(function(j){
+    h+='<div style="border-top:1px solid #F3D2CD;padding:10px 0">'+
+      '<div style="font-size:13.5px;font-weight:600;margin-bottom:3px">'+esc(j.ad)+oncEt(j.oncelik)+'</div>'+
+      '<div style="font-size:11px;color:#8592A0;margin-bottom:8px">'+ad(j.atayan||'')+' atadı · '+tad(j.ts_)+'</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="b r" data-a="kabul" data-j="'+j.id+'" style="margin:0;flex:1">Kabul et ve başla</button>'+
+        '<button class="b g" data-a="det" data-j="'+j.id+'" style="margin:0">Gör</button>'+
+      '</div></div>';
+   });
+   h+='</div>';
+  }
+  var _acil=bende().filter(function(j){return j.oncelik=='acil'});
+  var _yuk=bende().filter(function(j){return j.oncelik=='yuksek'});
+  if(_acil.length){
+   h+='<button data-a="det" data-j="'+_acil[0].id+'" style="display:block;width:100%;text-align:left;border:0;background:#C0392B;color:#fff;border-radius:12px;padding:13px 15px;margin-bottom:12px;font-size:14px;cursor:pointer;font-weight:700;box-shadow:0 3px 12px rgba(192,57,47,.45)">\uD83D\uDD34 ACİL İŞ: '+esc(_acil[0].ad)+(_acil.length>1?' (+'+(_acil.length-1)+' acil daha)':'')+' — dokun</button>';
+  } else if(_yuk.length){
+   h+='<button data-a="det" data-j="'+_yuk[0].id+'" style="display:block;width:100%;text-align:left;border:0;background:#B9770E;color:#fff;border-radius:12px;padding:12px 15px;margin-bottom:12px;font-size:13.5px;cursor:pointer;font-weight:700">⚠ Öncelikli iş: '+esc(_yuk[0].ad)+(_yuk.length>1?' (+'+(_yuk.length-1)+')':'')+' — dokun</button>';
+  }
   var _GS=genelStat();
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px">'+
     dkart('Aç\u0131k iş',_GS.acik,'#1B5E3F','#E8F3EC')+
@@ -1717,7 +1739,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s46-ONCELIK · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s48-KABUL · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2280,7 +2302,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s46-ONCELIK</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s48-KABUL</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3069,6 +3091,13 @@ document.addEventListener('click',function(e){
    ts_:document.getElementById('ktz').value,ac:ac,dk:dk});
   say('Kaydedildi — '+sa(dk)+' saat');
  }
+ else if(a=='kabul'){
+  var _kj=bul(+t.dataset.j); if(!_kj){return}
+  var _ci=cur(_kj); if(!_ci||_ci.k!=ME){say('Bu iş sana atanmış değil.');return}
+  var _tn=now(); _kj.kabul=true; _kj.bas=_tn; _ci.g=_tn;
+  (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'İşi kabul etti — başladı'});
+  say('İşi kabul ettin — süre başladı');
+ }
  else if(a=='add'){NS.push({a:'',k:ME,t:2,tp:'i'})}
  else if(a=='del'){if(NS.length>1)NS.splice(+t.dataset.i,1);else say('En az bir adım olmalı')}
  else if(a=='new'){
@@ -3087,12 +3116,12 @@ document.addEventListener('click',function(e){
   adm.push({a:'Bölüm onayı',k:cf2.sef,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   var onc=(document.getElementById('jonc')&&document.getElementById('jonc').value)||'normal';
-  J.unshift({id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:ts3,a:adm,oncelik:onc,
+  J.unshift({id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:ts3,a:adm,oncelik:onc,kabul:(anaK==ME),atandi:ts3,atayan:ME,
    lg:[{ts:ts3,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'+(onc!='normal'?' · '+(onc=='acil'?'ACİL':'YÜKSEK')+' öncelik':'')}]});
   ATAMA=false;
   V='ana';say(kisiler.length>1?('İş başlatıldı — '+kisiler.length+' kişiye'):('İş başlatıldı — sorumlu '+ad(anaK)));
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
-  try{var _hd=kisiler.filter(function(x){return x!=ME});if(_hd.length){var _pb=(onc=='acil'?'🔴 ACİL — ':onc=='yuksek'?'⚠ Öncelikli — ':'')+'Sana yeni iş düştü';pushGonder(_hd,_pb,nm);}}catch(e){}
+  try{var _hd=kisiler.filter(function(x){return x!=ME});if(_hd.length){var _pb=(onc=='acil'?'🔴 ACİL — ':onc=='yuksek'?'⚠ Öncelikli — ':'')+'Sana iş atandı — kabul et';pushGonder(_hd,_pb,nm);}}catch(e){}
  }
  else return;
  try{cekmece(false)}catch(e){}
