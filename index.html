@@ -1696,7 +1696,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s60-SIRA</div>'+
+  '<div class="galt">SÜRÜM s61-GUNYAZ</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1835,7 +1835,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s60-SIRA · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s61-GUNYAZ · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2011,7 +2011,10 @@ function ciz(){try{gozBanner()}catch(e){}
     h+='<div class="card"><h3>Gün gün iş dökümü</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
     gunler.forEach(function(d,gi){var kayit=K.filter(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});
      var txt=kayit.map(function(r){var rd=zmn(r.ts);return ii(rd.getHours())+':'+ii(rd.getMinutes())+'-'+(r.bit||'')+' '+esc(r.tip||'')+(r.ac?' — '+esc(r.ac):'')}).join('<br>');
-     h+='<tr><td>'+(gi+1)+'</td><td>'+dtar(d)+'</td><td>'+txt+'</td></tr>';});
+     var iso=d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate());
+     var nt=(j.gunluk&&j.gunluk[iso])?('<div style="color:#12315C;font-weight:600;margin-top:'+(txt?'5px':'0')+'">'+esc(j.gunluk[iso])+'</div>'):'';
+     var bt='<button data-a="gunyaz" data-j="'+j.id+'" data-d="'+iso+'" style="margin-top:6px;border:1px solid #CDD9CF;background:#F4FBF6;color:#2E7D4B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer">\u270E '+((j.gunluk&&j.gunluk[iso])?'Düzenle':'Yaz')+'</button>';
+     h+='<tr><td>'+(gi+1)+'</td><td>'+dtar(d)+'</td><td>'+txt+nt+bt+'</td></tr>';});
     h+='</table></div><div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. İş günleri (hafta sonu hariç) listelenir.</div></div>';
    }})();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
@@ -2420,7 +2423,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s60-SIRA</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s61-GUNYAZ</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3243,6 +3246,15 @@ document.addEventListener('click',function(e){
   var _tn=now(); _kj.kabul=true; _kj.bas=_tn; _ci.g=_tn;
   (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'İşi kabul etti — başladı'});
   say('İşi kabul ettin — süre başladı');
+ }
+ else if(a=='gunyaz'){
+  var _gj=bul(+t.dataset.j); if(!_gj){return}
+  var _d=t.dataset.d;var _mv=(_gj.gunluk&&_gj.gunluk[_d])||'';
+  var _tx=prompt('Bu gün yapılan iş / not ('+_d+'):',_mv);
+  if(_tx===null)return;_tx=_tx.trim();_gj.gunluk=_gj.gunluk||{};
+  if(_tx){_gj.gunluk[_d]=_tx}else{delete _gj.gunluk[_d]}
+  (_gj.lg=_gj.lg||[]).push({ts:now(),k:ME,tip:'Gün notu — '+_d,msg:_tx});
+  say(_tx?'Not kaydedildi':'Not silindi');
  }
  else if(a=='add'){NS.push({a:'',k:ME,t:2,tp:'i'})}
  else if(a=='del'){if(NS.length>1)NS.splice(+t.dataset.i,1);else say('En az bir adım olmalı')}
