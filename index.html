@@ -745,6 +745,7 @@ var P=[
  ['dilvin','Dilvin Eymen Aydın','Doküman Yönetim Uzmanı','DY','c'],
  ['gizem','Gizem Kaya Akın','İş Zekası ve Raporlama Ekip Lideri','VA','l'],
  ['dilek','Dilek Alparslan Güner','İş Zekası ve Raporlama Uzmanı','VA','c']];
+var ATAMADISI=['ozkan','mesut'];  /* iş veren roller — atama/ek kişi listelerinde çıkmaz */
 var FT={
  SI:['Süreç haritalama','Zaman etüdü','Kaizen','SMED','Norm kadro','5S / saha','Raporlama','Toplantı'],
  IK:['Denetim planı','Saha denetimi','Kontrol noktası','Bulgu takibi','Risk analizi','Raporlama','Toplantı'],
@@ -2624,11 +2625,11 @@ function ciz(){try{gozBanner()}catch(e){}
     '<label>Tesis</label><select class="n" id="jt">'+
     T.map(function(x){return '<option value="'+x.id+'">'+x.ad+'</option>'}).join('')+'</select>'+
     '<label>'+(ATAMA?'Kime atanacak':'İşi kim yapacak')+'</label><select class="n" id="jk"'+(atamaYetkisi()?'':' disabled')+'>'+(ATAMA?'<option value="">— Kişi seç —</option>':'')+
-    Object.keys(B).map(function(bk){var g5=P.filter(function(p){return p[3]==bk});
+    Object.keys(B).map(function(bk){var g5=P.filter(function(p){return p[3]==bk&&ATAMADISI.indexOf(p[0])<0});
      return g5.length?'<optgroup label="'+B[bk].ad+'">'+g5.map(function(p){
       return '<option value="'+p[0]+'"'+(p[0]==ME&&!ATAMA?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</optgroup>':''}).join('')+
     '</select>'+
-    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
+    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.filter(function(p){return ATAMADISI.indexOf(p[0])<0}).map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:#F2F4F3;color:#16202B;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
     '<div style="height:14px"></div><button class="b" data-a="new">'+(ATAMA?'İş ata':'İşi başlat')+'</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
