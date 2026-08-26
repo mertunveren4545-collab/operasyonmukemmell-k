@@ -1,16 +1,17 @@
 {
-  "name": "OPM — Operasyonel Mükemmellik",
-  "short_name": "OPM",
-  "description": "İş akışı, çalışma kaydı ve mesajlaşma",
+  "name": "OPEX — Operasyonel Mükemmellik",
+  "short_name": "OPEX",
+  "description": "Keskinoğlu OPEX — süreç ve iş takip sistemi",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0E2647",
+  "background_color": "#0E2A46",
   "theme_color": "#12315C",
   "lang": "tr",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }
