@@ -206,6 +206,19 @@ body.dk .itab .isad{color:#E4E9EE}
 body.dk .itab tr.gecsat td{background:#3A1E1A;box-shadow:inset 3px 0 0 #C0392B}
 body.dk .gtab td:nth-child(1){background:#1B2A22;color:#7FC79B}
 body.dk .gtab td:nth-child(2){color:#E4E9EE}
+.hk{display:none}
+@media(max-width:599px){
+ .hf{display:none}.hk{display:inline}
+ .dtab{font-size:11px;table-layout:fixed}
+ .dtab th{padding:8px 2px;font-size:9px;letter-spacing:0}
+ .dtab td{padding:11px 2px;font-size:15px}
+ .dtab th:first-child,.dtab td.dbol{width:82px;font-size:10.5px;line-height:1.15;word-break:break-word;padding-left:6px}
+ .dtab td.dbol::before{width:5px;height:5px;margin-right:4px}
+ .itab{font-size:11px}
+ .itab th,.itab td{padding:7px 6px}
+ .itab .isad{min-width:120px}
+ .gtab th,.gtab td{padding:7px 7px}
+}
 /* ---- yatay şema ---- */
 .ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:stretch}
 .ogrid>div{display:flex}
@@ -1696,7 +1709,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s61-GUNYAZ</div>'+
+  '<div class="galt">SÜRÜM s62-MOBIL</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1777,7 +1790,7 @@ function ciz(){try{gozBanner()}catch(e){}
   }
   var _GS=genelStat();
   h+='<div class="card" style="padding:10px"><div style="overflow-x:auto"><table class="dtab">'+
-    '<tr><th style="text-align:left">Bölüm</th><th>Toplam</th><th>Tamamlanan</th><th>Devam</th><th>Onayda</th><th>Geciken</th></tr>';
+    '<tr><th style="text-align:left">Bölüm</th><th>Toplam</th><th><span class="hf">Tamamlanan</span><span class="hk">Tamam</span></th><th>Devam</th><th>Onayda</th><th><span class="hf">Geciken</span><span class="hk">Gec.</span></th></tr>';
   bolumListesi().forEach(function(k){var v=bolStat(k);var dv=v.acik-v.onay;
    h+='<tr>'+
      '<td class="dbol" data-a="bdet" data-b="'+k+'">'+B[k].ad+'</td>'+
@@ -1835,7 +1848,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s61-GUNYAZ · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s62-MOBIL · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -1863,7 +1876,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '<span>'+kis.length+' personel · '+L.length+' açık iş · onay: '+ks(B[OB].sef)+'</span>'+
      '<div class="araclar">'+(ARAC[OB]||[]).map(function(x){return '<i>'+x+'</i>'}).join('')+'</div></div>';
    h+='<div class="card" style="padding:10px"><div style="overflow-x:auto"><table class="dtab">'+
-     '<tr><th style="text-align:left">Kişi</th><th>Toplam</th><th>Tamamlanan</th><th>Devam</th><th>Onayda</th><th>Geciken</th></tr>';
+     '<tr><th style="text-align:left">Kişi</th><th>Toplam</th><th><span class="hf">Tamamlanan</span><span class="hk">Tamam</span></th><th>Devam</th><th>Onayda</th><th><span class="hf">Geciken</span><span class="hk">Gec.</span></th></tr>';
    var _kisi=siralaP(P.filter(function(p){return p[3]==OB})),_tt={toplam:0,tamam:0,devam:0,onay:0,gec:0};
    _kisi.forEach(function(pp){var v=kisiStat(OB,pp[0]);_tt.toplam+=v.toplam;_tt.tamam+=v.tamam;_tt.devam+=v.devam;_tt.onay+=v.onay;_tt.gec+=v.gec;
     h+='<tr>'+
@@ -2423,7 +2436,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s61-GUNYAZ</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s62-MOBIL</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
