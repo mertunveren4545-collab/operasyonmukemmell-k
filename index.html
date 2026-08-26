@@ -206,6 +206,8 @@ body.dk .itab .isad{color:#E4E9EE}
 body.dk .itab tr.gecsat td{background:#3A1E1A;box-shadow:inset 3px 0 0 #C0392B}
 body.dk .gtab td:nth-child(1){background:#1B2A22;color:#7FC79B}
 body.dk .gtab td:nth-child(2){color:#E4E9EE}
+.extgun td{background:#FDEEEC!important}
+body.dk .extgun td{background:#3A1E1A!important}
 .hk{display:none}
 @media(max-width:599px){
  .hf{display:none}.hk{display:inline}
@@ -1710,7 +1712,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s64-UZAMA</div>'+
+  '<div class="galt">SÜRÜM s65-EKTERM</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1849,7 +1851,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s64-UZAMA · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s65-EKTERM · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2031,8 +2033,9 @@ function ciz(){try{gozBanner()}catch(e){}
      var iso=d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate());
      var nt=(j.gunluk&&j.gunluk[iso])?('<div style="color:#12315C;font-weight:600;margin-top:'+(txt?'5px':'0')+'">'+esc(j.gunluk[iso])+'</div>'):'';
      var bt='<button data-a="gunyaz" data-j="'+j.id+'" data-d="'+iso+'" style="margin-top:6px;border:1px solid #CDD9CF;background:#F4FBF6;color:#2E7D4B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer">\u270E '+((j.gunluk&&j.gunluk[iso])?'Düzenle':'Yaz')+'</button>';
-     h+='<tr><td>'+(gi+1)+'</td><td>'+dtar(d)+'</td><td>'+txt+nt+bt+'</td></tr>';});
-    h+='</table></div><div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. İş günleri (hafta sonu hariç) listelenir.</div></div>';
+     var _ext=task&&(gi>=(task.t-(j.ekgun||0)));
+     h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+bt+'</td></tr>';});
+    h+='</table></div><button data-a="ekterm" data-j="'+j.id+'" class="b g" style="margin-top:10px;width:auto;padding:8px 14px;font-size:12px">＋ Ek termin talebi</button><div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (araya iş girmesi / ek termin talebi). İş günleri (hafta sonu hariç) listelenir.</div></div>';
    }})();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
   var _lg=(j.lg||[]).slice().sort(function(a,b){return zmn(a.ts)-zmn(b.ts)});
@@ -2440,7 +2443,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s64-UZAMA</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s65-EKTERM</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3287,6 +3290,17 @@ document.addEventListener('click',function(e){
   var _u=URL.createObjectURL(_bl);var _w=window.open(_u,'_blank');
   if(!_w){var _a=document.createElement('a');_a.href=_u;_a.download=_x.ad;document.body.appendChild(_a);_a.click();_a.remove();}
   setTimeout(function(){URL.revokeObjectURL(_u)},60000);return;
+ }
+ else if(a=='ekterm'){
+  var _ej=bul(+t.dataset.j); if(!_ej){return}
+  var _g=prompt('Kaç iş günü eklensin?','1'); if(_g===null)return;
+  _g=parseFloat(String(_g).replace(',','.')); if(!(_g>0)){say('Geçerli bir gün gir.');return}
+  var _nd=prompt('Ek termin nedeni:',''); if(_nd===null)return;
+  var _tk=null;(_ej.a||[]).forEach(function(x){if(stip(x)=='i'&&!_tk)_tk=x}); if(!_tk){say('İş adımı yok');return}
+  _tk.t=Math.round((_tk.t+_g)*100)/100; _ej.ekgun=Math.round(((_ej.ekgun||0)+_g)*100)/100;
+  _ej.uzama=_ej.uzama||[];_ej.uzama.push({ts:now(),gun:_g,neden:'Ek termin talebi'+(_nd?' — '+_nd:''),kim:ME});
+  (_ej.lg=_ej.lg||[]).push({ts:now(),k:ME,tip:'Ek termin +'+_g+' gün',msg:_nd});
+  say('Termin +'+_g+' gün uzatıldı');
  }
  else if(a=='gunyaz'){
   var _gj=bul(+t.dataset.j); if(!_gj){return}
