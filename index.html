@@ -1064,16 +1064,18 @@ function gosterBildirim(baslik,ayar){
 }
 var VAPID_PUB='BEKEZnaDhk-HkQ72EnGP3eKsJP-ORjebmB0P91LfStP4-seykVa1kPi2QF72aW2qNesqOd8sh2PlBHDQvqw7aIM';
 function _b64u(b){var pad='='.repeat((4-b.length%4)%4);var x=(b+pad).replace(/-/g,'+').replace(/_/g,'/');var raw=atob(x),arr=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);return arr}
-async function pushAbone(){
+async function pushAbone(sesli){
  try{
-  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  if(!dbClient||!ME)return;
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){if(sesli)say('Bu cihaz push desteklemiyor.');return}
+  if(!('Notification' in window)||Notification.permission!=='granted'){if(sesli)say('Önce bildirim izni gerekli.');return}
+  if(!dbClient||!ME){if(sesli)say('Bağlantı/oturum yok.');return}
   var reg=await navigator.serviceWorker.ready;
   var sub=await reg.pushManager.getSubscription();
   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_b64u(VAPID_PUB)});
-  if(sub){await dbClient.from('push_subs').upsert({endpoint:sub.endpoint,kullanici:ME,sub:sub.toJSON(),guncelleme:new Date().toISOString()});}
- }catch(e){console.log('pushAbone hata:',e.message||e)}
+  if(sub){var r=await dbClient.from('push_subs').upsert({endpoint:sub.endpoint,kullanici:ME,sub:sub.toJSON(),guncelleme:new Date().toISOString()});
+   if(r&&r.error){if(sesli)say('Abonelik kaydedilemedi: '+r.error.message)}else{if(sesli)say('Bu cihaz bildirime abone oldu \u2713')}}
+  else{if(sesli)say('Abonelik oluşturulamadı.')}
+ }catch(e){if(sesli)say('Abone olunamadı: '+(e.message||e))}
 }
 async function pushGonder(hedefler,baslik,govde){
  try{
@@ -1174,12 +1176,12 @@ function bildirimIzni(){
 }
 function bildirimAc(){
  if(!('Notification' in window)){say('Bu cihaz/tarayıcı bildirim desteklemiyor.');return}
- if(Notification.permission==='granted'){say('Bildirimler zaten açık \u2713');try{bip()}catch(e){}gosterBildirim('OPEX',{body:'Bildirimler zaten açık \u2713',icon:'icon-192.png'});return}
+ if(Notification.permission==='granted'){say('Bildirimler zaten açık \u2713');try{bip()}catch(e){}gosterBildirim('OPEX',{body:'Bildirimler zaten açık \u2713',icon:'icon-192.png'});pushAbone(true);return}
  if(Notification.permission==='denied'){say('Bildirim izni daha önce engellenmiş. Tarayıcı adres çubuğundaki kilit/ayar simgesinden bu siteye bildirim izni ver.');return}
  Notification.requestPermission().then(function(pp){
   if(pp==='granted'){say('Bildirimler açıldı \u2713');try{bip()}catch(e){}
    gosterBildirim('OPEX',{body:'Bildirimler artık açık.',icon:'icon-192.png'});
-   pushAbone();
+   pushAbone(true);
    ciz();
   }else say('Bildirim izni verilmedi.');
  }).catch(function(){});
@@ -1712,7 +1714,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s65-EKTERM</div>'+
+  '<div class="galt">SÜRÜM s66-PUSHTEST</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1851,7 +1853,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s65-EKTERM · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s66-PUSHTEST · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2443,7 +2445,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s65-EKTERM</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s66-PUSHTEST</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
