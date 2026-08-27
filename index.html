@@ -1666,7 +1666,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s75-SIFIR</div>'+
+  '<div class="galt">SÜRÜM s76-RESET</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1806,7 +1806,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s75-SIFIR · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s76-RESET · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2207,6 +2207,10 @@ function ciz(){try{gozBanner()}catch(e){}
      '<div class="cizgi"><i style="width:70%"></i></div></div>'+
    '</div>';
 
+  if(sistemci()&&K.length)h+='<div class="card tehlike"><h3>⚠ Yönetici — veri sıfırlama</h3>'+
+    '<div class="td">Tüm çalışma kayıtlarını ('+K.length+' kayıt · '+sa(dkT)+' saat) kalıcı siler. Örnek/demo veriyi temizlemek için kullan.</div>'+
+    '<button class="b r" data-a="kayitsil">Tüm çalışma kayıtlarını sil</button></div>';
+
   h+='<div class="card"><div class="dbaslik"><em>🍩</em><b>Süre nereye gidiyor</b>'+
     '<span>'+((''+(Math.round((rw+tb)*10)/10)).replace('.',','))+' gün toplam</span></div>'+donut(rw,tb)+
     '<div class="lg2"><span><i style="background:#2E7D4B"></i>Çalışılan '+((''+rw).replace('.',','))+' gün (kayıt)</span>'+
@@ -2399,7 +2403,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s75-SIFIR</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s76-RESET</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3185,6 +3189,19 @@ document.addEventListener('click',function(e){
   c2.d='b';c2.g=0;p2.d='a';p2.b=0;p2.g=ts2;j2.lg=j2.lg||[];
   j2.lg.push({ts:ts2,k:ME,hedef:p2.k,tip:'Geri gönderdi → '+ad(p2.k),msg:m});
   say('Geri gönderildi → '+ad(p2.k));V='ana';RED=0;
+ }
+ else if(a=='kayitsil'){
+  if(!sistemci()){say('Bu işlem için yetkin yok.');return}
+  if(!confirm('TÜM çalışma kayıtları silinecek ('+K.length+' kayıt). Bu geri alınamaz. Emin misin?'))return;
+  if(dbClient){
+   say('Siliniyor…');
+   dbClient.from('kayitlar').delete().neq('id','___yok___').select().then(function(r){
+    if(r&&r.error){say('❌ Silinemedi (RLS): '+r.error.message+' — kayitlar tablosuna DELETE izni gerek.');return}
+    var _n=(r&&r.data)?r.data.length:0;
+    if(!_n&&K.length){say('⚠ Veritabanı silmedi — kayitlar tablosunda DELETE izni (RLS) yok. SQL politikası gerekli.');return}
+    K=[];V='ana';say('✓ '+_n+' çalışma kaydı silindi');ciz();
+   },function(){say('Silme sırasında bağlantı hatası.')});
+  }else{K=[];say('Kayıtlar temizlendi');ciz();}
  }
  else if(a=='issil'){
   if(!sistemci()){say('Bu işlem için yetkin yok.');return}
