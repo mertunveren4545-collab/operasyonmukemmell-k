@@ -825,6 +825,8 @@ var FT={
  PY:['Proje planlama','İlerleme takibi','Paydaş görüşmesi','Performans raporu','Toplantı']};
 var AY=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 
+function ozelFaal(){try{return JSON.parse(localStorage.getItem('opmuk_faal_'+ME)||'[]')}catch(e){return[]}}
+function ozelFaalYaz(a){try{localStorage.setItem('opmuk_faal_'+ME,JSON.stringify(a))}catch(e){}}
 function pn(i){for(var x=0;x<P.length;x++)if(P[x][0]==i)return P[x];return P[2]}
 function ad(i){return pn(i)[1]}
 var RENKLER=['#1E4A85','#2E7D4B','#8E3247','#5B4B8A','#0E7C86','#B07C16','#3F6D2A','#8E2F21','#2B6CB0','#7A4E9C'];
@@ -1718,7 +1720,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s72-ARSIV</div>'+
+  '<div class="galt">SÜRÜM s73-FAAL</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1858,7 +1860,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s72-ARSIV · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s73-FAAL · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2450,7 +2452,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s72-ARSIV</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s73-FAAL</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2725,7 +2727,7 @@ function ciz(){try{gozBanner()}catch(e){}
     'Yapabileceğin şey sıfırlamaktır: Supabase → Authentication → Users → kişi → şifresini 123456 yap.</div>';
  }
  else if(V=='kayit'){
-  var mb=pn(ME)[3]||'SI',ls=FT[mb];
+  var mb=pn(ME)[3]||'SI',_oz=ozelFaal(),ls=(FT[mb]||[]).concat(_oz).filter(function(x,i,a){return a.indexOf(x)==i});
   var bugun=new Date().toISOString().slice(0,10);
   h='<div class="card"><label>Tarih</label><input type="date" id="kg" value="'+bugun+'">'+
     '<div class="two" style="gap:8px"><div style="flex:1"><label>Başlangıç</label>'+
@@ -2734,7 +2736,8 @@ function ciz(){try{gozBanner()}catch(e){}
     '<label>Tesis</label><select class="n" id="ktz">'+
     T.map(function(x){return '<option value="'+x.id+'">'+x.ad+'</option>'}).join('')+'</select>'+
     '<label>Faaliyet</label><select class="n" id="kt">'+
-    ls.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select>'+
+    ls.map(function(x){return '<option>'+esc(x)+'</option>'}).join('')+'</select>'+
+    '<div style="display:flex;gap:6px;margin:4px 0 10px"><button class="b g" data-a="faalekle" style="margin:0;flex:1;padding:7px;font-size:12px">＋ Faaliyet ekle</button>'+(_oz.length?'<button class="b g" data-a="faalsil" style="margin:0;flex:1;padding:7px;font-size:12px">－ Özel faaliyet kaldır</button>':'')+'</div>'+
     '<label>Bu çalışma hangi işin sürecini uzattı? (o işe ek termin eklenir)</label><select class="n" id="kis_is">'+
     '<option value="">— Genel / hepsini geciktirdi (tüm açık işlere eklenir)</option>'+
     bende().filter(function(j){var c=cur(j);return c&&stip(c)=='i'}).map(function(j){return '<option value="'+j.id+'">'+esc(j.ad)+'</option>'}).join('')+'</select>'+
@@ -3245,6 +3248,20 @@ document.addEventListener('click',function(e){
   try{if(typeof _isHash!=='undefined')delete _isHash[_js.id]}catch(e){}
   V='ana';RED=0;say('İş silindi: '+_js.ad);
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,80);
+ }
+ else if(a=='faalekle'){
+  var _nf=prompt('Yeni faaliyet adı:',''); if(_nf===null)return; _nf=_nf.trim();
+  if(_nf.length<2){say('Geçerli bir ad gir.');return}
+  var _mb2=pn(ME)[3]||'SI',_l=ozelFaal();
+  if((FT[_mb2]||[]).indexOf(_nf)>=0||_l.indexOf(_nf)>=0){say('Bu faaliyet zaten var.');return}
+  _l.push(_nf);ozelFaalYaz(_l);say('Faaliyet eklendi: '+_nf);
+ }
+ else if(a=='faalsil'){
+  var _l=ozelFaal(); if(!_l.length){say('Özel faaliyet yok.');return}
+  var _s=prompt('Kaldırılacak faaliyeti tam yaz:\n\n'+_l.join('\n'),''); if(_s===null)return; _s=_s.trim();
+  var _ix=_l.indexOf(_s);
+  if(_ix<0){say('Listede yok: '+_s);return}
+  _l.splice(_ix,1);ozelFaalYaz(_l);say('Kaldırıldı: '+_s);
  }
  else if(a=='pnew'){
   var na=document.getElementById('pa').value.trim(),nu=document.getElementById('pu').value.trim(),
