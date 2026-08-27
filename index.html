@@ -1718,7 +1718,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s70-TARIH</div>'+
+  '<div class="galt">SÜRÜM s71-SIL</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1858,7 +1858,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s70-TARIH · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s71-SIL · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2450,7 +2450,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s70-TARIH</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s71-SIL</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3240,15 +3240,19 @@ document.addEventListener('click',function(e){
   if(!sistemci()){say('Bu işlem için yetkin yok.');return}
   var _js=bul(+t.dataset.j); if(!_js)return;
   if(!confirm('"'+_js.ad+'" işini KALICI olarak silmek istiyor musun?\n\nBu geri alınamaz.'))return;
-  var _sid=_js.id;
+  var _sid=_js.id, _snm=_js.ad;
+  function _yerelSil(){try{if(typeof _isHash!=='undefined')delete _isHash[_sid]}catch(e){}
+   J=J.filter(function(x){return x.id!=_sid});V='ana';RED=0;ciz();}
   if(dbClient){
-   dbClient.from('isler').delete().eq('id',String(_sid)).then(function(r){
-    if(r&&r.error)say('Silinemedi (yetki/RLS): '+r.error.message);
+   say('Siliniyor…');
+   dbClient.from('isler').delete().eq('id',String(_sid)).select().then(function(r){
+    if(r&&r.error){say('❌ Silinemedi (yetki/RLS): '+r.error.message);return}
+    if(!r||!r.data||!r.data.length){
+     say('⚠ Veritabanı satırı silinmedi — isler tablosunda DELETE izni (RLS) yok. Bu yüzden açılışta geri geliyor. Supabase\u2019de silme politikası eklenmeli.');
+     return;}
+    _yerelSil();say('✓ Kalıcı silindi: '+_snm);
    },function(){say('Silme sırasında bağlantı hatası.')});
-  }
-  try{if(typeof _isHash!=='undefined')delete _isHash[_sid]}catch(e){}
-  J=J.filter(function(x){return x.id!=_sid});
-  say('İş silindi: '+_js.ad);V='ana';RED=0;
+  }else{_yerelSil();say('İş silindi: '+_snm);}
  }
  else if(a=='pnew'){
   var na=document.getElementById('pa').value.trim(),nu=document.getElementById('pu').value.trim(),
