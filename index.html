@@ -665,7 +665,7 @@ body.dk .disli{opacity:.22}
  .dekor.sag{right:-72px;top:78px;width:170px;height:370px}
 }
 main{position:relative;z-index:1}
-header{position:relative;z-index:3}
+header{position:sticky;top:0;z-index:20}
 /* --- üst bilgi akışı --- */
 .serit{background:#0B2140;color:#DDE7F2;overflow:hidden;position:relative;
  border-bottom:1px solid rgba(255,255,255,.10)}
@@ -1422,6 +1422,12 @@ function anlikBildirimKur(){
   }catch(e){}
 }
 var ME='mert',V='ana',OB='SI',OJ=0,NS=null,RED=0,ED=0,YP={ad:'',unvan:'',br:'SI',rol:'c'};var ATAMA=false;
+/* ---- GERİ GEÇMİŞİ ---- tek adım geri için basit yığın.
+   det (iş detayı) gibi alt sayfaya girerken navDurum() yığına eklenir,
+   "‹ Geri" (data-a="geri") en son durumu geri yükler; yığın boşsa ana ekran. */
+var GECMIS=[];
+function navDurum(){return {V:V,OJ:OJ,OB:OB,FILT:FILT,GFILT:GFILT,GBOL:GBOL,GKIS:GKIS};}
+function navYukle(s){V=s.V;OJ=s.OJ;OB=s.OB;FILT=s.FILT;GFILT=s.GFILT;GBOL=s.GBOL;GKIS=s.GKIS;}
 
 /* ---------- HESAP ---------- */
 function stip(x){return x.tp||(x.o?'o':'i')}
@@ -1678,7 +1684,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s80-TABLO</div>'+
+  '<div class="galt">SÜRÜM s81-GERINAV</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1706,7 +1712,7 @@ function ciz(){try{gozBanner()}catch(e){}
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:(FILT=='bit'?'Tamamlanan işlerim':'Bende bekleyenler'),
    akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik'};
  t.innerHTML='<button class="mnb" data-a="cekmeceac">☰</button>'+
-   (V=='ana'?'':'<button class="bk" data-a="ana">‹ Geri</button>')+
+   (V=='ana'?'':'<button class="bk" data-a="geri">‹ Geri</button>')+
    (V=='ana'
      ?'<div class="tt marka"><span class="mrk"><i></i><i></i><i></i></span>'+
        '<span><b style="display:block;line-height:1.05">OPEX</b>'+
@@ -1818,7 +1824,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s80-TABLO · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s81-GERINAV · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2416,7 +2422,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s80-TABLO</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s81-GERINAV</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3079,14 +3085,15 @@ document.addEventListener('click',function(e){
  if(a=='cekmecekapat'){cekmece(false);return}
  if(a=='ayarlar'){V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
  if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';temaUygula();ciz();return}
- if(a=='ana'){V='ana';RED=0;ED=0}
+ if(a=='ana'){V='ana';RED=0;ED=0;GECMIS=[];}
+ else if(a=='geri'){if(GECMIS.length){navYukle(GECMIS.pop());RED=0;ED=0;}else{V='ana';RED=0;ED=0;}}
  else if(a=='bdet'){V='bdet';OB=t.dataset.b}
  else if(a=='genfilt'){GFILT=t.dataset.f;GBOL='';GKIS='';V='genliste'}
  else if(a=='genfilt2'){GFILT=t.dataset.f;GBOL=t.dataset.b||'';GKIS='';V='genliste'}
  else if(a=='genfilt3'){GFILT=t.dataset.f;GBOL=t.dataset.b||'';GKIS=t.dataset.k||'';V='genliste'}
  else if(a=='bende'){V='bende';FILT=''}
  else if(a=='liste'&&t.dataset.f=='bit'){V='bende';FILT='bit'}
- else if(a=='det'){V='det';OJ=+t.dataset.j;RED=0}
+ else if(a=='det'){GECMIS.push(navDurum());V='det';OJ=+t.dataset.j;RED=0}
  else if(a=='org'){V='org'}
  else if(a=='ekle'){V='ekle';YP={ad:'',unvan:'',br:t.dataset.b||'SI',rol:'c'}}
  else if(a=='zoom'){ZOOM=!ZOOM}
