@@ -1684,7 +1684,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s83-COKKULLANICI</div>'+
+  '<div class="galt">SÜRÜM s84-SIFREFIX</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1824,7 +1824,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s83-COKKULLANICI · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s84-SIFREFIX · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2422,7 +2422,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s83-COKKULLANICI</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s84-SIFREFIX</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2999,7 +2999,11 @@ document.addEventListener('click',function(e){
   t.textContent='Sıfırlanıyor…';t.disabled=true;
   dbClient.functions.invoke('sifre-sifirla',{body:{kisi:uk}}).then(function(r){
     var hata=(r&&r.error)||(r&&r.data&&r.data.error);
-    if(hata){say('Sıfırlama başarısız: '+(hata.message||hata));ciz();return}
+    if(hata){var hm=hata.message||String(hata);
+      if(/Edge Function|Failed to send|fetch|not found|404|NetworkError/i.test(hm))
+        say('Otomatik sıfırlama fonksiyonu (sifre-sifirla) kurulu değil. Yukarıdaki adımla Supabase panelinden şifreyi 123456 yap, sonra "Elle yaptım, kapat".');
+      else say('Sıfırlama başarısız: '+hm);
+      ciz();return;}
     TALEPLER=TALEPLER.filter(function(x){return x.id!=tid});
     if(dbClient)dbClient.from('sifre_talep').update({durum:'t'}).eq('id',tid).then(function(){},function(){});
     say(ad(uk)+' şifresi 123456 yapıldı. Kişi bununla girip kendi şifresini belirleyecek.');ciz();
