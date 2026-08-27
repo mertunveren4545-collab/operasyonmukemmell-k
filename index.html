@@ -1387,6 +1387,20 @@ function nabiz(){
  dbClient.from('kullanici_durum').upsert({id:ME,ad:ad(ME),bolum:pn(ME)[3]||'',
    son_gorulme:new Date().toISOString()}).then(function(){},function(){});
 }
+/* Edge Function'a doğrudan çağrı → gerçek HTTP durumunu (404/401/500/CORS) öğrenmek için. */
+async function sifreTani(uk){
+ try{
+  var tok=SUPABASE_KEY;
+  try{var s=await dbClient.auth.getSession();if(s&&s.data&&s.data.session&&s.data.session.access_token)tok=s.data.session.access_token;}catch(e){}
+  var res=await fetch(SUPABASE_URL+'/functions/v1/sifre-sifirla',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+tok},
+    body:JSON.stringify({kisi:uk})
+  });
+  var metin='';try{metin=await res.text()}catch(e){}
+  return {ok:res.ok,status:res.status,metin:metin};
+ }catch(e){return {ok:false,status:0,metin:String((e&&e.message)||e)};}
+}
 var _rtT=null;
 function rtTetik(){clearTimeout(_rtT);_rtT=setTimeout(function(){try{isKontrol()}catch(e){}},700)}
 function anlikBildirimKur(){
@@ -1684,7 +1698,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s84-SIFREFIX</div>'+
+  '<div class="galt">SÜRÜM s85-SIFRETANI</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1824,7 +1838,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s84-SIFREFIX · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s85-SIFRETANI · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2422,7 +2436,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s84-SIFREFIX</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s85-SIFRETANI</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2997,17 +3011,28 @@ document.addEventListener('click',function(e){
   var tid=t.dataset.i, uk=t.dataset.k;
   if(!dbClient){say('Supabase bağlı değil.');return}
   t.textContent='Sıfırlanıyor…';t.disabled=true;
-  dbClient.functions.invoke('sifre-sifirla',{body:{kisi:uk}}).then(function(r){
+  (async function(){
+   function tamamla(){TALEPLER=TALEPLER.filter(function(x){return x.id!=tid});
+     if(dbClient)dbClient.from('sifre_talep').update({durum:'t'}).eq('id',tid).then(function(){},function(){});
+     say(ad(uk)+' şifresi 123456 yapıldı. Kişi bununla girip kendi şifresini belirleyecek.');ciz();}
+   try{
+    var r=await dbClient.functions.invoke('sifre-sifirla',{body:{kisi:uk}});
     var hata=(r&&r.error)||(r&&r.data&&r.data.error);
-    if(hata){var hm=hata.message||String(hata);
-      if(/Edge Function|Failed to send|fetch|not found|404|NetworkError/i.test(hm))
-        say('Otomatik sıfırlama fonksiyonu (sifre-sifirla) kurulu değil. Yukarıdaki adımla Supabase panelinden şifreyi 123456 yap, sonra "Elle yaptım, kapat".');
-      else say('Sıfırlama başarısız: '+hm);
-      ciz();return;}
-    TALEPLER=TALEPLER.filter(function(x){return x.id!=tid});
-    if(dbClient)dbClient.from('sifre_talep').update({durum:'t'}).eq('id',tid).then(function(){},function(){});
-    say(ad(uk)+' şifresi 123456 yapıldı. Kişi bununla girip kendi şifresini belirleyecek.');ciz();
-  }).catch(function(e){say('Hata: '+(e.message||e));ciz()});
+    if(!hata){tamamla();return;}
+    console.log('SIFIRLA invoke hatası:',hata);
+    /* invoke opak "Failed to send" verdi → gerçek HTTP durumunu doğrudan çağırıp öğren.
+       Bu çağrı başarılıysa şifre zaten sıfırlanmıştır (yedek yol). */
+    var tani=await sifreTani(uk);
+    console.log('SIFIRLA teşhis:',tani);
+    if(tani.ok){tamamla();return;}
+    if(tani.status===404) say('Fonksiyon bulunamadı (404). Listede adı tam "sifre-sifirla" mı? Değilse o adla deploy et.');
+    else if(tani.status===401||tani.status===403) say('Yetki hatası ('+tani.status+'). Fonksiyon ayarlarında "Verify JWT"yi KAPAT, ya da çıkıp tekrar gir.');
+    else if(tani.status===0) say('Fonksiyona ulaşılamadı (CORS/ağ). Kodun tamamını (OPTIONS + CORS başlıkları dahil) yapıştırdığından emin ol.');
+    else if(tani.status>=500) say('Fonksiyon hata verdi ('+tani.status+'): '+(tani.metin||'').slice(0,140));
+    else say('Sıfırlama başarısız — durum '+tani.status+' '+(tani.metin||'').slice(0,120));
+    ciz();
+   }catch(e){console.log('SIFIRLA catch:',e);say('Hata: '+(e.message||e));ciz();}
+  })();
   return;
  }
  if(a=='talepkapat'){
