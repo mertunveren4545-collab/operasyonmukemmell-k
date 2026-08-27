@@ -1080,8 +1080,10 @@ async function pushAbone(sesli){
 async function pushGonder(hedefler,baslik,govde){
  try{
   if(!dbClient||!hedefler||!hedefler.length)return;
-  await dbClient.functions.invoke('push-gonder',{body:{hedef:hedefler,baslik:baslik,govde:govde}});
- }catch(e){console.log('pushGonder hata:',e.message||e)}
+  var r=await dbClient.functions.invoke('push-gonder',{body:{hedef:hedefler,baslik:baslik,govde:govde}});
+  if(r&&r.error){console.log('Push hatası:',r.error.message||r.error)}
+  else if(r&&r.data&&r.data.fail){console.log('Push: '+r.data.fail+' cihaza ulaşmadı')}
+ }catch(e){say('Push çağrılamadı: '+(e.message||e))}
 }
 function gunlukHatirlat(){
  try{
@@ -1714,7 +1716,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s66-PUSHTEST</div>'+
+  '<div class="galt">SÜRÜM s69-TERMIN</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1779,8 +1781,9 @@ function ciz(){try{gozBanner()}catch(e){}
     h+='<div class="arow">'+
       '<div class="an">'+esc(j.ad)+oncEt(j.oncelik)+'</div>'+
       '<div class="am">'+ad(j.atayan||'')+' atadı · '+tad(j.ts_)+'</div>'+
-      '<div style="display:flex;gap:8px">'+
-        '<button class="b r" data-a="kabul" data-j="'+j.id+'" style="margin:0;flex:1">Kabul et ve başla</button>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="b r" data-a="kabulonc" data-j="'+j.id+'" style="margin:0;flex:1 1 100%">Öncelikli — şimdi başla</button>'+
+        '<button class="b" data-a="kabulsira" data-j="'+j.id+'" style="margin:0;flex:1">Sıraya al</button>'+
         '<button class="b g" data-a="det" data-j="'+j.id+'" style="margin:0">Gör</button>'+
       '</div></div>';
    });
@@ -1853,7 +1856,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s66-PUSHTEST · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s69-TERMIN · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2445,7 +2448,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s66-PUSHTEST</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s69-TERMIN</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2730,8 +2733,8 @@ function ciz(){try{gozBanner()}catch(e){}
     T.map(function(x){return '<option value="'+x.id+'">'+x.ad+'</option>'}).join('')+'</select>'+
     '<label>Faaliyet</label><select class="n" id="kt">'+
     ls.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select>'+
-    '<label>Bu çalışma hangi iş için?</label><select class="n" id="kis_is">'+
-    '<option value="">— Genel / başka iş (elimdeki işleri geciktirdi)</option>'+
+    '<label>Bu çalışma hangi işin sürecini uzattı? (o işe ek termin eklenir)</label><select class="n" id="kis_is">'+
+    '<option value="">— Genel / hepsini geciktirdi (tüm açık işlere eklenir)</option>'+
     bende().filter(function(j){var c=cur(j);return c&&stip(c)=='i'}).map(function(j){return '<option value="'+j.id+'">'+esc(j.ad)+'</option>'}).join('')+'</select>'+
     '<label>Ne yaptın</label><textarea id="ka" placeholder="Kısaca yaz."></textarea>'+
     '<div style="height:12px"></div><button class="b" data-a="knew">Kaydet</button>'+
@@ -3265,25 +3268,63 @@ document.addEventListener('click',function(e){
    ts_:document.getElementById('ktz').value,ac:ac,dk:dk});
   var _hi=document.getElementById('kis_is')?document.getElementById('kis_is').value:'';
   var _gun=Math.round(dk/480*100)/100;
-  var _neden=document.getElementById('kt').value+(ac?' — '+ac:'');
+  var _fa=document.getElementById('kt').value;
+  var _neden='⏱ '+_fa+(ac?' — '+ac:'');
   var _uz=[];
   bende().forEach(function(j){var c=cur(j);if(!c||stip(c)!='i')return;
-   if(_hi&&String(j.id)==String(_hi))return;
+   /* seçili iş varsa SADECE onu uzat; boşsa (genel) hepsini uzat */
+   if(_hi){if(String(j.id)!=String(_hi))return;}
    var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
    task.t=Math.round((task.t+_gun)*100)/100;
    j.ekgun=Math.round(((j.ekgun||0)+_gun)*100)/100;
    j.uzama=j.uzama||[];j.uzama.push({ts:now(),dk:dk,gun:_gun,neden:_neden,kim:ME});
    (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin +'+_gun+' gün uzadı',msg:_neden});
    _uz.push(j.ad);});
-  if(_uz.length)say('Kaydedildi — '+_uz.length+' işin termini +'+_gun+' gün uzadı');
+  if(_uz.length&&_hi)say('Kaydedildi — "'+_uz[0].slice(0,26)+'" işine +'+_gun+' gün ek termin');
+  else if(_uz.length)say('Kaydedildi — '+_uz.length+' açık işe +'+_gun+' gün ek termin');
   else say('Kaydedildi — '+sa(dk)+' saat');
  }
- else if(a=='kabul'){
+ else if(a=='kabulonc'){
+  /* Öncelikli kabul: işi hemen başlat, süresi kadar diğer açık işlere ek termin ekle */
   var _kj=bul(+t.dataset.j); if(!_kj){return}
   var _ci=cur(_kj); if(!_ci||_ci.k!=ME){say('Bu iş sana atanmış değil.');return}
   var _tn=now(); _kj.kabul=true; _kj.bas=_tn; _ci.g=_tn;
-  (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'İşi kabul etti — başladı'});
-  say('İşi kabul ettin — süre başladı');
+  if(_kj.oncelik!='acil')_kj.oncelik='yuksek';
+  (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Öncelikli kabul — hemen başladı'});
+  var _yd=Math.round((_ci.t||1)*100)/100,_uz=[];
+  bende().forEach(function(j){if(j.id==_kj.id)return;var c=cur(j);if(!c||stip(c)!='i')return;
+   var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
+   task.t=Math.round((task.t+_yd)*100)/100;
+   j.ekgun=Math.round(((j.ekgun||0)+_yd)*100)/100;
+   j.uzama=j.uzama||[];j.uzama.push({ts:now(),gun:_yd,neden:'⏱ Öncelikli iş araya girdi — '+_kj.ad,kim:ME});
+   (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin +'+_yd+' gün',msg:'Öncelikli iş: '+_kj.ad});
+   _uz.push(j.ad);});
+  try{if(_uz.length)pushGonder([ME],'Öncelikli iş başladı',_uz.length+' işin termini +'+_yd+' gün ötelendi');}catch(e){}
+  say('Öncelikli kabul — süre başladı'+(_uz.length?'; '+_uz.length+' işe +'+_yd+' gün eklendi':''));
+ }
+ else if(a=='kabulsira'){
+  /* Sıraya al: elindeki en geç biten işin ardına yerleştir, diğer işlere dokunma */
+  var _kj=bul(+t.dataset.j); if(!_kj){return}
+  var _ci=cur(_kj); if(!_ci||_ci.k!=ME){say('Bu iş sana atanmış değil.');return}
+  var _son=null;
+  bende().forEach(function(j){if(j.id==_kj.id)return;
+   var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
+   var acilis=task.g||j.bas;if(!acilis)return;
+   var gl=isGunleri(zmn(acilis),task.t||1);
+   if(gl.length){var son=gl[gl.length-1];if(!_son||son>_son)_son=son;}});
+  var _tn=now();_kj.kabul=true;_kj.oncelik='normal';
+  if(_son){
+   var _bd=new Date(_son.getFullYear(),_son.getMonth(),_son.getDate()+1);
+   while(!isGunu(_bd))_bd.setDate(_bd.getDate()+1);
+   _bd.setHours(9,0,0,0);var _st=yer(_bd);
+   _kj.bas=_st;_ci.g=_st;
+   (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Sıraya alındı — '+dtar(_bd)+' başlar'});
+   say('Sıraya alındı — '+dtar(_bd)+' tarihinde başlayacak');
+  }else{
+   _kj.bas=_tn;_ci.g=_tn;
+   (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Kabul edildi — başladı (sıra boştu)'});
+   say('Sırada başka iş yoktu — hemen başladı');
+  }
  }
  else if(a=='ekac'){
   var _lst=ekListe(bul(+t.dataset.j))||[];var _dc=_lst.filter(function(y){return y.tur!='i'});var _x=_dc[+t.dataset.x];
