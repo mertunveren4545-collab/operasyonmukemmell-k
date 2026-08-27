@@ -248,6 +248,8 @@ body.dk .tip.o{background:#1D2A22;color:#8FD3AC}
  color:#4C5966;font-size:13px;font-weight:600;background:#FAFBFC}
 .upl input{display:none}
 body.dk .upl{background:#1A1F26;border-color:#39424C;color:#A9B4BF}
+body.dk .ekkc{background:#1E2730!important;color:#DDE3E9!important;border-color:#39424C!important}
+body.dk .ekkc input{accent-color:#4C9BE0}
 body.dk .ekl{border-bottom-color:#262D36}
 body.dk .ekl .ic{background:#222A33;color:#8FB6EA}
 .fs{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:30;display:flex;align-items:center;justify-content:center;padding:12px}
@@ -1716,7 +1718,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s69-TERMIN</div>'+
+  '<div class="galt">SÜRÜM s70-TARIH</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1856,7 +1858,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s69-TERMIN · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s70-TARIH · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2448,7 +2450,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s69-TERMIN</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s70-TARIH</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2762,7 +2764,8 @@ function ciz(){try{gozBanner()}catch(e){}
      return g5.length?'<optgroup label="'+B[bk].ad+'">'+g5.map(function(p){
       return '<option value="'+p[0]+'"'+(p[0]==ME&&!ATAMA?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</optgroup>':''}).join('')+
     '</select>'+
-    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
+    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Başlangıç / açılış tarihi</label><input type="date" id="jdate" value="'+new Date().toISOString().slice(0,10)+'" max="'+new Date().toISOString().slice(0,10)+'"><div class="note" style="margin:-6px 0 8px">Geç kalınan işi geriye dönük açmak için tarihi değiştir; termin bu tarihten sayılır.</div>'+
+    '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
     '<div style="height:14px"></div><button class="b" data-a="new">'+(ATAMA?'İş ata':'İşi başlat')+'</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
@@ -3359,7 +3362,9 @@ document.addEventListener('click',function(e){
  else if(a=='new'){
   var nm=document.getElementById('ja').value.trim();
   if(nm.length<4){say('İşe ad ver.');return}
-  var ts3=now(),kk=document.getElementById('jk').value,gg9=+document.getElementById('jg').value||5;
+  var _jd=document.getElementById('jdate'),ts3=now();
+  if(_jd&&_jd.value){var _dp=new Date(_jd.value+'T09:00');if(!isNaN(_dp)&&_dp<=new Date())ts3=yer(_dp);}
+  var kk=document.getElementById('jk').value,gg9=+document.getElementById('jg').value||5;
   var anaK=kk, ekK=[];
   if(ATAMA&&!anaK){say('Önce kime atayacağını seç.');return}
   var _cbs=document.querySelectorAll('.ekk:checked');
