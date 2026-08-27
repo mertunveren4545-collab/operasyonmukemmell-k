@@ -1666,7 +1666,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s77-DEMOSIL</div>'+
+  '<div class="galt">SÜRÜM s78-YENISIRA</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1806,7 +1806,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s77-DEMOSIL · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s78-YENISIRA · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2404,7 +2404,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s77-DEMOSIL</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s78-YENISIRA</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3376,10 +3376,62 @@ document.addEventListener('click',function(e){
   adm.push({a:'Bölüm onayı',k:cf2.sef,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   var onc=(document.getElementById('jonc')&&document.getElementById('jonc').value)||'normal';
-  J.unshift({id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:ts3,a:adm,oncelik:onc,kabul:(anaK==ME),atandi:ts3,atayan:ME,
-   lg:[{ts:ts3,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'+(onc!='normal'?' · '+(onc=='acil'?'ACİL':'YÜKSEK')+' öncelik':'')}]});
+
+  /* ============================================================
+     KENDİNE İŞ AÇARKEN ÖNCELİK / SIRA KARARI  (s78)
+     TETİK  : "＋ Yeni iş aç" formunda Kaydet basıldığında (a=='new')
+     KOŞUL  : işin ana sorumlusu SEN isen (anaK==ME) VE elinde
+              devam eden (kabul edilmiş, açık) iş varsa.
+     confirm SORUSU:
+       TAMAM → 'onc'  (Öncelikli / şimdi başla): yeni iş HEMEN başlar,
+               elindeki HER açık işin ilk 'i' adımına +yeniSüre gün
+               ek termin eklenir.  → 'kabulonc' ile aynı mantık.
+       İPTAL → 'sira' (Sıraya al): yeni iş, elindeki en geç biten işin
+               ardındaki ilk iş gününe ötelenir; diğer işlere DOKUNULMAZ.
+               → 'kabulsira' ile aynı mantık.
+     yeniSüre = formdaki "Termin (iş günü)" alanı (jg) = gg9.
+     ============================================================ */
+  var _yeniSure=gg9;                 /* yeni işin süresi (gün) = eklenecek ek termin miktarı */
+  var _elde=[];                      /* elimdeki devam eden AÇIK işler (süreç bende, 'i' adımı) */
+  if(anaK==ME){bende().forEach(function(j){var c=cur(j);if(c&&stip(c)=='i')_elde.push(j);});}
+  var _sched='onc';                  /* varsayılan karar: öncelikli */
+  if(_elde.length){                  /* elimde iş varsa SOR */
+   _sched = confirm('Elinde devam eden '+_elde.length+' iş var.\n\nTAMAM → Bu YENİ işe şimdi başla (öncelikli). Elindeki işlere +'+_yeniSure+' gün ek termin eklenir.\n\nİPTAL → Sıraya al. Yaptığına devam et; bu iş son işinin ardından başlar.') ? 'onc' : 'sira';
+  }
+  var _yjBas=ts3;                    /* yeni işin başlangıcı (sıraya alınırsa ileri kayar) */
+  if(_elde.length && _sched=='sira'){
+   /* SIRAYA AL → en geç biten elimdeki işin bitişini bul, ertesi iş gününe koy */
+   var _son=null;
+   _elde.forEach(function(j){var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
+    var acilis=task.g||j.bas;if(!acilis)return;var gl=isGunleri(zmn(acilis),task.t||1);
+    if(gl.length){var son=gl[gl.length-1];if(!_son||son>_son)_son=son;}});
+   if(_son){var _bd=new Date(_son.getFullYear(),_son.getMonth(),_son.getDate()+1);
+    while(!isGunu(_bd))_bd.setDate(_bd.getDate()+1);_bd.setHours(9,0,0,0);_yjBas=yer(_bd);
+    for(var _ai=0;_ai<adm.length;_ai++){if(adm[_ai].tp=='i')adm[_ai].g=_yjBas;}}   /* iş adımlarının başlangıcını da ötele */
+  }
+
+  J.unshift({id:Date.now(),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:_yjBas,a:adm,oncelik:onc,kabul:(anaK==ME),atandi:ts3,atayan:ME,
+   lg:[{ts:ts3,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'+(onc!='normal'?' · '+(onc=='acil'?'ACİL':'YÜKSEK')+' öncelik':'')+(_elde.length?(_sched=='onc'?' · öncelikli — elindekilere +'+_yeniSure+'g':' · sıraya alındı'):'')}]});
+  var _newId=J[0].id;
+
+  /* ÖNCELİKLİ dalı → yeni iş eklendikten SONRA elimdeki her açık işe ek termin uygula */
+  var _uzYeni=[];
+  if(_elde.length && _sched=='onc'){
+   _elde.forEach(function(j){if(j.id==_newId)return;
+    var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
+    task.t=Math.round((task.t+_yeniSure)*100)/100;                 /* ilk iş adımının süresini (termini) uzat */
+    j.ekgun=Math.round(((j.ekgun||0)+_yeniSure)*100)/100;          /* toplam ek gün (pembe günler) */
+    j.uzama=j.uzama||[];j.uzama.push({ts:now(),gun:_yeniSure,neden:'⏱ Öncelikli iş araya girdi — '+nm,kim:ME});
+    (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin +'+_yeniSure+' gün',msg:'Öncelikli yeni iş: '+nm});
+    _uzYeni.push(j.ad);});
+   if(_uzYeni.length){try{pushGonder([ME],'Öncelikli iş açıldı',_uzYeni.length+' işin termini +'+_yeniSure+' gün ötelendi');}catch(e){}}
+  }
+
   ATAMA=false;
-  V='ana';say(kisiler.length>1?('İş atandı — '+kisiler.length+' kişiye'):(anaK!=ME?('✓ İş atandı → '+ad(anaK)+' (kabul bekliyor)'):('İş başlatıldı — sorumlu '+ad(anaK))));
+  /* bilgilendirme mesajı → atama / öncelikli / sıra durumuna göre */
+  var _selfMsg='İş başlatıldı — sorumlu '+ad(anaK);
+  if(_elde.length){_selfMsg=(_sched=='onc')?('Öncelikli açıldı'+(_uzYeni.length?' — '+_uzYeni.length+' işe +'+_yeniSure+' gün ek termin':'')):('Sıraya alındı — '+dtar(zmn(_yjBas))+' başlayacak');}
+  V='ana';say(kisiler.length>1?('İş atandı — '+kisiler.length+' kişiye'):(anaK!=ME?('✓ İş atandı → '+ad(anaK)+' (kabul bekliyor)'):_selfMsg));
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
   try{var _hd=kisiler.filter(function(x){return x!=ME});if(_hd.length){var _pb=(onc=='acil'?'🔴 ACİL — ':onc=='yuksek'?'⚠ Öncelikli — ':'')+'Sana iş atandı — kabul et';pushGonder(_hd,_pb,nm);}}catch(e){}
  }
