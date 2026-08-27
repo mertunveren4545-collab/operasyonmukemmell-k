@@ -1666,7 +1666,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s78-YENISIRA</div>'+
+  '<div class="galt">SÜRÜM s79-RLSGUARD</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1806,7 +1806,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s78-YENISIRA · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s79-RLSGUARD · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2404,7 +2404,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s78-YENISIRA</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s79-RLSGUARD</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3560,11 +3560,16 @@ function talepleriGetir(){
     if(_dg.length){ok=await guvenliYaz('isler',_dg,'İşler');
       if(ok===false)_dg.forEach(function(sat){delete _isHash[sat.id]});}
    if(ok&&ilk){ilk=false;console.log('Bulut baglantisi tamam')}
-   await guvenliYaz('tesisler',T.map(function(x){return {id:x.id,ad:x.ad}}));
-   await guvenliYaz('personel',P.map(function(p){
-     return {id:p[0],ad:p[1],unvan:p[2],bolum:p[3],rol:p[4]}}));
-   await guvenliYaz('bolumler',Object.keys(B).map(function(k,i){
-     return {id:k,ad:B[k].ad,sef:B[k].sef,ust:B[k].ust,ust_gerek:!!B[k].ug,sira:i}}));
+   /* ORG YAPISI (tesis/personel/bölüm) → SADECE sistemci yazar.
+      Normal kullanıcı yalnızca okur; bu yüzden bu tablolara upsert
+      denemez ve RLS "new row violates policy / 401" hatası oluşmaz. */
+   if(sistemci()){
+    await guvenliYaz('tesisler',T.map(function(x){return {id:x.id,ad:x.ad}}));
+    await guvenliYaz('personel',P.map(function(p){
+      return {id:p[0],ad:p[1],unvan:p[2],bolum:p[3],rol:p[4]}}));
+    await guvenliYaz('bolumler',Object.keys(B).map(function(k,i){
+      return {id:k,ad:B[k].ad,sef:B[k].sef,ust:B[k].ust,ust_gerek:!!B[k].ug,sira:i}}));
+   }
    var yeni=K.filter(function(r){return !yazilan[r.id]});
    if(yeni.length){
     var ok2=await guvenliYaz('kayitlar',yeni.map(function(r){
