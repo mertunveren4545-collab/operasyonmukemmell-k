@@ -871,64 +871,9 @@ function gunAd(t){var d=zmn(t),b=new Date();b.setHours(0,0,0,0);
 function sa(d){return (d/60).toFixed(1).replace('.',',')}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-var J=[
-{id:1,ts_:'t10',ad:'Paslanmaz Atölye norm kadro raporu',br:'SI',bas:ago(14,'08:30'),a:[
- {a:'Saha veri toplama',k:'mert',t:5,o:0,d:'t',g:ago(14,'08:30'),b:ago(8,'16:10')},
- {a:'Veri kontrolü',k:'gokhan',t:2,o:0,tp:'k',d:'t',g:ago(8,'16:10'),b:ago(3,'11:25')},
- {a:'Müdür onayı',k:'mesut',t:1,o:1,d:'a',g:ago(3,'11:25'),b:0},
- {a:'Raporlama',k:'mert',t:3,o:0,d:'b',g:0,b:0}],
- lg:[{ts:ago(14,'08:30'),k:'mesut',tip:'İş açıldı'},
-     {ts:ago(11,'09:15'),k:'mesut',hedef:'mert',tip:'Geri gönderdi → Mert Ünveren',msg:'Gözlem sayısı yetersiz, en az 40 tur olmalı.'},
-     {ts:ago(3,'11:25'),k:'gokhan',tip:'Adımı tamamladı → Mesut Ünver'}]},
-{id:2,dst:[{ts:ago(4,'10:20'),isteyen:'mert',kimden:'dilek',durum:'b',
- ne:'SAP PM iş emirlerinin kapanış tarihleri — son 3 ay, atölye kırılımlı.',gun:2}],
- ts_:'t11',ad:'Argon Atölyesi kapasite analizi',br:'SI',bas:ago(9,'09:00'),a:[
- {a:'SAP PM veri çekimi',k:'dilek',t:2,o:0,d:'t',g:ago(9,'09:00'),b:ago(6,'14:40')},
- {a:'Kapasite modeli',k:'mert',t:4,o:0,d:'a',g:ago(6,'14:40'),b:0},
- {a:'Veri doğrulama kontrolü',k:'dilek',t:2,o:0,tp:'k',d:'b',g:0,b:0},
- {a:'Müdür onayı',k:'mesut',t:1,o:1,d:'b',g:0,b:0}],
- lg:[{ts:ago(9,'09:00'),k:'mesut',tip:'İş açıldı'}]},
-{id:3,ts_:'t2',ad:'Kırım hattı OEE dosyası',br:'SI',bas:ago(21,'08:15'),a:[
- {a:'Duruş verisi analizi',k:'gokhan',t:3,o:0,d:'t',g:ago(21,'08:15'),b:ago(17,'15:30')},
- {a:'Kaizen aksiyon planı',k:'berna',t:4,o:0,d:'a',g:ago(9,'10:05'),b:0},
- {a:'Müdür onayı',k:'mesut',t:1,o:1,d:'b',g:0,b:0}],
- lg:[{ts:ago(21,'08:15'),k:'mesut',tip:'İş açıldı'}]},
-{id:4,ts_:'t7',ad:'Tedarikçi denetim raporu — yem tesisi',br:'IK',bas:ago(11,'09:45'),a:[
- {a:'Saha denetimi',k:'meltem',t:3,o:0,d:'t',g:ago(11,'09:45'),b:ago(7,'17:00')},
- {a:'Bulgu değerlendirme',k:'feyza',t:2,o:0,tp:'k',d:'t',g:ago(7,'17:00'),b:ago(5,'13:10')},
- {a:'Yönetici onayı',k:'kamil',t:1,o:1,d:'a',g:ago(5,'13:10'),b:0}],
- lg:[{ts:ago(11,'09:45'),k:'kamil',tip:'İş açıldı'}]},
-{id:5,ts_:'t1',ad:'Üretim maliyet dashboardu faz 2',br:'VA',bas:ago(6,'10:30'),a:[
- {a:'Veri hazırlama',k:'dilek',t:3,o:0,d:'t',g:ago(6,'10:30'),b:ago(3,'16:45')},
- {a:'Dashboard geliştirme',k:'gizem',t:4,o:0,d:'a',g:ago(3,'16:45'),b:0}],
- lg:[{ts:ago(6,'10:30'),k:'gizem',tip:'İş açıldı'}]},
-{id:6,ts_:'t15',ad:'Doküman numaralandırma standardı',br:'DY',bas:ago(19,'08:20'),a:[
- {a:'Taslak hazırlama',k:'dilvin',t:4,o:0,d:'t',g:ago(19,'08:20'),b:ago(14,'15:10')},
- {a:'Yayın ve eğitim',k:'dilvin',t:3,o:0,d:'a',g:ago(4,'09:35'),b:0}],
- lg:[{ts:ago(19,'08:20'),k:'mesut',tip:'İş açıldı'}]},
-{id:7,ts_:'t14',ad:'Depo 5S uygulama planı',br:'SI',bas:ago(24,'08:50'),a:[
- {a:'Saha tespiti',k:'emre',t:3,o:0,d:'t',g:ago(24,'08:50'),b:ago(20,'14:20')},
- {a:'Plan hazırlama',k:'emre',t:4,o:0,d:'a',g:ago(20,'14:20'),b:0}],
- lg:[{ts:ago(24,'08:50'),k:'mesut',tip:'İş açıldı'},
-     {ts:ago(16,'09:05'),k:'mesut',hedef:'emre',tip:'Geri gönderdi → Emre Kaan Filiz',msg:'Aksiyon sorumluları ve tarihleri boş bırakılmış.'}]}];
+var J=[];
 
 var K=[];
-[['mert',0,'Zaman etüdü','Paslanmaz atölyede 40 gözlem turu alındı.',180,'t10'],
- ['mert',1,'Norm kadro','Argon iş listesi çıkarıldı.',150,'t11'],
- ['mert',3,'Toplantı','Bakım şefiyle iş kuyruğu değerlendirmesi.',60,'t15'],
- ['gokhan',0,'Kaizen','Kırım hattı kök neden analizi.',160,'t2'],
- ['gokhan',2,'Süreç haritalama','Hat akışı yerinde çizildi.',200,'t2'],
- ['berna',0,'SMED','Kalıp değişim videosu çekildi.',195,'t1'],
- ['emre',5,'5S / saha','Depo bölge etiketlemesi.',120,'t14'],
- ['kamil',0,'Denetim planı','3. çeyrek denetim takvimi güncellendi.',140,'t15'],
- ['meltem',1,'Saha denetimi','Yem tesisi süreç denetimi.',230,'t7'],
- ['feyza',1,'Bulgu takibi','Bulguların kapanış kontrolü.',180,'t4'],
- ['alican',0,'Kontrol noktası','Soğuk zincir kontrolleri.',150,'t3'],
- ['ilyas',3,'Saha denetimi','Kuluçkahane denetimi.',195,'t8'],
- ['dilvin',0,'Doküman revizyonu','12 talimat revizyonu hazırlandı.',175,'t15'],
- ['gizem',0,'Dashboard geliştirme','Maliyet dashboardu ürün kırılımı.',185,'t1'],
- ['dilek',1,'Veri hazırlama','Üretim verisi temizlendi.',170,'t6']
-].forEach(function(x,i){K.push({id:'k'+i,k:x[0],ts:ago(x[1]),tip:x[2],ac:x[3],dk:x[4],ts_:x[5]||'t15'})});
 
 var TEMA='lacivert';
 var TEMALAR={
@@ -1721,7 +1666,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s74-ANALIZ</div>'+
+  '<div class="galt">SÜRÜM s75-SIFIR</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1861,7 +1806,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s74-ANALIZ · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s75-SIFIR · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2454,7 +2399,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s74-ANALIZ</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s75-SIFIR</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
