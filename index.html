@@ -1666,7 +1666,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s76-RESET</div>'+
+  '<div class="galt">SÜRÜM s77-DEMOSIL</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1806,7 +1806,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s76-RESET · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s77-DEMOSIL · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2207,9 +2207,10 @@ function ciz(){try{gozBanner()}catch(e){}
      '<div class="cizgi"><i style="width:70%"></i></div></div>'+
    '</div>';
 
-  if(sistemci()&&K.length)h+='<div class="card tehlike"><h3>⚠ Yönetici — veri sıfırlama</h3>'+
-    '<div class="td">Tüm çalışma kayıtlarını ('+K.length+' kayıt · '+sa(dkT)+' saat) kalıcı siler. Örnek/demo veriyi temizlemek için kullan.</div>'+
-    '<button class="b r" data-a="kayitsil">Tüm çalışma kayıtlarını sil</button></div>';
+  if(sistemci()){var _dc=K.filter(function(r){return /^k([0-9]|1[0-4])$/.test(String(r.id))}).length;
+   if(_dc)h+='<div class="card tehlike"><h3>⚠ Yönetici — demo veri temizliği</h3>'+
+    '<div class="td">Uygulamayla gelen '+_dc+' örnek çalışma kaydını siler. <b>Senin girdiğin kayıtlar korunur.</b></div>'+
+    '<button class="b r" data-a="demosil">Örnek/demo kayıtları temizle</button></div>';}
 
   h+='<div class="card"><div class="dbaslik"><em>🍩</em><b>Süre nereye gidiyor</b>'+
     '<span>'+((''+(Math.round((rw+tb)*10)/10)).replace('.',','))+' gün toplam</span></div>'+donut(rw,tb)+
@@ -2403,7 +2404,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s76-RESET</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s77-DEMOSIL</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2701,9 +2702,11 @@ function ciz(){try{gozBanner()}catch(e){}
   if(!mk.length)h+='<div style="font-size:13px;color:#8592A0">Kayıt yok.</div>';
   mk.slice(0,20).forEach(function(r){
    var sa1=r.ts.slice(11,16),sa2=r.bit||'';
-   h+='<div class="li"><div class="h"><b>'+esc(r.tip)+'</b><i>'+gunAd(r.ts)+' · '+sa(r.dk)+' sa</i></div>'+
+   var _demo=/^k([0-9]|1[0-4])$/.test(String(r.id));
+   h+='<div class="li"><div class="h"><b>'+esc(r.tip)+(_demo?' <span style="font-size:10px;color:#C0392B">(demo)</span>':'')+'</b><i>'+gunAd(r.ts)+' · '+sa(r.dk)+' sa</i></div>'+
      '<div class="s">🕐 '+sa1+(sa2?'–'+sa2:'')+' · 📍 '+tad(r.ts_)+'</div>'+
-     '<div class="s" style="color:#16202B;font-size:13px">'+esc(r.ac)+'</div></div>';
+     '<div class="s" style="color:#16202B;font-size:13px">'+esc(r.ac)+'</div>'+
+     '<button class="b r" data-a="kaydsil" data-k="'+r.id+'" style="margin:6px 0 0;padding:5px 12px;font-size:11px;width:auto">Sil</button></div>';
   });
   h+='</div>';
  }
@@ -3190,18 +3193,36 @@ document.addEventListener('click',function(e){
   j2.lg.push({ts:ts2,k:ME,hedef:p2.k,tip:'Geri gönderdi → '+ad(p2.k),msg:m});
   say('Geri gönderildi → '+ad(p2.k));V='ana';RED=0;
  }
- else if(a=='kayitsil'){
+ else if(a=='demosil'){
   if(!sistemci()){say('Bu işlem için yetkin yok.');return}
-  if(!confirm('TÜM çalışma kayıtları silinecek ('+K.length+' kayıt). Bu geri alınamaz. Emin misin?'))return;
+  var _dids=[];for(var _di=0;_di<15;_di++)_dids.push('k'+_di);
+  var _dvar=K.filter(function(r){return _dids.indexOf(String(r.id))>=0});
+  if(!_dvar.length){say('Demo kayıt kalmamış.');return}
+  if(!confirm(_dvar.length+' örnek/demo kayıt silinecek. Senin girdiğin kayıtlar KORUNUR. Emin misin?'))return;
   if(dbClient){
    say('Siliniyor…');
-   dbClient.from('kayitlar').delete().neq('id','___yok___').select().then(function(r){
-    if(r&&r.error){say('❌ Silinemedi (RLS): '+r.error.message+' — kayitlar tablosuna DELETE izni gerek.');return}
+   dbClient.from('kayitlar').delete().in('id',_dids).select().then(function(r){
+    if(r&&r.error){say('❌ Silinemedi (RLS): '+r.error.message);return}
     var _n=(r&&r.data)?r.data.length:0;
-    if(!_n&&K.length){say('⚠ Veritabanı silmedi — kayitlar tablosunda DELETE izni (RLS) yok. SQL politikası gerekli.');return}
-    K=[];V='ana';say('✓ '+_n+' çalışma kaydı silindi');ciz();
-   },function(){say('Silme sırasında bağlantı hatası.')});
-  }else{K=[];say('Kayıtlar temizlendi');ciz();}
+    if(!_n){say('⚠ Silinemedi — kayitlar tablosunda DELETE izni (RLS) yok. SQL politikası gerekli.');return}
+    K=K.filter(function(x){return _dids.indexOf(String(x.id))<0});
+    say('✓ '+_n+' demo kayıt silindi');ciz();
+   },function(){say('Bağlantı hatası.')});
+  }else{K=K.filter(function(x){return _dids.indexOf(String(x.id))<0});say('Demo kayıtlar temizlendi');ciz();}
+ }
+ else if(a=='kaydsil'){
+  var _kid=t.dataset.k; if(!_kid)return;
+  var _rec=null;for(var _z=0;_z<K.length;_z++)if(String(K[_z].id)==String(_kid))_rec=K[_z];
+  if(!confirm('Bu çalışma kaydı silinsin mi?'+(_rec?'\n\n'+_rec.tip+' · '+sa(_rec.dk)+' sa':'')))return;
+  if(dbClient){
+   say('Siliniyor…');
+   dbClient.from('kayitlar').delete().eq('id',String(_kid)).select().then(function(r){
+    if(r&&r.error){say('❌ Silinemedi (RLS): '+r.error.message);return}
+    if(!r||!r.data||!r.data.length){say('⚠ Silinemedi — kayitlar tablosunda DELETE izni (RLS) yok.');return}
+    K=K.filter(function(x){return String(x.id)!=String(_kid)});
+    say('✓ Kayıt silindi');ciz();
+   },function(){say('Bağlantı hatası.')});
+  }else{K=K.filter(function(x){return String(x.id)!=String(_kid)});say('Kayıt silindi');ciz();}
  }
  else if(a=='issil'){
   if(!sistemci()){say('Bu işlem için yetkin yok.');return}
