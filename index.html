@@ -847,7 +847,7 @@ function isGunu(d){var g=d.getDay();return g!==0&&g!==6}
 function isGunleri(bas,adet){var out=[],d=new Date(bas.getFullYear(),bas.getMonth(),bas.getDate()),i=0;while(out.length<adet&&i<500){if(isGunu(d))out.push(new Date(d));d.setDate(d.getDate()+1);i++}return out}
 function dtar(d){return ii(d.getDate())+'.'+ii(d.getMonth()+1)+'.'+d.getFullYear()}
 function dataURLBlob(du){try{var a=du.split(','),m=(a[0].match(/:(.*?);/)||[])[1]||'application/octet-stream',b=atob(a[1]),n=b.length,u=new Uint8Array(n);while(n--)u[n]=b.charCodeAt(n);return new Blob([u],{type:m})}catch(e){return null}}
-function isKolon(j){var steps=j.a||[],task=null,onays=[];steps.forEach(function(x){var tp=stip(x);if(tp=='i'&&!task){task=x}else if(tp=='o'){onays.push(x)}});var c=cur(j);var acilisTs=(task&&task.g)?task.g:j.bas;var terminD='';if(task&&acilisTs){var gl=isGunleri(zmn(acilisTs),task.t||1);if(gl.length)terminD=dtar(gl[gl.length-1])}var surec=(j.kabul===false)?'Kabul bekliyor':(c?((stip(c)=='o'||stip(c)=='k')?(ad(c.k)+' (onayda)'):ad(c.k)):'Tamamlandı');var bitti=!c&&j.kabul!==false;return {isim:task?ad(task.k):'',is:j.ad,tesis:tad(j.ts_),acilis:acilisTs?dtar(zmn(acilisTs)):'',termin:terminD,sebep:(j.uzama&&j.uzama.length)?j.uzama.map(function(u){return u.neden}).join(' | '):(j.gecikmeSebebi||''),gonderme:(task&&task.b)?dtar(zmn(task.b)):'',onay1:(onays[0]&&onays[0].b)?dtar(zmn(onays[0].b)):'',onay2:(onays[1]&&onays[1].b)?dtar(zmn(onays[1].b)):'',surec:surec,tamam:(bitti&&steps.length&&steps[steps.length-1].b)?dtar(zmn(steps[steps.length-1].b)):'',aciklama:(function(){var g=j.gunluk||{};var s=Object.keys(g).sort().map(function(d){return g[d]}).filter(Boolean).join(' · ');return s||j.aciklama||''})()}}
+function isKolon(j){var steps=j.a||[],task=null,onays=[];steps.forEach(function(x){var tp=stip(x);if(tp=='i'&&!task){task=x}else if(tp=='o'){onays.push(x)}});var c=cur(j);var acilisTs=(task&&task.g)?task.g:j.bas;var terminD='';if(task&&acilisTs){var gl=isGunleri(zmn(acilisTs),Math.round(task.t)||1);if(gl.length)terminD=dtar(gl[gl.length-1])}var surec=(j.kabul===false)?'Kabul bekliyor':(c?((stip(c)=='o'||stip(c)=='k')?(ad(c.k)+' (onayda)'):ad(c.k)):'Tamamlandı');var bitti=!c&&j.kabul!==false;return {isim:task?ad(task.k):'',is:j.ad,tesis:tad(j.ts_),acilis:acilisTs?dtar(zmn(acilisTs)):'',termin:terminD,sebep:(j.uzama&&j.uzama.length)?j.uzama.map(function(u){return u.neden}).join(' | '):(j.gecikmeSebebi||''),gonderme:(task&&task.b)?dtar(zmn(task.b)):'',onay1:(onays[0]&&onays[0].b)?dtar(zmn(onays[0].b)):'',onay2:(onays[1]&&onays[1].b)?dtar(zmn(onays[1].b)):'',surec:surec,tamam:(bitti&&steps.length&&steps[steps.length-1].b)?dtar(zmn(steps[steps.length-1].b)):'',aciklama:(function(){var g=j.gunluk||{};var s=Object.keys(g).sort().map(function(d){return g[d]}).filter(Boolean).join(' · ');return s||j.aciklama||''})()}}
 function isTablo(list){if(!list.length)return '<div style="font-size:13px;color:#8592A0">İş yok.</div>';
  /* kompakt = sabit kolon genişliği + satır sarması → tek ekrana sığar, yatay kaydırma yok */
  var h='<table class="itab kompakt"><colgroup>'+
@@ -1698,7 +1698,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s85-SIFRETANI</div>'+
+  '<div class="galt">SÜRÜM s86-TERMINTESIS</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1838,7 +1838,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s85-SIFRETANI · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s86-TERMINTESIS · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2013,7 +2013,7 @@ function ciz(){try{gozBanner()}catch(e){}
    j.uzama.slice().reverse().forEach(function(u){h+='<div class="li"><div class="h"><b>+'+u.gun+' gün</b><i>'+fmt(u.ts)+'</i></div><div class="s" style="color:#16202B;font-size:13px">'+esc(u.neden)+'</div><div class="s">'+ad(u.kim)+'</div></div>';});
    h+='<div class="note">Elindeki işe çalışmadığın (başka işe/çalışmaya ayırdığın) süre kadar termin otomatik uzar.</div></div>';}
   (function(){var steps=j.a||[],task=null;steps.forEach(function(x){if(stip(x)=='i'&&!task)task=x});var acilisTs=(task&&task.g)?task.g:j.bas;
-   if(acilisTs){var adet=task?(task.t||5):5;if(adet<1)adet=1;if(adet>90)adet=90;var gunler=isGunleri(zmn(acilisTs),adet);var owner=task?task.k:(cur(j)?cur(j).k:null);
+   if(acilisTs){var adet=task?(Math.round(task.t)||5):5;if(adet<1)adet=1;if(adet>90)adet=90;var gunler=isGunleri(zmn(acilisTs),adet);var owner=task?task.k:(cur(j)?cur(j).k:null);
     h+='<div class="card"><h3>Gün gün iş dökümü</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
     gunler.forEach(function(d,gi){var kayit=K.filter(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});
      var txt=kayit.map(function(r){var rd=zmn(r.ts);return ii(rd.getHours())+':'+ii(rd.getMinutes())+'-'+(r.bit||'')+' '+esc(r.tip||'')+(r.ac?' — '+esc(r.ac):'')}).join('<br>');
@@ -2436,7 +2436,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s85-SIFRETANI</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s86-TERMINTESIS</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3144,6 +3144,7 @@ document.addEventListener('click',function(e){
   var el3=document.getElementById('te'),nv=el3?el3.value.trim():'';
   if(nv.length<3){say('Tesis adı en az 3 harf olmalı.');return}
   for(var z=0;z<T.length;z++)if(T[z].id==t.dataset.i)T[z].ad=nv;
+  if(dbClient)dbClient.from('tesisler').upsert({id:t.dataset.i,ad:nv}).then(function(){},function(){});
   ED=0;say('Tesis adı güncellendi.');
  }
  else if(a=='tdel'){
@@ -3158,7 +3159,9 @@ document.addEventListener('click',function(e){
   if(tn.length<3){say('Tesis adı yaz.');return}
   if(T.some(function(x){return x.ad.toLocaleLowerCase('tr')==tn.toLocaleLowerCase('tr')}))
    {say('Bu tesis zaten var.');return}
-  T.push({id:'t'+Date.now(),ad:tn});say(tn+' eklendi');
+  var _tid='t'+Date.now();T.push({id:_tid,ad:tn});
+  if(dbClient)dbClient.from('tesisler').upsert({id:_tid,ad:tn}).then(function(r){if(r&&r.error)say('Buluta yazılamadı: '+r.error.message)},function(){});
+  say(tn+' eklendi');
  }
  else if(a=='yeni'){ATAMA=false;V='yeni'}
  else if(a=='isata'){ATAMA=true;V='yeni'}
@@ -3262,15 +3265,28 @@ document.addEventListener('click',function(e){
   var _kid=t.dataset.k; if(!_kid)return;
   var _rec=null;for(var _z=0;_z<K.length;_z++)if(String(K[_z].id)==String(_kid))_rec=K[_z];
   if(!confirm('Bu çalışma kaydı silinsin mi?'+(_rec?'\n\n'+_rec.tip+' · '+sa(_rec.dk)+' sa':'')))return;
+  /* Bu kaydın açtığı termin uzatmasını işten geri al (uzama.kid eşleşmesiyle) */
+  function _terminGeriAl(){
+   J.forEach(function(j){if(!j.uzama)return;
+    for(var _u=j.uzama.length-1;_u>=0;_u--){var uu=j.uzama[_u];
+     if(uu.kid&&String(uu.kid)==String(_kid)){
+      var g=uu.gun||0,task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});
+      if(task)task.t=Math.max(1,Math.round((task.t-g)*100)/100);
+      j.ekgun=Math.round(((j.ekgun||0)-g)*100)/100;if(j.ekgun<0)j.ekgun=0;
+      j.uzama.splice(_u,1);
+      (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin −'+g+' gün (çalışma kaydı silindi)'});
+     }}});
+  }
   if(dbClient){
    say('Siliniyor…');
    dbClient.from('kayitlar').delete().eq('id',String(_kid)).select().then(function(r){
     if(r&&r.error){say('❌ Silinemedi (RLS): '+r.error.message);return}
     if(!r||!r.data||!r.data.length){say('⚠ Silinemedi — kayitlar tablosunda DELETE izni (RLS) yok.');return}
+    _terminGeriAl();
     K=K.filter(function(x){return String(x.id)!=String(_kid)});
-    say('✓ Kayıt silindi');ciz();
+    say('✓ Kayıt silindi, termin geri alındı');ciz();
    },function(){say('Bağlantı hatası.')});
-  }else{K=K.filter(function(x){return String(x.id)!=String(_kid)});say('Kayıt silindi');ciz();}
+  }else{_terminGeriAl();K=K.filter(function(x){return String(x.id)!=String(_kid)});say('Kayıt silindi');ciz();}
  }
  else if(a=='issil'){
   if(!sistemci()){say('Bu işlem için yetkin yok.');return}
@@ -3313,7 +3329,8 @@ document.addEventListener('click',function(e){
   if(!gg2||!b1||!b2){say('Tarih ve saatleri doldur.');return}
   var dk=(+b2.slice(0,2)*60+ +b2.slice(3))-(+b1.slice(0,2)*60+ +b1.slice(3));
   if(dk<15){say('Bitiş saati başlangıçtan en az 15 dk sonra olmalı.');return}
-  K.unshift({id:'k'+Date.now()+Math.floor(Math.random()*1000),k:ME,ts:new Date(gg2+'T'+b1).toISOString(),bit:b2,tip:document.getElementById('kt').value,
+  var _kkid='k'+Date.now()+Math.floor(Math.random()*1000);
+  K.unshift({id:_kkid,k:ME,ts:new Date(gg2+'T'+b1).toISOString(),bit:b2,tip:document.getElementById('kt').value,
    ts_:document.getElementById('ktz').value,ac:ac,dk:dk});
   var _hi=document.getElementById('kis_is')?document.getElementById('kis_is').value:'';
   var _gun=Math.round(dk/480*100)/100;
@@ -3326,7 +3343,7 @@ document.addEventListener('click',function(e){
    var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
    task.t=Math.round((task.t+_gun)*100)/100;
    j.ekgun=Math.round(((j.ekgun||0)+_gun)*100)/100;
-   j.uzama=j.uzama||[];j.uzama.push({ts:now(),dk:dk,gun:_gun,neden:_neden,kim:ME});
+   j.uzama=j.uzama||[];j.uzama.push({ts:now(),dk:dk,gun:_gun,neden:_neden,kim:ME,kid:_kkid});
    (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin +'+_gun+' gün uzadı',msg:_neden});
    _uz.push(j.ad);});
   if(_uz.length&&_hi)say('Kaydedildi — "'+_uz[0].slice(0,26)+'" işine +'+_gun+' gün ek termin');
@@ -3612,7 +3629,9 @@ function talepleriGetir(){
       Normal kullanıcı yalnızca okur; bu yüzden bu tablolara upsert
       denemez ve RLS "new row violates policy / 401" hatası oluşmaz. */
    if(sistemci()){
-    await guvenliYaz('tesisler',T.map(function(x){return {id:x.id,ad:x.ad}}));
+    /* tesisler ARTIK burada toplu yazılmıyor — ekleme/düzenleme anında tekil upsert
+       ediliyor (tnew/tsave). Böylece her senkronda listenin ezilip yeniden yazılması
+       ve bayat/varsayılan T'nin buluta basılıp eklenenlerin kaybolması sorunu biter. */
     await guvenliYaz('personel',P.map(function(p){
       return {id:p[0],ad:p[1],unvan:p[2],bolum:p[3],rol:p[4]}}));
     await guvenliYaz('bolumler',Object.keys(B).map(function(k,i){
