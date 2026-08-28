@@ -30,6 +30,9 @@ header{background:#12315C;color:#fff;padding:11px 12px}
 .top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
 .top .bk{background:#1E4A85;border:0;color:#fff;padding:8px 12px;border-radius:6px;font-size:14px}
 .top .tt{font-size:15.5px;font-weight:600;flex:1}
+.top .anab{background:#2E7D4B;flex:none}
+body.dk .top .anab{background:#1F5A38}
+@media(max-width:599px){.top .anab .anab-t{display:none}.top .anab{padding:8px 10px}}
 select.who{width:100%;padding:10px;border:0;border-radius:6px;background:#1E4A85;color:#fff;font-size:15px}
 main{padding:12px;max-width:620px;margin:0 auto}
 h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#77838F;margin:18px 0 8px}
@@ -187,6 +190,26 @@ body.dk .tehlike .td{color:#9AA4AE}
 body.dk .itab.kompakt .acik{color:#9FB0A6}
 .itab td:nth-child(10){font-weight:600;color:#12315C}
 .itabWrap{width:100%}
+/* ---- Takvim ---- */
+.takvim .tkbas{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.takvim .tkyil{width:auto;padding:6px 12px;border-radius:8px;border:1px solid #D8E5DD;background:#fff;font-weight:600;color:#20493A}
+.takvim .tkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.takvim .tkay{position:relative;background:#F4F7F5;border:1px solid #E4EBE6;border-radius:9px;padding:13px 8px;font-weight:600;color:#2A3B33;cursor:pointer;font-size:13px;transition:.12s}
+.takvim .tkay:hover{background:#E9F1EB}
+.takvim .tkay.sec{background:#1E4A85;color:#fff;border-color:#1E4A85}
+.takvim .tkay i{position:absolute;top:4px;right:5px;font-style:normal;font-size:10px;font-weight:700;background:#C0392B;color:#fff;border-radius:9px;padding:0 5px;min-width:15px;text-align:center}
+.takvim .tkay.sec i{background:#fff;color:#1E4A85}
+.takvim .tklist{margin-top:14px;border-top:1px solid #EEF1EF;padding-top:11px}
+.takvim .tklbas{font-weight:700;font-size:12.5px;color:#1B5E3F;margin-bottom:9px}
+.takvim .tkis{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:#F9FBFA;border:1px solid #EEF1EF;border-radius:8px;padding:9px 11px;margin-bottom:6px;cursor:pointer;font-size:12.5px;color:#2A3B33}
+.takvim .tkis:hover{background:#EFF6F1}
+.takvim .tkis i{font-style:normal;color:#12315C;font-weight:700;white-space:nowrap}
+body.dk .takvim .tkay{background:#20282E;border-color:#2A353D;color:#C6CED4}
+body.dk .takvim .tkyil{background:#161C21;border-color:#2A353D;color:#E4E9EE}
+body.dk .takvim .tkis{background:#20282E;border-color:#2A353D;color:#C6CED4}
+body.dk .takvim .tklbas{color:#7FD1A4}
+/* PC'de sol altta, dar ve şık dursun */
+@media(min-width:900px){.takvim{max-width:360px;margin-right:auto}}
 .itab tr.gecsat td{background:#FDEEEC;box-shadow:inset 3px 0 0 #C0392B}
 .itab tr.gecsat:hover td{background:#FCE4E1}
 .gtab{font-size:12px;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(16,40,30,.05)}
@@ -232,7 +255,7 @@ body.dk .extgun td{background:#3A1E1A!important}
  .itab.kompakt{table-layout:auto;min-width:860px}
  .itab.kompakt th,.itab.kompakt td{font-size:11.5px;padding:9px 10px;white-space:nowrap;word-break:normal;overflow-wrap:normal}
  .itab.kompakt colgroup col{width:auto!important}
- .itab.kompakt td:nth-child(1),.itab.kompakt th:nth-child(1){white-space:normal;min-width:80px}
+ .itab.kompakt td:nth-child(1),.itab.kompakt th:nth-child(1){white-space:nowrap;min-width:96px}
  .itab.kompakt td:nth-child(2),.itab.kompakt th:nth-child(2){white-space:normal;min-width:150px;max-width:215px}
  .itab.kompakt td:nth-child(3),.itab.kompakt th:nth-child(3){white-space:normal;min-width:88px}
  .itab.kompakt td:nth-child(6),.itab.kompakt th:nth-child(6){white-space:normal;min-width:120px;max-width:190px}
@@ -792,8 +815,7 @@ var B={
  SI:{ad:'Süreç İyileştirme',sef:'mesut',ust:'ozkan',ug:1},
  IK:{ad:'İç Kontrol & Süreç Denetimi',sef:'kamil',ust:'ozkan',ug:0},
  DY:{ad:'Doküman Yönetim Sistemleri',sef:'ozkan',ust:'ozkan',ug:0},
- VA:{ad:'Veri Analitiği & İş Zekası',sef:'gizem',ust:'ozkan',ug:1},
- PY:{ad:'Proje Yönetimi',sef:'ozkan',ust:'ozkan',ug:0}};
+ VA:{ad:'Veri Analitiği & İş Zekası',sef:'gizem',ust:'ozkan',ug:1}};
 var T=[
  {id:'t1',ad:'Pastörize Tesisi'},
  {id:'t2',ad:'Kırım Tesisi'},
@@ -857,7 +879,10 @@ var P=[
  ['ilyas','İlyas Yılmaz','İç Denetçi','IK','c'],
  ['dilvin','Dilvin Eymen Aydın','Doküman Yönetim Uzmanı','DY','c'],
  ['gizem','Gizem Kaya Akın','İş Zekası ve Raporlama Ekip Lideri','VA','l'],
- ['dilek','Dilek Alparslan Güner','İş Zekası ve Raporlama Uzmanı','VA','c']];
+ ['dilek','Dilek Alparslan Güner','İş Zekası ve Raporlama Uzmanı','VA','c'],
+ ['busra','Büşra Kadayıfçı','Veri Analitiği Uzmanı','VA','c'],
+ ['batuhan','Batuhan Metin','Veri Analitiği Uzmanı','VA','c']];
+var P_VARSAYILAN=P.slice();
 var FT={
  SI:['Süreç haritalama','Zaman etüdü','Kaizen','SMED','Norm kadro','5S / saha','Raporlama','Toplantı'],
  IK:['Denetim planı','Saha denetimi','Kontrol noktası','Bulgu takibi','Risk analizi','Raporlama','Toplantı'],
@@ -955,6 +980,28 @@ function temaUygula(){
  try{localStorage.setItem('opmuk_tema',TEMA);localStorage.setItem('opmuk_dark',DARK?'1':'0')}catch(e){}
 }
 var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0;
+var TAKYIL=new Date().getFullYear(),TAKAY=null;
+var AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+/* Bir işin termin (bitiş) tarihini döndürür — takvim için */
+function isTermin(j){var tk=anaAdim(j);if(!tk)return null;var a=(tk.g)?tk.g:j.bas;if(!a)return null;var gl=isGunleri(zmn(a),Math.round(tk.t)||1);return gl.length?gl[gl.length-1]:null}
+function takvimKart(){
+ var yil=TAKYIL||new Date().getFullYear();
+ var yopt='';for(var y=new Date().getFullYear()-1;y<=new Date().getFullYear()+2;y++)yopt+='<option value="'+y+'"'+(y==yil?' selected':'')+'>'+y+'</option>';
+ var h='<div class="card takvim"><div class="tkbas"><h3 style="margin:0">Takvim</h3><select class="tkyil" onchange="TAKYIL=+this.value;TAKAY=null;ciz()">'+yopt+'</select></div><div class="tkgrid">';
+ for(var m=0;m<12;m++){
+  var say=J.filter(function(j){if(j.silindi||!gor(j))return false;var d=isTermin(j);return d&&d.getFullYear()==yil&&d.getMonth()==m}).length;
+  h+='<button class="tkay'+(TAKAY===m?' sec':'')+'" data-a="takay" data-m="'+m+'">'+AYLAR[m]+(say?'<i>'+say+'</i>':'')+'</button>';
+ }
+ h+='</div>';
+ if(TAKAY!==null){
+  var liste=J.filter(function(j){if(j.silindi||!gor(j))return false;var d=isTermin(j);return d&&d.getFullYear()==yil&&d.getMonth()==TAKAY}).sort(function(a,b){return isTermin(a)-isTermin(b)});
+  h+='<div class="tklist"><div class="tklbas">'+AYLAR[TAKAY]+' '+yil+' — termini bu ay olan işler ('+liste.length+')</div>';
+  if(!liste.length)h+='<div style="font-size:12px;color:#8592A0;padding:6px 2px">Bu ay termini olan iş yok.</div>';
+  liste.forEach(function(j){var d=isTermin(j);h+='<button class="tkis" data-a="det" data-j="'+j.id+'"><span>'+esc(j.ad)+'</span><i>'+dtar(d)+'</i></button>'});
+  h+='</div>';
+ }else{h+='<div class="note" style="margin:8px 0 0">Termini olan işleri görmek için bir ay seç.</div>';}
+ return h+'</div>';
+}
 function bekleyenDestek(){var r=[];
  J.forEach(function(j){(j.dst||[]).forEach(function(d,i){
   if(d.durum=='b'&&d.kimden==ME)r.push({j:j,d:d,i:i})})});
@@ -978,6 +1025,8 @@ var ETIKETLER=[
  ['✅','STANDART','standartlaştıralım'],
  ['🎯','HEDEF','termine odak']];
 function yonetici(){return ME=='mert'||ME=='mesut'}
+/* Termin (ek gün) ekleme yetkisi: yalnızca Mesut Bey ve Mert */
+function terminYetkisi(){return ME=='mert'||ME=='mesut'}
 function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if((pn(ME)[4]||'')=='ust')return true;var _u=(pn(ME)[2]||'').toLocaleLowerCase('tr');if(_u.indexOf('müdür')>=0||_u.indexOf('mudur')>=0||_u.indexOf('direktör')>=0||_u.indexOf('direktor')>=0||_u.indexOf('şef')>=0||_u.indexOf('sef')>=0||_u.indexOf('yönetici')>=0||_u.indexOf('yonetici')>=0)return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function oncEt(o){if(o=='acil')return '<span style="flex:none;background:#C0392B;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">ACİL</span>';if(o=='yuksek')return '<span style="flex:none;background:#B9770E;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">YÜKSEK</span>';return ''}
 function bYetkiTum(){return sistemci()}
@@ -1512,6 +1561,23 @@ function tipAd(t){return t=='o'?'ONAY':t=='k'?'KONTROL':'İŞ'}
 function cur(j){for(var i=0;i<j.a.length;i++)if(j.a[i].d=='a')return j.a[i];return null}
 /* Ana (asıl işi yapan) 'i' adımı: önce aktif iş adımı, yoksa ilk tamamlanmamış iş adımı, yoksa ilk iş adımı */
 function anaAdim(j){var c=cur(j);if(c&&stip(c)=='i')return c;var t=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&x.d!='t'&&!t)t=x});if(t)return t;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!t)t=x});return t}
+/* Çok kişili işte tüm aktif iş adımlarını aynı başlangıca çeker → aynı iş = aynı gün.
+   Kabul anında sadece ilk adım güncelleniyordu, diğerleri oluşturma tarihinde kalıp
+   farklı gün gösteriyordu; bu onu düzeltir. */
+function isAdimHizala(j,ts){if(!ts)return;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&x.d=='a')x.g=ts})}
+/* Yüklemede eski verideki tutarsızlığı onarır: kabul edilmiş bir işte birden çok aktif
+   iş adımı FARKLI başlangıç taşıyorsa hepsini işin başlangıcına (yoksa en erken güne) eşitler. */
+function isBaslangicOnar(j){
+ if(!j||j.kabul===false)return false;
+ var akt=(j.a||[]).filter(function(x){return stip(x)=='i'&&x.d=='a'});
+ if(akt.length<2)return false;
+ var gset={};akt.forEach(function(x){gset[x.g||0]=1});
+ if(Object.keys(gset).length<2)return false;         /* zaten hepsi aynı */
+ var hedef=j.bas;if(!hedef){var mn=null;akt.forEach(function(x){if(x.g&&(mn===null||x.g<mn))mn=x.g});hedef=mn||j.bas}
+ if(!hedef)return false;
+ akt.forEach(function(x){x.g=hedef});
+ return true;
+}
 function gec(s){return s.g?gn(s.g,TODAY):0}
 function as(s){return gec(s)-s.t}
 function gor(j){if(j&&j.silindi)return false;var p=pn(ME);
@@ -1763,7 +1829,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s88-YATAYTABLO</div>'+
+  '<div class="galt">SÜRÜM s91-MADDELER</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1792,6 +1858,7 @@ function ciz(){try{gozBanner()}catch(e){}
    akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik'};
  t.innerHTML='<button class="mnb" data-a="cekmeceac">☰</button>'+
    (V=='ana'?'':'<button class="bk" data-a="geri">‹ Geri</button>')+
+   (V=='ana'?'':'<button class="bk anab" data-a="ana" title="Ana sayfa">⌂<span class="anab-t"> Ana Sayfa</span></button>')+
    (V=='ana'
      ?'<div class="tt marka"><span class="mrk"><i></i><i></i><i></i></span>'+
        '<span><b style="display:block;line-height:1.05">OPEX</b>'+
@@ -1903,7 +1970,8 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s88-YATAYTABLO · '+
+  h+=takvimKart();
+  h+='<div class="note" style="margin:12px 0 0">sürüm s91-MADDELER · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -1994,7 +2062,12 @@ function ciz(){try{gozBanner()}catch(e){}
     if(GFILT=='gec')return as(c)>0;
     return true;});
   var _w={acil:0,yuksek:1,normal:2};
-  liste.sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});
+  if(GFILT=='tamam'){
+    /* Tamamlanan işler: tamamlanma tarihi en güncel olan en üstte */
+    liste.sort(function(a,b){var sa=(a.a&&a.a.length)?(a.a[a.a.length-1].b||''):'',sb=(b.a&&b.a.length)?(b.a[b.a.length-1].b||''):'';return sa<sb?1:(sa>sb?-1:0)});
+  }else{
+    liste.sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});
+  }
   h='<h2 style="margin:4px 0 10px">'+(etk[GFILT]||'İşler')+(GBOL&&B[GBOL]?(' — '+B[GBOL].ad):'')+(GKIS?(' · '+ad(GKIS)):'')+' ('+liste.length+')</h2>';
   if(!liste.length)h+='<div class="emp">Bu durumda iş yok.</div>';
   h+='<div class="card">'+isTablo(liste)+'</div>';
@@ -2110,7 +2183,7 @@ function ciz(){try{gozBanner()}catch(e){}
      var bt='<button data-a="gunyaz" data-j="'+j.id+'" data-d="'+iso+'" style="margin-top:6px;border:1px solid #CDD9CF;background:#F4FBF6;color:#2E7D4B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer">\u270E '+((j.gunluk&&j.gunluk[iso])?'Düzenle':'Yaz')+'</button>';
      var _ext=task&&(gi>=(task.t-(j.ekgun||0)));
      h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+bt+'</td></tr>';});
-    h+='</table></div><button data-a="ekterm" data-j="'+j.id+'" class="b g" style="margin-top:10px;width:auto;padding:8px 14px;font-size:12px">＋ Ek termin talebi</button><div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (araya iş girmesi / ek termin talebi). İş günleri (hafta sonu hariç) listelenir.</div></div>';
+    h+='</table></div>'+(terminYetkisi()?'<button data-a="ekterm" data-j="'+j.id+'" class="b g" style="margin-top:10px;width:auto;padding:8px 14px;font-size:12px">＋ Ek termin talebi</button>':'')+'<div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (araya iş girmesi / ek termin talebi). İş günleri (hafta sonu hariç) listelenir.</div></div>';
    }})();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
   var _lg=(j.lg||[]).slice().sort(function(a,b){return zmn(a.ts)-zmn(b.ts)});
@@ -2524,7 +2597,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s88-YATAYTABLO</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s91-MADDELER</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -3269,7 +3342,7 @@ document.addEventListener('click',function(e){
  else if(a=='dst'){DST=+t.dataset.j}
  else if(a=='dno'){DST=0}
  else if(a=='atadegis'){ATAND=+t.dataset.j}
- else if(a=='atadno'){ATAND=0}
+ else if(a=='takay'){var _m=+t.dataset.m;TAKAY=(TAKAY===_m)?null:_m} else if(a=='atadno'){ATAND=0}
  else if(a=='atadgo'){
   var _aj=bul(+t.dataset.j); if(!_aj){return}
   if(!((_aj.atayan==ME)||atamaYetkisi()||sistemci())){say('Bu işi devretme yetkin yok.');return}
@@ -3483,7 +3556,7 @@ document.addEventListener('click',function(e){
   /* Öncelikli kabul: işi hemen başlat, süresi kadar diğer açık işlere ek termin ekle */
   var _kj=bul(+t.dataset.j); if(!_kj){return}
   var _ci=cur(_kj); if(!_ci||_ci.k!=ME){say('Bu iş sana atanmış değil.');return}
-  var _tn=now(); _kj.kabul=true; _kj.bas=_tn; _ci.g=_tn;
+  var _tn=now(); _kj.kabul=true; _kj.bas=_tn; isAdimHizala(_kj,_tn);
   if(_kj.oncelik!='acil')_kj.oncelik='yuksek';
   (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Öncelikli kabul — hemen başladı'});
   var _yd=Math.round((_ci.t||1)*100)/100,_uz=[];
@@ -3512,11 +3585,11 @@ document.addEventListener('click',function(e){
    var _bd=new Date(_son.getFullYear(),_son.getMonth(),_son.getDate()+1);
    while(!isGunu(_bd))_bd.setDate(_bd.getDate()+1);
    _bd.setHours(9,0,0,0);var _st=yer(_bd);
-   _kj.bas=_st;_ci.g=_st;
+   _kj.bas=_st;isAdimHizala(_kj,_st);
    (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Sıraya alındı — '+dtar(_bd)+' başlar'});
    say('Sıraya alındı — '+dtar(_bd)+' tarihinde başlayacak');
   }else{
-   _kj.bas=_tn;_ci.g=_tn;
+   _kj.bas=_tn;isAdimHizala(_kj,_tn);
    (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Kabul edildi — başladı (sıra boştu)'});
    say('Sırada başka iş yoktu — hemen başladı');
   }
@@ -3530,6 +3603,7 @@ document.addEventListener('click',function(e){
   setTimeout(function(){URL.revokeObjectURL(_u)},60000);return;
  }
  else if(a=='ekterm'){
+  if(!terminYetkisi()){say('Termin ekleme yetkisi yalnızca Mesut Bey ve Mert’te.');return}
   var _ej=bul(+t.dataset.j); if(!_ej){return}
   var _g=prompt('Kaç iş günü eklensin?','1'); if(_g===null)return;
   _g=parseFloat(String(_g).replace(',','.')); if(!(_g>0)){say('Geçerli bir gün gir.');return}
@@ -3788,9 +3862,17 @@ function talepleriGetir(){
      dbClient.from('kayitlar').select('*').order('baslangic',{ascending:false}).limit(500)]);
    var iL=r[0].data,tL=r[1].data,pL=r[2].data,bL=r[3].data,kL=r[4].data;
    if(iL&&iL.length){var g=iL.map(function(x){return x.veri}).filter(Boolean);if(g.length)J=g}
+   try{var _onar=0;J.forEach(function(j){if(isBaslangicOnar(j))_onar++});if(_onar&&window.senkronCalistir)setTimeout(window.senkronCalistir,1200);}catch(e){}
    if(tL&&tL.length)T=tL.map(function(x){return {id:x.id,ad:x.ad}});
    try{T=tesisFarkUygula(T)}catch(e){}
    if(pL&&pL.length)P=pL.map(function(x){return [x.id,x.ad,x.unvan,x.bolum,x.rol]});
+   /* Büşra ve Batuhan bulutta yoksa da her zaman listede olsun (Veri Analitiği) */
+   ['busra','batuhan'].forEach(function(_id){
+     if(!P.some(function(p){return p[0]==_id})){
+       var _v=P_VARSAYILAN.filter(function(p){return p[0]==_id})[0];
+       if(_v)P.push(_v.slice());
+     }
+   });
    if(bL&&bL.length)bL.forEach(function(x){
      if(B[x.id])B[x.id]={ad:x.ad,sef:x.sef,ust:x.ust,ug:x.ust_gerek?1:0}});
    if(kL&&kL.length){
