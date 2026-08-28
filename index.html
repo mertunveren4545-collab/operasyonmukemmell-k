@@ -186,6 +186,7 @@ body.dk .tehlike .td{color:#9AA4AE}
 .itab.kompakt .acik{color:#5A6B60;font-size:10px}
 body.dk .itab.kompakt .acik{color:#9FB0A6}
 .itab td:nth-child(10){font-weight:600;color:#12315C}
+.itabWrap{width:100%}
 .itab tr.gecsat td{background:#FDEEEC;box-shadow:inset 3px 0 0 #C0392B}
 .itab tr.gecsat:hover td{background:#FCE4E1}
 .gtab{font-size:12px;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(16,40,30,.05)}
@@ -225,6 +226,20 @@ body.dk .extgun td{background:#3A1E1A!important}
  .itab{font-size:11px}
  .itab th,.itab td{padding:7px 6px}
  .itab .isad{min-width:120px}
+ /* telefonda İşler tablosu: yatay kaydırılabilir, sütunlar okunur genişlikte,
+    metin harf harf değil kelime kelime sarar (bilgisayarda değişmez) */
+ .itabWrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
+ .itab.kompakt{table-layout:auto;min-width:860px}
+ .itab.kompakt th,.itab.kompakt td{font-size:11.5px;padding:9px 10px;white-space:nowrap;word-break:normal;overflow-wrap:normal}
+ .itab.kompakt colgroup col{width:auto!important}
+ .itab.kompakt td:nth-child(1),.itab.kompakt th:nth-child(1){white-space:normal;min-width:80px}
+ .itab.kompakt td:nth-child(2),.itab.kompakt th:nth-child(2){white-space:normal;min-width:150px;max-width:215px}
+ .itab.kompakt td:nth-child(3),.itab.kompakt th:nth-child(3){white-space:normal;min-width:88px}
+ .itab.kompakt td:nth-child(6),.itab.kompakt th:nth-child(6){white-space:normal;min-width:120px;max-width:190px}
+ .itab.kompakt td:nth-child(10),.itab.kompakt th:nth-child(10){white-space:normal;min-width:92px}
+ .itab.kompakt td:nth-child(12),.itab.kompakt th:nth-child(12){white-space:normal;min-width:130px;max-width:215px}
+ .itab.kompakt .isad{min-width:150px}
+ .itab.kompakt .acik{font-size:11px}
  .gtab th,.gtab td{padding:7px 7px}
 }
 /* ---- yatay şema ---- */
@@ -869,8 +884,9 @@ function dtar(d){return ii(d.getDate())+'.'+ii(d.getMonth()+1)+'.'+d.getFullYear
 function dataURLBlob(du){try{var a=du.split(','),m=(a[0].match(/:(.*?);/)||[])[1]||'application/octet-stream',b=atob(a[1]),n=b.length,u=new Uint8Array(n);while(n--)u[n]=b.charCodeAt(n);return new Blob([u],{type:m})}catch(e){return null}}
 function isKolon(j,taskOverride){var steps=j.a||[],task=null,onays=[];steps.forEach(function(x){var tp=stip(x);if(tp=='i'&&!task){task=x}else if(tp=='o'){onays.push(x)}});if(taskOverride)task=taskOverride;var c=cur(j);var acilisTs=(task&&task.g)?task.g:j.bas;var terminD='';if(task&&acilisTs){var gl=isGunleri(zmn(acilisTs),Math.round(task.t)||1);if(gl.length)terminD=dtar(gl[gl.length-1])}var surec=(j.kabul===false)?'Kabul bekliyor':(c?((stip(c)=='o'||stip(c)=='k')?(ad(c.k)+' (onayda)'):ad(c.k)):'Tamamlandı');var bitti=!c&&j.kabul!==false;return {isim:task?ad(task.k):'',is:j.ad,tesis:tad(j.ts_),acilis:acilisTs?dtar(zmn(acilisTs)):'',termin:terminD,sebep:(j.uzama&&j.uzama.length)?j.uzama.map(function(u){return u.neden}).join(' | '):(j.gecikmeSebebi||''),gonderme:(task&&task.b)?dtar(zmn(task.b)):'',onay1:(onays[0]&&onays[0].b)?dtar(zmn(onays[0].b)):'',onay2:(onays[1]&&onays[1].b)?dtar(zmn(onays[1].b)):'',surec:surec,tamam:(bitti&&steps.length&&steps[steps.length-1].b)?dtar(zmn(steps[steps.length-1].b)):'',aciklama:(function(){var g=j.gunluk||{};var s=Object.keys(g).sort().map(function(d){return g[d]}).filter(Boolean).join(' · ');return s||j.aciklama||''})()}}
 function isTablo(list){if(!list.length)return '<div style="font-size:13px;color:#8592A0">İş yok.</div>';
- /* kompakt = sabit kolon genişliği + satır sarması → tek ekrana sığar, yatay kaydırma yok */
- var h='<table class="itab kompakt"><colgroup>'+
+ /* bilgisayarda: sabit kolonlu tam-ekran tablo. telefonda: yatay kaydırılabilir,
+    okunur sütun genişlikleri, kelime bazında sarma (CSS itabWrap + @media 599px) */
+ var h='<div class="itabWrap"><table class="itab kompakt"><colgroup>'+
   '<col style="width:8%"><col style="width:13%"><col style="width:9%"><col style="width:7%"><col style="width:7%"><col style="width:11%"><col style="width:7%"><col style="width:6%"><col style="width:6%"><col style="width:9%"><col style="width:7%"><col style="width:10%">'+
   '</colgroup>'+
   '<tr><th>İsim</th><th>İş</th><th>Tesis</th><th>Başlangıç</th><th>Termin</th><th>Termin Uymama Sebebi</th><th>İş Gönderme</th><th>1. Onay</th><th>2. Onay</th><th>Süreç Kimde</th><th>Tamamlanma</th><th>Açıklama</th></tr>';
@@ -883,7 +899,7 @@ function isTablo(list){if(!list.length)return '<div style="font-size:13px;color:
   _uniq.forEach(function(tk){var k=isKolon(j,tk);
    h+='<tr data-a="det" data-j="'+j.id+'"'+(a2>0?' class="gecsat"':'')+'><td>'+esc(k.isim)+'</td><td class="isad">'+esc(k.is)+oncEt(j.oncelik)+'</td><td>'+esc(k.tesis)+'</td><td>'+k.acilis+'</td><td>'+k.termin+'</td><td>'+esc(k.sebep)+'</td><td>'+k.gonderme+'</td><td>'+k.onay1+'</td><td>'+k.onay2+'</td><td>'+esc(k.surec)+'</td><td>'+k.tamam+'</td><td class="acik" title="'+esc(k.aciklama)+'">'+esc(k.aciklama)+'</td></tr>';
   });
- });return h+'</table>'}
+ });return h+'</table></div>'}
 function yer(d){return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())+'T'+ii(d.getHours())+':'+ii(d.getMinutes())}
 var ST=['08:40','10:15','13:20','15:45','09:30','11:50','16:20','14:05'],SX=0;
 function ago(n,s){var d=new Date();d.setDate(d.getDate()-n);var t=s||ST[SX++%8];
@@ -1747,7 +1763,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s87-COKKISI</div>'+
+  '<div class="galt">SÜRÜM s88-YATAYTABLO</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1887,7 +1903,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s87-COKKISI · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s88-YATAYTABLO · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2508,7 +2524,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s87-COKKISI</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s88-YATAYTABLO</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
