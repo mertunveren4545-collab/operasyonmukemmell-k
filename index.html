@@ -796,6 +796,26 @@ var T=[
  {id:'t14',ad:'Lojistik / Depo'},
  {id:'t15',ad:'Genel / Tesis dışı'}];
 function tad(i){for(var x=0;x<T.length;x++)if(T[x].id==i)return T[x].ad;return '—'}
+/* ---- Tesis kalıcılığı (cihazda saklanan ekleme/silme/adlandırma farkı) ----
+   Bazı hesaplarda bulut (Supabase) DELETE izni RLS ile kapalı olduğundan,
+   silinen tesis buluttan gerçekten gitmiyor ve her yenilemede geri geliyordu.
+   Bu katman kullanıcının ekleme / silme / ad değiştirme isteğini cihazda
+   (localStorage) tutar ve her açılışta uygular. Böylece HİÇBİR tesis kullanıcı
+   silmedikçe kaybolmaz; silinen de yenilemede geri gelmez. */
+function _tdFark(){var d;try{d=JSON.parse(localStorage.getItem('opmuk_tesis_fark')||'{}')||{}}catch(e){d={}}d.sil=d.sil||[];d.ekle=d.ekle||[];d.ad=d.ad||{};return d}
+function _tdYaz(d){try{localStorage.setItem('opmuk_tesis_fark',JSON.stringify(d))}catch(e){}}
+function tesisFarkUygula(liste){
+ var d=_tdFark();
+ liste.forEach(function(x){if(d.ad[x.id])x.ad=d.ad[x.id]});          /* ad değişiklikleri */
+ liste=liste.filter(function(x){return d.sil.indexOf(x.id)<0});      /* silinenleri gizle */
+ d.ekle.forEach(function(e){                                          /* eklenenleri geri getir */
+  var varMi=liste.some(function(x){return x.id==e.id})||
+            liste.some(function(x){return (x.ad||'').toLocaleLowerCase('tr')==(e.ad||'').toLocaleLowerCase('tr')});
+  if(!varMi)liste.push(e);
+ });
+ return liste;
+}
+try{T=tesisFarkUygula(T)}catch(e){}
 var ODAK={
  SI:{alt:[{b:'Süreç İyileştirme',l:['Süreç haritalama','Süreç standardizasyonu','Yalın (Lean), Six Sigma projeleri','Süreç KPI takibi']},
           {b:'Yalın Dönüşüm',l:['Kaizen çalışmaları','İsraf azaltma','Verimlilik arttırma projeleri','Saha iyileştirme uygulamaları']}]},
@@ -909,7 +929,7 @@ function temaUygula(){
   '.obas{color:'+c.ana+'}';
  try{localStorage.setItem('opmuk_tema',TEMA);localStorage.setItem('opmuk_dark',DARK?'1':'0')}catch(e){}
 }
-var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0;
+var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0;
 function bekleyenDestek(){var r=[];
  J.forEach(function(j){(j.dst||[]).forEach(function(d,i){
   if(d.durum=='b'&&d.kimden==ME)r.push({j:j,d:d,i:i})})});
@@ -1447,6 +1467,8 @@ function navYukle(s){V=s.V;OJ=s.OJ;OB=s.OB;FILT=s.FILT;GFILT=s.GFILT;GBOL=s.GBOL
 function stip(x){return x.tp||(x.o?'o':'i')}
 function tipAd(t){return t=='o'?'ONAY':t=='k'?'KONTROL':'İŞ'}
 function cur(j){for(var i=0;i<j.a.length;i++)if(j.a[i].d=='a')return j.a[i];return null}
+/* Ana (asıl işi yapan) 'i' adımı: önce aktif iş adımı, yoksa ilk tamamlanmamış iş adımı, yoksa ilk iş adımı */
+function anaAdim(j){var c=cur(j);if(c&&stip(c)=='i')return c;var t=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&x.d!='t'&&!t)t=x});if(t)return t;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!t)t=x});return t}
 function gec(s){return s.g?gn(s.g,TODAY):0}
 function as(s){return gec(s)-s.t}
 function gor(j){if(j&&j.silindi)return false;var p=pn(ME);
@@ -1978,6 +2000,29 @@ function ciz(){try{gozBanner()}catch(e){}
    '</div>';
   });
   h+='</div></div>';
+  /* ---- Atanan kişiyi değiştir (atayan / yetkili) ---- */
+  (function(){
+   var _tk=anaAdim(j);
+   if(!_tk||_tk.d=='t')return;                       /* iş adımı bitmişse (onay/kapanış) değiştirme */
+   var _yetki=(j.atayan==ME)||atamaYetkisi()||sistemci();
+   if(!_yetki)return;
+   h+='<div class="card"><h3>Atanan kişi</h3>'+
+     '<div style="font-size:13px;color:#5A6A63;margin-bottom:10px">Şu an: <b>'+ad(_tk.k)+'</b>'+
+     (j.kabul===false?' <span style="color:#B9770E;font-weight:600">(kabul bekliyor)</span>':(cur(j)===_tk?' <span style="color:#B9770E;font-weight:600">(sürüyor)</span>':''))+'</div>';
+   if(ATAND==j.id){
+    h+='<label>Yeni sorumlu</label><select class="n" id="atsec"><option value="">— Kişi seç —</option>'+
+      Object.keys(B).map(function(bk){var g7=P.filter(function(p){return p[3]==bk&&p[0]!=_tk.k});
+       return g7.length?'<optgroup label="'+B[bk].ad+'">'+g7.map(function(p){
+        return '<option value="'+p[0]+'">'+esc(p[1])+' — '+esc(p[2])+'</option>'}).join('')+'</optgroup>':''}).join('')+
+      '</select>'+
+      '<div style="height:10px"></div><div class="two">'+
+      '<button class="b" data-a="atadgo" data-j="'+j.id+'">Değiştir ve gönder</button>'+
+      '<button class="b g" data-a="atadno">Vazgeç</button></div>'+
+      '<div class="note">Yeni kişi işi kabul edene kadar termin başlamaz. Kabul bekleyen işlerde ise devir hemen görünür.</div></div>';
+   }else{
+    h+='<button class="b g" data-a="atadegis" data-j="'+j.id+'">Atanan kişiyi değiştir</button></div>';
+   }
+  })();
    if(c&&as(c)>0){
     var _srm=c.k;
     var _dk=K.filter(function(kk){return kk.k==_srm&&(!j.bas||String(kk.ts)>=String(j.bas))}).sort(function(a,b){return (String(b.ts)>String(a.ts))?1:-1});
@@ -3144,13 +3189,20 @@ document.addEventListener('click',function(e){
   var el3=document.getElementById('te'),nv=el3?el3.value.trim():'';
   if(nv.length<3){say('Tesis adı en az 3 harf olmalı.');return}
   for(var z=0;z<T.length;z++)if(T[z].id==t.dataset.i)T[z].ad=nv;
-  if(dbClient)dbClient.from('tesisler').upsert({id:t.dataset.i,ad:nv}).then(function(){},function(){});
+  var _d=_tdFark();_d.ad[t.dataset.i]=nv;_d.ekle.forEach(function(e){if(e.id==t.dataset.i)e.ad=nv});_tdYaz(_d);
+  if(dbClient)dbClient.from('tesisler').upsert({id:t.dataset.i,ad:nv}).then(function(r){if(r&&r.error)say('Buluta yazılamadı (cihazda saklandı): '+r.error.message)},function(){});
   ED=0;say('Tesis adı güncellendi.');
  }
  else if(a=='tdel'){
   var sid=t.dataset.i,sad='';
   T.forEach(function(x){if(x.id==sid)sad=x.ad});
   T=T.filter(function(x){return x.id!=sid});
+  /* cihazda kalıcı sil → yenilemede geri gelmez (bulut DELETE kapalı olsa bile) */
+  var _d=_tdFark();
+  if(_d.sil.indexOf(sid)<0)_d.sil.push(sid);
+  _d.ekle=_d.ekle.filter(function(e){return e.id!=sid});
+  if(_d.ad[sid])delete _d.ad[sid];
+  _tdYaz(_d);
   if(dbClient)dbClient.from('tesisler').delete().eq('id',sid).then(function(){},function(){});
   ED=0;say(sad+' silindi. Eski kayıtlarda "—" görünür.');
  }
@@ -3160,7 +3212,12 @@ document.addEventListener('click',function(e){
   if(T.some(function(x){return x.ad.toLocaleLowerCase('tr')==tn.toLocaleLowerCase('tr')}))
    {say('Bu tesis zaten var.');return}
   var _tid='t'+Date.now();T.push({id:_tid,ad:tn});
-  if(dbClient)dbClient.from('tesisler').upsert({id:_tid,ad:tn}).then(function(r){if(r&&r.error)say('Buluta yazılamadı: '+r.error.message)},function(){});
+  /* cihazda kalıcı kıl → yenilemede kaybolmaz (bulut yazımı başarısız olsa bile) */
+  var _d=_tdFark();
+  var _si=_d.sil.indexOf(_tid);if(_si>=0)_d.sil.splice(_si,1);
+  if(!_d.ekle.some(function(e){return e.id==_tid}))_d.ekle.push({id:_tid,ad:tn});
+  _tdYaz(_d);
+  if(dbClient)dbClient.from('tesisler').upsert({id:_tid,ad:tn}).then(function(r){if(r&&r.error)say('Buluta yazılamadı (cihazda saklandı): '+r.error.message)},function(){});
   say(tn+' eklendi');
  }
  else if(a=='yeni'){ATAMA=false;V='yeni'}
@@ -3168,6 +3225,35 @@ document.addEventListener('click',function(e){
  else if(a=='red'){RED=+t.dataset.j}
  else if(a=='dst'){DST=+t.dataset.j}
  else if(a=='dno'){DST=0}
+ else if(a=='atadegis'){ATAND=+t.dataset.j}
+ else if(a=='atadno'){ATAND=0}
+ else if(a=='atadgo'){
+  var _aj=bul(+t.dataset.j); if(!_aj){return}
+  if(!((_aj.atayan==ME)||atamaYetkisi()||sistemci())){say('Bu işi devretme yetkin yok.');return}
+  var _sel=document.getElementById('atsec'),_yeni=_sel?_sel.value:'';
+  if(!_yeni){say('Yeni sorumluyu seç.');return}
+  var _tk=anaAdim(_aj); if(!_tk||_tk.d=='t'){say('Bu iş adımı artık devredilemez.');return}
+  var _eski=_tk.k;
+  if(_yeni==_eski){say('Zaten bu kişide.');ATAND=0;return}
+  var _tn=now(),_wasCur=(cur(_aj)===_tk);
+  _tk.k=_yeni;
+  if(_yeni==ME){
+   /* atayan işi kendine aldı → hemen üstlenir, termin şimdi başlar */
+   _aj.kabul=true;_tk.d='a';_tk.b=0;if(!_tk.g)_tk.g=_tn;if(!_aj.bas)_aj.bas=_tn;
+  }else{
+   /* başkasına devir → yeni kişi kabul edene kadar bekler, termin sıfırdan başlar */
+   _aj.kabul=false;_tk.d='a';_tk.g=0;_tk.b=0;
+  }
+  (_aj.lg=_aj.lg||[]).push({ts:_tn,k:ME,tip:'Atanan kişi değişti: '+ad(_eski)+' → '+ad(_yeni)});
+  _aj.atayan=ME;_aj.atandi=_tn;
+  ATAND=0;
+  try{
+   if(_yeni!=ME)pushGonder([_yeni],'Sana iş atandı — kabul et',_aj.ad);
+   if(_eski!=ME)pushGonder([_eski],'İş senden alındı',_aj.ad+' → '+ad(_yeni));
+  }catch(e){}
+  say('Atanan kişi değişti → '+ad(_yeni)+(_yeni!=ME?' (kabul bekliyor)':''));
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
+ }
  else if(a=='dgo'){
   var jd=bul(+t.dataset.j);
   var dk2=document.getElementById('dk').value,dn2=document.getElementById('dn').value.trim(),
@@ -3660,6 +3746,7 @@ function talepleriGetir(){
    var iL=r[0].data,tL=r[1].data,pL=r[2].data,bL=r[3].data,kL=r[4].data;
    if(iL&&iL.length){var g=iL.map(function(x){return x.veri}).filter(Boolean);if(g.length)J=g}
    if(tL&&tL.length)T=tL.map(function(x){return {id:x.id,ad:x.ad}});
+   try{T=tesisFarkUygula(T)}catch(e){}
    if(pL&&pL.length)P=pL.map(function(x){return [x.id,x.ad,x.unvan,x.bolum,x.rol]});
    if(bL&&bL.length)bL.forEach(function(x){
      if(B[x.id])B[x.id]={ad:x.ad,sef:x.sef,ust:x.ust,ug:x.ust_gerek?1:0}});
