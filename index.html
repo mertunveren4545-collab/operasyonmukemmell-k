@@ -1038,9 +1038,27 @@ function onizle(m){
  return p+(m.metin||'').slice(0,42);
 }
 var SW=null;
+function _swTazele(){if(window._swReloaded)return;window._swReloaded=true;setTimeout(function(){location.reload()},350);}
 if('serviceWorker' in navigator){
- navigator.serviceWorker.register('sw.js').then(function(r){SW=r},function(){});
+ navigator.serviceWorker.register('sw.js').then(function(r){
+   SW=r;
+   try{r.update()}catch(e){}
+   /* yeni sürüm bulunduğunda: kurulunca devreye al ve sayfayı bir kez tazele
+      → böylece index güncellemesi telefonda otomatik görünür, eski önbellek takılmaz */
+   r.addEventListener('updatefound',function(){
+    var nw=r.installing;if(!nw)return;
+    nw.addEventListener('statechange',function(){
+     if(nw.state=='installed'&&navigator.serviceWorker.controller){
+      try{if(r.waiting)r.waiting.postMessage('skipWaiting')}catch(e){}
+      _swTazele();
+     }
+    });
+   });
+ },function(){});
  navigator.serviceWorker.ready.then(function(r){SW=r}).catch(function(){});
+ navigator.serviceWorker.addEventListener('controllerchange',_swTazele);
+ /* uygulama öne gelince güncelleme kontrolü */
+ document.addEventListener('visibilitychange',function(){if(!document.hidden&&SW){try{SW.update()}catch(e){}}});
 }
 function swReg(){
  if('serviceWorker' in navigator && navigator.serviceWorker.ready) return navigator.serviceWorker.ready;
@@ -1729,7 +1747,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s86-TERMINTESIS</div>'+
+  '<div class="galt">SÜRÜM s87-COKKISI</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1869,7 +1887,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s86-TERMINTESIS · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s87-COKKISI · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2490,7 +2508,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s86-TERMINTESIS</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s87-COKKISI</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
