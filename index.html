@@ -1829,7 +1829,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s91-MADDELER</div>'+
+  '<div class="galt">SÜRÜM s92-TAKVIMYER</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1924,19 +1924,7 @@ function ciz(){try{gozBanner()}catch(e){}
    '</tr>';});
   h+='<tr class="dtop"><td style="text-align:left">TOPLAM</td><td data-a="genfilt" data-f="toplam">'+_GS.toplam+'</td><td data-a="genfilt" data-f="tamam">'+_GS.tamam+'</td><td data-a="genfilt" data-f="devam">'+(_GS.acik-_GS.onay)+'</td><td data-a="genfilt" data-f="onay">'+_GS.onay+'</td><td data-a="genfilt" data-f="gec">'+_GS.gec+'</td></tr>';
   h+='</table></div></div>';
-  h+='<h2>'+(tumBolum()?'Bölüm durumları':'Bölümüm')+'</h2>';
-  bolumListesi().forEach(function(k){
-   var vv=bolStat(k);
-   h+='<div class="r" data-a="bdet" data-b="'+k+'" style="display:block;cursor:pointer;padding:13px 14px;margin-bottom:9px">'+
-     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">'+
-       '<b style="font-size:14px">'+B[k].ad+'</b><span style="color:#B7C0BB;font-size:18px">\u203a</span></div>'+
-     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">'+
-       minik('Açık',vv.acik,'#1B5E3F','#E8F3EC')+
-       minik('Onayda',vv.onay,'#B9770E','#FFF8E1')+
-       minik('Geciken',vv.gec,vv.gec?'#C0392B':'#7A8A83',vv.gec?'#FBE9E7':'#F4F6F5')+
-       minik('Tamam',vv.tamam,'#1B5E3F','#E8F3EC')+
-     '</div></div>';
-  });
+  h+=takvimKart();
 
   var bd=bekleyenDestek();
   if(bd.length){
@@ -1970,8 +1958,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+=takvimKart();
-  h+='<div class="note" style="margin:12px 0 0">sürüm s91-MADDELER · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s92-TAKVIMYER · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2597,7 +2584,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s91-MADDELER</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s92-TAKVIMYER</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
