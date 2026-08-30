@@ -645,6 +645,13 @@ body.dk .gozet i{background:#171C23;border-color:#252C35;color:#8592A0}
  #app{grid-template-columns:repeat(3,1fr)}
  #app>.card,#app>.box,#app>.fl{grid-column:span 3}
 }
+/* Çok geniş ekran: takvimi sol dış boşluğa al, altındaki içerik yukarı gelsin */
+@media(min-width:1800px){
+ #app{position:relative}
+ #app>.card.takvim{position:absolute;left:-232px;width:210px;max-width:none;margin:0;padding:14px 12px}
+ #app>.card.takvim .tkay{padding:11px 4px;font-size:12px}
+ #app>.card.takvim .tkbas h3{font-size:16px}
+}
 /* --- sohbet kendi düzeninde --- */
 #app.sohbet{display:block!important;max-width:780px;margin:0 auto}
 #app.sohbet .mliste{max-height:calc(100vh - 320px);overflow-y:auto;
@@ -1831,7 +1838,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s93-TAKVIMSOL</div>'+
+  '<div class="galt">SÜRÜM s94-TAKVIMSOL2</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1849,6 +1856,15 @@ function sifreEkrani(zorunlu){
   '<div class="note">Kolay hatırlayacağın ama başkasının tahmin edemeyeceği bir şey seç.</div>'+
   '</div></div>';
 }
+function yerlestirTakvim(){
+ var el=document.getElementById('app'); if(!el)return;
+ var tk=el.querySelector('.takvim'); if(!tk)return;
+ if(window.innerWidth>=1800){
+  var tbl=el.querySelector('.dtab'), card=tbl?tbl.closest('.card'):null;
+  tk.style.top=(card?(card.offsetTop+card.offsetHeight+12):120)+'px';
+ } else { tk.style.top=''; }
+}
+if(!window.__takResizeBound){window.__takResizeBound=1;window.addEventListener('resize',function(){try{yerlestirTakvim()}catch(e){}});}
 function ciz(){try{gozBanner()}catch(e){}
  if(!GIRIS){girisEkrani();return}
  if(ZORUNLU){sifreEkrani(true);return}
@@ -1960,7 +1976,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s93-TAKVIMSOL · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s94-TAKVIMSOL2 · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2586,7 +2602,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s93-TAKVIMSOL</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s94-TAKVIMSOL2</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
@@ -2910,6 +2926,7 @@ function ciz(){try{gozBanner()}catch(e){}
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
  }
  el.innerHTML=h;
+ try{yerlestirTakvim()}catch(e){}
  try{seritYaz()}catch(e){console.log('serit:',e.message)}
  if(SIG){
   var sw=document.getElementById('sw'),sc=document.getElementById('sc');
