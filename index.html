@@ -629,6 +629,8 @@ body.dk .gozet i{background:#171C23;border-color:#252C35;color:#8592A0}
  #app>.kv,#app>.card,#app>.box,#app>.fl,#app>.org,#app>.oamac,#app>.zbtn,
  #app>.emp,#app>.b,#app>.two,#app>.yazar,#app>.ogrid,#app>.grid,#app>.tabs{grid-column:1/-1}
  #app>.r,#app>.brow{width:100%;display:flex}
+ /* Takvim tek kolon: sağındaki boşluğa alttaki içerik gelsin (sadece masaüstü) */
+ #app>.card.takvim{grid-column:auto;align-self:start}
  body.genis main{max-width:none;padding:16px 26px}
  body.genis #app{display:block}
  #app>.acts{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
@@ -1829,7 +1831,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s92-TAKVIMYER</div>'+
+  '<div class="galt">SÜRÜM s93-TAKVIMSOL</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1958,7 +1960,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s92-TAKVIMYER · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s93-TAKVIMSOL · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2584,7 +2586,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s92-TAKVIMYER</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s93-TAKVIMSOL</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
