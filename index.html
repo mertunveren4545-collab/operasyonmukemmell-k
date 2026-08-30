@@ -557,18 +557,19 @@ body.dk .kisilistesi button{background:#1A1F26;border-color:#333C46;color:#8FB6E
 .top{position:relative}
 .top .tg{margin-left:auto}
 .top .tt.marka.opxwm{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
- flex:none;gap:11px;pointer-events:none;white-space:nowrap}
+ flex:none;gap:13px;pointer-events:none;white-space:nowrap}
 .opxwm .mtx{display:flex;flex-direction:column;line-height:1}
-.opxwm b{font-size:17px;letter-spacing:.16em}
-.opxwm .mtx>span{margin-top:0}
+.opxwm b{font-size:19px;letter-spacing:.18em}
+.opxwm .mtx>span{margin-top:1px}
 @media(min-width:900px){
- .opxwm{gap:14px}
- .opxwm b{font-size:20px;letter-spacing:.22em}
- .opxwm .mtx>span{font-size:10px;letter-spacing:.16em}
- .opxwm .mrk i:nth-child(1){width:24px}
- .opxwm .mrk i:nth-child(2){width:17px}
- .opxwm .mrk i:nth-child(3){width:10px}
- .opxwm .mrk i{height:4px}
+ .opxwm{gap:20px}
+ .opxwm b{font-size:27px;letter-spacing:.30em}
+ .opxwm .mtx>span{font-size:11.5px;letter-spacing:.22em;margin-top:3px}
+ .opxwm .mrk{gap:4px}
+ .opxwm .mrk i{height:5px}
+ .opxwm .mrk i:nth-child(1){width:32px}
+ .opxwm .mrk i:nth-child(2){width:23px}
+ .opxwm .mrk i:nth-child(3){width:13px}
 }
 .gr-logo{text-align:center;margin-bottom:18px}
 .gr-logo .cizgi{display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:12px}
@@ -1857,7 +1858,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s97-OPEXORTA</div>'+
+  '<div class="galt">SÜRÜM s98-OPEXBUYUK</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1995,7 +1996,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s97-OPEXORTA · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s98-OPEXBUYUK · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2621,7 +2622,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s97-OPEXORTA</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s98-OPEXBUYUK</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
