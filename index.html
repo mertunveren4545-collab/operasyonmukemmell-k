@@ -553,6 +553,27 @@ body.dk .kisilistesi button{background:#1A1F26;border-color:#333C46;color:#8FB6E
 .marka .mrk i:nth-child(3){width:8px;background:#E8C34A}
 .marka b{font-size:16px;letter-spacing:.14em;font-weight:800}
 .marka span{font-size:9.5px;letter-spacing:.10em;text-transform:uppercase;opacity:.72;display:block;margin-top:-2px}
+/* ---- Şık OPEX marka (üst barın ortasında) ---- */
+.top{position:relative}
+.top .tg{margin-left:auto}
+.top .tt.marka.opxwm{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+ flex:none;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center;
+ pointer-events:none;white-space:nowrap}
+.opxwm b{font-size:20px;font-weight:800;letter-spacing:.24em;line-height:1;padding-left:.24em;color:#EFCF6E}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+ .opxwm b{background:linear-gradient(95deg,#F6DE86 0%,#EBC24C 42%,#7FD6A0 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  filter:drop-shadow(0 1px 6px rgba(232,195,74,.22))}
+}
+.opxwm .fl{display:block;height:2px;width:66%;margin:3px auto 0;border-radius:2px;
+ background:linear-gradient(90deg,transparent,#E8C34A 28%,#5FBF87 72%,transparent)}
+.opxwm span{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#D7E1F0;opacity:.7;
+ margin-top:3px;padding-left:.12em}
+@media(min-width:900px){
+ .opxwm b{font-size:25px;letter-spacing:.32em;padding-left:.32em}
+ .opxwm .fl{margin-top:4px;width:70%}
+ .opxwm span{font-size:9.5px;letter-spacing:.24em;padding-left:.24em;margin-top:4px}
+}
 .gr-logo{text-align:center;margin-bottom:18px}
 .gr-logo .cizgi{display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:12px}
 .gr-logo .cizgi i{display:block;height:8px;border-radius:5px}
@@ -1840,7 +1861,7 @@ function girisEkrani(){
   '<div style="height:9px"></div><button class="b g" data-a="unut">Şifremi unuttum</button>'+
   '</div>'+
   '<div class="gozet"><i>İş akışı</i><i>Çalışma kaydı</i><i>İş atama</i><i>Analiz</i></div>'+
-  '<div class="galt">SÜRÜM s95-TAKVIMSOL3</div>'+
+  '<div class="galt">SÜRÜM s96-OPEXMARKA</div>'+
   '</div></div>';
 }
 function sifreEkrani(zorunlu){
@@ -1880,9 +1901,8 @@ function ciz(){try{gozBanner()}catch(e){}
    (V=='ana'?'':'<button class="bk" data-a="geri">‹ Geri</button>')+
    (V=='ana'?'':'<button class="bk anab" data-a="ana" title="Ana sayfa">⌂<span class="anab-t"> Ana Sayfa</span></button>')+
    (V=='ana'
-     ?'<div class="tt marka"><span class="mrk"><i></i><i></i><i></i></span>'+
-       '<span><b style="display:block;line-height:1.05">OPEX</b>'+
-       '<span>Operasyonel Mükemmellik</span></span></div>'
+     ?'<div class="tt marka opxwm"><b>OPEX</b><em class="fl"></em>'+
+       '<span>Operasyonel Mükemmellik</span></div>'
      :'<div class="tt">'+bl[V]+'</div>')+
    '<button class="tg" data-a="tema">'+(DARK?'☀':'☾')+'</button>'+
    '<button class="cik" data-a="cikis">Çıkış</button>';
@@ -1978,7 +1998,7 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
-  h+='<div class="note" style="margin:12px 0 0">sürüm s95-TAKVIMSOL3 · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s96-OPEXMARKA · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2604,7 +2624,7 @@ function ciz(){try{gozBanner()}catch(e){}
      '</div>';
   }
   h+='<div class="card"><div class="dbaslik"><em>ℹ️</em><b>Sistem</b></div>'+
-    '<div class="li"><div class="h"><b>Sürüm</b><i>s95-TAKVIMSOL3</i></div></div>'+
+    '<div class="li"><div class="h"><b>Sürüm</b><i>s96-OPEXMARKA</i></div></div>'+
     '<div class="li"><div class="h"><b>Kullanıcı</b><i>'+ad(ME)+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Bölüm</b><i>'+(pn(ME)[3]?bad(pn(ME)[3]):'Direktörlük')+'</i></div></div>'+
     '<div class="li"><div class="h"><b>Yetki</b><i>'+(sistemci()?'Sistem sorumlusu':tumBolum()?'Tüm bölümler':'Kendi bölümü')+'</i></div></div>'+
