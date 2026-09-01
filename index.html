@@ -214,7 +214,7 @@ body.dk .takvim .tklbas{color:#7FD1A4}
 .itab tr.gecsat:hover td{background:#FCE4E1}
 .itab tr.ortakgrp td:first-child{box-shadow:inset 3px 0 0 #2E7D4B}
 .itab tr.ortakgrp.gecsat td:first-child{box-shadow:inset 3px 0 0 #C0392B}
-.ortak{display:inline-block;margin-left:6px;font-size:9px;font-weight:800;letter-spacing:.02em;color:#1E5C36;background:#E3F1E8;border:1px solid #BFE0CC;padding:2px 6px;border-radius:8px;vertical-align:middle;white-space:nowrap}
+.ortak{display:inline-block;margin-left:6px;font-size:9px;font-weight:800;letter-spacing:.02em;color:#1E5C36;background:#E3F1E8;border:1px solid #BFE0CC;padding:2px 6px;border-radius:8px;vertical-align:middle;white-space:normal;line-height:1.5}
 body.dk .ortak{color:#8FE0AA;background:#1E3A2A;border-color:#2E5C40}
 .gtab{font-size:12px;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(16,40,30,.05)}
 .gtab th{background:linear-gradient(180deg,#F3F8F5,#E8F1EB);color:#20493A;font-weight:800;font-size:10px;letter-spacing:.03em;text-transform:uppercase;padding:10px 9px;text-align:left;border-bottom:2px solid #D8E5DD}
@@ -955,7 +955,8 @@ function isTablo(list){if(!list.length)return '<div style="font-size:13px;color:
   _tasks.forEach(function(tk){if(!_gor[tk.k]){_gor[tk.k]=1;_uniq.push(tk)}});
   if(!_uniq.length)_uniq=[null];
   var _cok=_uniq.length>1;                                    /* aynı iş birden çok kişide mi? */
-  var _ortEt=_cok?'<span class="ortak" title="Bu iş '+_uniq.length+' kişiye atandı — hepsi aynı işi yapıyor">👥 ortak · '+_uniq.length+' kişi</span>':'';
+  var _adlar=_uniq.map(function(u){return (u&&u.k)?ad(u.k):''}).filter(Boolean);
+  var _ortEt=_cok?'<span class="ortak" title="Bu iş '+_uniq.length+' kişiye atandı — hepsi aynı işi yapıyor">👥 ortak ('+_uniq.length+' kişi) · '+esc(_adlar.join(', '))+'</span>':'';
   _uniq.forEach(function(tk){var k=isKolon(j,tk);
    var _cls=(a2>0?' gecsat':'')+(_cok?' ortakgrp':'');
    h+='<tr data-a="det" data-j="'+j.id+'"'+(_cls?' class="'+_cls.trim()+'"':'')+'><td>'+esc(k.isim)+'</td><td class="isad">'+esc(k.is)+oncEt(j.oncelik)+_ortEt+'</td><td>'+esc(k.tesis)+'</td><td>'+k.acilis+'</td><td>'+k.termin+'</td><td>'+esc(k.sebep)+'</td><td>'+k.gonderme+'</td><td>'+k.onay1+'</td><td>'+k.onay2+'</td><td>'+esc(k.surec)+'</td><td>'+k.tamam+'</td><td class="acik" title="'+esc(k.aciklama)+'">'+esc(k.aciklama)+'</td></tr>';
@@ -1588,8 +1589,8 @@ var ME='mert',V='ana',OB='SI',OJ=0,NS=null,RED=0,ED=0,YP={ad:'',unvan:'',br:'SI'
    det (iş detayı) gibi alt sayfaya girerken navDurum() yığına eklenir,
    "‹ Geri" (data-a="geri") en son durumu geri yükler; yığın boşsa ana ekran. */
 var GECMIS=[];
-function navDurum(){return {V:V,OJ:OJ,OB:OB,FILT:FILT,GFILT:GFILT,GBOL:GBOL,GKIS:GKIS};}
-function navYukle(s){V=s.V;OJ=s.OJ;OB=s.OB;FILT=s.FILT;GFILT=s.GFILT;GBOL=s.GBOL;GKIS=s.GKIS;}
+function navDurum(){return {V:V,OJ:OJ,OB:OB,FILT:FILT,GFILT:GFILT,GBOL:GBOL,GKIS:GKIS,OP2:OP2,YP:YP,ATAMA:ATAMA};}
+function navYukle(s){V=s.V;OJ=s.OJ;OB=s.OB;FILT=s.FILT;GFILT=s.GFILT;GBOL=s.GBOL;GKIS=s.GKIS;if('OP2' in s)OP2=s.OP2;if('YP' in s)YP=s.YP;if('ATAMA' in s)ATAMA=s.ATAMA;}
 
 /* ---------- HESAP ---------- */
 function stip(x){return x.tp||(x.o?'o':'i')}
@@ -2029,14 +2030,11 @@ function ciz(){try{gozBanner()}catch(e){}
  else if(V=='bende'||V=='bdet'){
   var L,kis=[];
   if(V=='bende'){L=(FILT=='bit')?bittiBenim():bende();}
-  else{L=bj(OB).filter(function(j){
-    if(cur(j))return true;                                                        /* normal açık iş (aktif adımı var) */
-    return (j.a||[]).some(function(x){return stip(x)=='i'&&x.d!='t'});            /* atanmış ama aktif bayrağını yitirmiş (tamamlanmamış) iş de görünsün */
-   });kis=siralaP(P.filter(function(p){return p[3]==OB}));}
+  else{L=bj(OB);kis=siralaP(P.filter(function(p){return p[3]==OB}));}   /* bölümdeki TÜM işler (açık + tamamlanan) görünsün */
   if(V=='bdet'){
    var jb=bj(OB),w=0,b2=0,ia=0;
    jb.forEach(function(j){var x=bek(j);w+=x[0];b2+=x[1];ia+=iade(j)});
-   var gg=L.filter(function(j){return as(cur(j))>0}).length;
+   var gg=L.filter(function(j){var c=cur(j);return c&&as(c)>0}).length;
    var ARAC={SI:['KAİZEN','5S','SMED','OEE','MUDA','PDCA','VSM','POKA-YOKE'],
     IK:['RİSK','KONTROL NOKTASI','UYGUNSUZLUK','DÜZELTİCİ FAALİYET'],
     DY:['STANDART','REVİZYON','ARŞİV','YAYIN'],
@@ -2045,7 +2043,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h='<div class="bkapak bk-'+OB+'"><div class="perde"></div>'+
      '<div class="ust">Operasyonel Mükemmellik</div>'+
      '<b>'+B[OB].ad+'</b>'+
-     '<span>'+kis.length+' personel · '+L.length+' açık iş · onay: '+ks(B[OB].sef)+'</span>'+
+     '<span>'+kis.length+' personel · '+L.filter(cur).length+' açık iş · onay: '+ks(B[OB].sef)+'</span>'+
      '<div class="araclar">'+(ARAC[OB]||[]).map(function(x){return '<i>'+x+'</i>'}).join('')+'</div></div>';
    h+='<div class="card" style="padding:10px"><div style="overflow-x:auto"><table class="dtab">'+
      '<tr><th style="text-align:left">Kişi</th><th>Toplam</th><th><span class="hf">Tamamlanan</span><span class="hk">Tamam</span></th><th>Devam</th><th>Onayda</th><th><span class="hf">Geciken</span><span class="hk">Gec.</span></th></tr>';
@@ -2087,7 +2085,7 @@ function ciz(){try{gozBanner()}catch(e){}
    kis.forEach(function(p){
     var rec=K.filter(function(r){return r.k==p[0]&&r.ts>=h7}),dk=0;
     rec.forEach(function(r){dk+=r.dk});
-    var n=L.filter(function(j){return cur(j).k==p[0]}).length;
+    var n=L.filter(function(j){var c=cur(j);return c&&c.k==p[0]}).length;
     h+='<div class="li"><div class="h"><b>'+p[1]+'</b><i>'+(n?n+' iş':'—')+'</i></div>'+
       '<div class="s">'+p[2]+'</div>'+
       '<div class="s">son 7 gün: '+rec.length+' kayıt · '+sa(dk)+' saat</div>'+
@@ -2993,6 +2991,7 @@ function yak(el,s){while(el&&el!==document){if(el.matches&&el.matches(s))return 
 document.addEventListener('click',function(e){
  var t=yak(e.target,'[data-a]');if(!t)return;
  var a=t.dataset.a;
+ var _navPrev=navDurum();   /* geri geçmişi için: bu tık işlenmeden ÖNCEki ekran */
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
@@ -3328,7 +3327,7 @@ document.addEventListener('click',function(e){
  }
  if(a=='cekmeceac'){cekmece(true);return}
  if(a=='cekmecekapat'){cekmece(false);return}
- if(a=='ayarlar'){V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
+ if(a=='ayarlar'){if(V!='ayarlar')GECMIS.push(_navPrev);V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
  if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';temaUygula();ciz();return}
  if(a=='ana'){V='ana';RED=0;ED=0;GECMIS=[];}
  else if(a=='geri'){if(GECMIS.length){navYukle(GECMIS.pop());RED=0;ED=0;}else{V='ana';RED=0;ED=0;}}
@@ -3338,7 +3337,7 @@ document.addEventListener('click',function(e){
  else if(a=='genfilt3'){GFILT=t.dataset.f;GBOL=t.dataset.b||'';GKIS=t.dataset.k||'';V='genliste'}
  else if(a=='bende'){V='bende';FILT=''}
  else if(a=='liste'&&t.dataset.f=='bit'){V='bende';FILT='bit'}
- else if(a=='det'){GECMIS.push(navDurum());V='det';OJ=+t.dataset.j;RED=0}
+ else if(a=='det'){V='det';OJ=+t.dataset.j;RED=0}
  else if(a=='org'){V='org'}
  else if(a=='ekle'){V='ekle';YP={ad:'',unvan:'',br:t.dataset.b||'SI',rol:'c'}}
  else if(a=='zoom'){ZOOM=!ZOOM}
@@ -3778,6 +3777,14 @@ document.addEventListener('click',function(e){
   try{var _hd=kisiler.filter(function(x){return x!=ME});if(_hd.length){var _pb=(onc=='acil'?'🔴 ACİL — ':onc=='yuksek'?'⚠ Öncelikli — ':'')+'Sana iş atandı — kabul et';pushGonder(_hd,_pb,nm);}}catch(e){}
  }
  else return;
+ /* geri geçmişi: ekran gerçekten değiştiyse önceki durumu yığına ekle (ana/geri hariç) */
+ if(a!='ana'&&a!='geri'){
+  var _nv=navDurum();
+  if(_nv.V!==_navPrev.V||_nv.OB!==_navPrev.OB||_nv.OJ!==_navPrev.OJ||_nv.GBOL!==_navPrev.GBOL||_nv.GKIS!==_navPrev.GKIS||_nv.GFILT!==_navPrev.GFILT||_nv.FILT!==_navPrev.FILT||_nv.OP2!==_navPrev.OP2){
+   GECMIS.push(_navPrev);
+   if(GECMIS.length>60)GECMIS.shift();
+  }
+ }
  try{cekmece(false)}catch(e){}
  ciz();window.scrollTo(0,0);
 });
