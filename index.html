@@ -1093,6 +1093,8 @@ var ETIKETLER=[
 function yonetici(){return ME=='mert'||ME=='mesut'}
 /* Termin (ek gün) ekleme yetkisi: yalnızca Mesut Bey ve Mert */
 function terminYetkisi(){return ME=='mert'||ME=='mesut'}
+/* Ek termin onayı: Süreç İyileştirme (SI) → Mesut, diğer tüm ekipler → Özkan */
+function terminOnayci(br){return br=='SI'?'mesut':'ozkan'}
 function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if((pn(ME)[4]||'')=='ust')return true;var _u=(pn(ME)[2]||'').toLocaleLowerCase('tr');if(_u.indexOf('müdür')>=0||_u.indexOf('mudur')>=0||_u.indexOf('direktör')>=0||_u.indexOf('direktor')>=0||_u.indexOf('şef')>=0||_u.indexOf('sef')>=0||_u.indexOf('yönetici')>=0||_u.indexOf('yonetici')>=0)return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function oncEt(o){if(o=='acil')return '<span style="flex:none;background:#C0392B;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">ACİL</span>';if(o=='yuksek')return '<span style="flex:none;background:#B9770E;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">YÜKSEK</span>';return ''}
 function bYetkiTum(){return sistemci()}
@@ -1698,6 +1700,8 @@ function bittiBenim(){
 }
 function bende(){var _r=J.filter(function(j){if(j.silindi)return false;var c=cur(j);return c&&c.k==ME&&j.kabul!==false});var _w={acil:0,yuksek:1,normal:2};return _r.sort(function(a,b){return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])})}
 function bekleyenAtama(){return J.filter(function(j){if(j.silindi)return false;var c=cur(j);return c&&c.k==ME&&j.kabul===false})}
+/* Bu kullanıcının onaylaması gereken bekleyen ek süre talepleri */
+function bekleyenTermin(){var r=[];J.filter(gor).forEach(function(j){(j.tal||[]).forEach(function(x){if(x.durum=='b'&&(terminOnayci(j.br)==ME||sistemci()))r.push({j:j,x:x})})});return r}
 function bek(j){var w=0,b=0;j.a.forEach(function(s){if(!s.g)return;
  var d=s.d=='t'?gn(s.g,s.b):gec(s);w+=Math.min(d,s.t);b+=Math.max(0,d-s.t)});return[w,b]}
 function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return n}
@@ -2007,6 +2011,19 @@ function ciz(){try{gozBanner()}catch(e){}
    });
    h+='</div>';
   }
+  var _btn=bekleyenTermin();
+  if(_btn.length){
+   h+='<div class="card atkart"><h3>⏳ Ek süre onayı bekleyen ('+_btn.length+')</h3>';
+   _btn.forEach(function(o){
+    h+='<div class="arow">'+
+      '<div class="an">'+esc(o.j.ad)+' <b style="color:#1F6FB2">+'+o.x.gun+' gün</b></div>'+
+      '<div class="am">'+ad(o.x.k)+' istedi · '+bad(o.j.br)+'</div>'+
+      '<div class="msg" style="margin:4px 0 8px">'+esc(o.x.neden)+'</div>'+
+      '<button class="b g" data-a="det" data-j="'+o.j.id+'" style="margin:0">Gör ve onayla</button>'+
+      '</div>';
+   });
+   h+='</div>';
+  }
   var _acil=bende().filter(function(j){return j.oncelik=='acil'});
   var _yuk=bende().filter(function(j){return j.oncelik=='yuksek'});
   if(_acil.length){
@@ -2308,7 +2325,7 @@ function ciz(){try{gozBanner()}catch(e){}
   if(j.uzama&&j.uzama.length){var _tuz=0;j.uzama.forEach(function(u){_tuz+=(u.gun||0)});_tuz=Math.round(_tuz*100)/100;
    h+='<div class="card"><h3>Termin uzamaları (+'+_tuz+' gün)</h3>';
    j.uzama.slice().reverse().forEach(function(u){h+='<div class="li"><div class="h"><b>+'+u.gun+' gün</b><i>'+fmt(u.ts)+'</i></div><div class="s" style="color:#16202B;font-size:13px">'+esc(u.neden)+'</div><div class="s">'+ad(u.kim)+'</div></div>';});
-   h+='<div class="note">Elindeki işe çalışmadığın (başka işe/çalışmaya ayırdığın) süre kadar termin otomatik uzar.</div></div>';}
+   h+='<div class="note">Termin yalnızca onaylı ek süre talepleriyle uzar; otomatik uzatma yok.</div></div>';}
   (function(){var steps=j.a||[],task=null;steps.forEach(function(x){if(stip(x)=='i'&&!task)task=x});var acilisTs=(task&&task.g)?task.g:j.bas;
    if(acilisTs){var adet=task?(Math.round(task.t)||5):5;if(adet<1)adet=1;if(adet>90)adet=90;var gunler=isGunleri(zmn(acilisTs),adet);var owner=task?task.k:(cur(j)?cur(j).k:null);var _ekAll=ekListe(j);var _fullDocs=_ekAll.filter(function(y){return y.tur!='i'});
     h+='<div class="card"><h3>Gün gün iş dökümü</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
@@ -2326,7 +2343,7 @@ function ciz(){try{gozBanner()}catch(e){}
       });_gekHtml+='</div>';}
      var _upl='<label class="gupl">📎 Dosya<input type="file" class="gunfu" data-j="'+j.id+'" data-gun="'+iso+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label>';
      h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+bt+_upl+'</div>'+_gekHtml+'</td></tr>';});
-    h+='</table></div>'+(terminYetkisi()?'<button data-a="ekterm" data-j="'+j.id+'" class="b g" style="margin-top:10px;width:auto;padding:8px 14px;font-size:12px">＋ Ek termin talebi</button>':'')+'<div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (araya iş girmesi / ek termin talebi). İş günleri (hafta sonu hariç) listelenir.</div></div>';
+    h+='</table></div>'+'<div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (onaylı ek termin). Ek süre gerekiyorsa, işi yapan kişi aşağıdan <b>"Ek süre talep et"</b> ile ister; yöneticisi onaylayınca termin uzar. İş günleri (hafta sonu hariç) listelenir.</div></div>';
    }})();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
   var _lg=(j.lg||[]).slice().sort(function(a,b){return zmn(a.ts)-zmn(b.ts)});
@@ -2361,14 +2378,14 @@ function ciz(){try{gozBanner()}catch(e){}
   if(tlp.length){
    h+='<div class="card"><h3>Ek süre talebi</h3>';
    tlp.forEach(function(x,xi){
-    var yetkili=(B[j.br].sef==ME)||KEY.indexOf(ME)>=0;
+    var yetkili=(terminOnayci(j.br)==ME)||sistemci();
     h+='<div class="li"><div class="h"><b>+'+x.gun+' iş günü</b><i>'+fmt(x.ts)+'</i></div>'+
       '<div class="s">'+ad(x.k)+' · '+esc(x.adim)+'</div>'+
       '<div class="msg">'+esc(x.neden)+'</div>'+
       (yetkili?'<div class="two" style="margin-top:8px">'+
         '<button class="b" data-a="tkab" data-j="'+j.id+'" data-x="'+xi+'">Kabul et</button>'+
         '<button class="b g" data-a="tret" data-j="'+j.id+'" data-x="'+xi+'">Reddet</button></div>'
-       :'<div class="s" style="margin-top:6px">Onay bekleniyor: '+ad(B[j.br].sef)+'</div>')+
+       :'<div class="s" style="margin-top:6px">Onay bekleniyor: '+ad(terminOnayci(j.br))+'</div>')+
       '</div>';
    });
    h+='</div>';
@@ -3572,7 +3589,9 @@ document.addEventListener('click',function(e){
   jt.tal=jt.tal||[];jt.lg=jt.lg||[];
   jt.tal.push({ts:now(),k:ME,gun:eg,neden:en,adim:ct.a,durum:'b'});
   jt.lg.push({ts:now(),k:ME,tip:'Ek süre talep etti (+'+eg+' gün)',msg:en});
-  TAL=0;say('Talep gönderildi → '+ad(B[jt.br].sef));
+  var _on=terminOnayci(jt.br);
+  TAL=0;say('Talep gönderildi → '+ad(_on)+' onayına düştü');
+  try{pushGonder([_on],'Ek süre talebi',ad(ME)+' +'+eg+' gün istedi — '+jt.ad);}catch(e){}
  }
  else if(a=='tkab'||a=='tret'){
   var jk=bul(+t.dataset.j),xi=+t.dataset.x;
@@ -3719,23 +3738,8 @@ document.addEventListener('click',function(e){
   var _kkid='k'+Date.now()+Math.floor(Math.random()*1000);
   K.unshift({id:_kkid,k:ME,ts:new Date(gg2+'T'+b1).toISOString(),bit:b2,tip:document.getElementById('kt').value,
    ts_:document.getElementById('ktz').value,ac:ac,dk:dk});
-  var _hi=document.getElementById('kis_is')?document.getElementById('kis_is').value:'';
-  var _gun=Math.round(dk/480*100)/100;
-  var _fa=document.getElementById('kt').value;
-  var _neden='⏱ '+_fa+(ac?' — '+ac:'');
-  var _uz=[];
-  bende().forEach(function(j){var c=cur(j);if(!c||stip(c)!='i')return;
-   /* seçili iş varsa SADECE onu uzat; boşsa (genel) hepsini uzat */
-   if(_hi){if(String(j.id)!=String(_hi))return;}
-   var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
-   task.t=Math.round((task.t+_gun)*100)/100;
-   j.ekgun=Math.round(((j.ekgun||0)+_gun)*100)/100;
-   j.uzama=j.uzama||[];j.uzama.push({ts:now(),dk:dk,gun:_gun,neden:_neden,kim:ME,kid:_kkid});
-   (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin +'+_gun+' gün uzadı',msg:_neden});
-   _uz.push(j.ad);});
-  if(_uz.length&&_hi)say('Kaydedildi — "'+_uz[0].slice(0,26)+'" işine +'+_gun+' gün ek termin');
-  else if(_uz.length)say('Kaydedildi — '+_uz.length+' açık işe +'+_gun+' gün ek termin');
-  else say('Kaydedildi — '+sa(dk)+' saat');
+  /* otomatik termin uzaması kaldırıldı — uzatma yalnız çalışanın talebi + yönetici onayı ile */
+  say('Kaydedildi — '+sa(dk)+' saat');
  }
  else if(a=='kabulonc'){
   /* Öncelikli kabul: işi hemen başlat, süresi kadar diğer açık işlere ek termin ekle */
@@ -3744,16 +3748,8 @@ document.addEventListener('click',function(e){
   var _tn=now(); _kj.kabul=true; _kj.bas=_tn; isAdimHizala(_kj,_tn);
   if(_kj.oncelik!='acil')_kj.oncelik='yuksek';
   (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Öncelikli kabul — hemen başladı'});
-  var _yd=Math.round((_ci.t||1)*100)/100,_uz=[];
-  bende().forEach(function(j){if(j.id==_kj.id)return;var c=cur(j);if(!c||stip(c)!='i')return;
-   var task=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!task)task=x});if(!task)return;
-   task.t=Math.round((task.t+_yd)*100)/100;
-   j.ekgun=Math.round(((j.ekgun||0)+_yd)*100)/100;
-   j.uzama=j.uzama||[];j.uzama.push({ts:now(),gun:_yd,neden:'⏱ Öncelikli iş araya girdi — '+_kj.ad,kim:ME});
-   (j.lg=j.lg||[]).push({ts:now(),k:ME,tip:'Termin +'+_yd+' gün',msg:'Öncelikli iş: '+_kj.ad});
-   _uz.push(j.ad);});
-  try{if(_uz.length)pushGonder([ME],'Öncelikli iş başladı',_uz.length+' işin termini +'+_yd+' gün ötelendi');}catch(e){}
-  say('Öncelikli kabul — süre başladı'+(_uz.length?'; '+_uz.length+' işe +'+_yd+' gün eklendi':''));
+  /* otomatik termin uzaması kaldırıldı — diğer işler kendiliğinden ötelenmez */
+  say('Öncelikli kabul — süre başladı');
  }
  else if(a=='kabulsira'){
   /* Sıraya al: elindeki en geç biten işin ardına yerleştir, diğer işlere dokunma */
