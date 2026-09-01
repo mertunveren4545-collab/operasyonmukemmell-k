@@ -295,6 +295,11 @@ body.dk .tip.o{background:#1D2A22;color:#8FD3AC}
 .upl{display:block;border:1.5px dashed #C3CAD1;border-radius:8px;padding:12px;text-align:center;
  color:#4C5966;font-size:13px;font-weight:600;background:#FAFBFC}
 .upl input{display:none}
+.gupl{display:inline-block;border:1px solid #CDD9CF;background:#F4FBF6;color:#2E7D4B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer}
+.gupl input{display:none}
+body.dk .gupl{background:#16241B;border-color:#2E5C40;color:#8FE0AA}
+.gekc{border:1px solid #C9D3DE;background:#F1F5F9;color:#274156;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.dk .gekc{background:#1B2530;border-color:#39424C;color:#CBD5E1}
 body.dk .upl{background:#1A1F26;border-color:#39424C;color:#A9B4BF}
 body.dk .ekkc{background:#1E2730!important;color:#DDE3E9!important;border-color:#39424C!important}
 body.dk .ekkc input{accent-color:#4C9BE0}
@@ -2076,8 +2081,14 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='</div>';el.innerHTML=h;return;
   }
   var _w={acil:0,yuksek:1,normal:2};
-  L=L.slice().sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});
-  h+='<div class="card"><h3>İşler ('+L.length+')</h3>'+isTablo(L)+'</div>';
+  function _srtAcik(arr){return arr.slice().sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});}
+  var _acikL=(V=='bdet')?L.filter(cur):L;                          /* bdet: sadece açık işler (bende zaten açık) */
+  var _bitL =(V=='bdet')?L.filter(function(j){return !cur(j)}):[]; /* bdet: tamamlanan işler ayrı bölmede */
+  h+='<div class="card"><h3>İşler ('+_acikL.length+')</h3>'+isTablo(_srtAcik(_acikL))+'</div>';
+  if(_bitL.length){
+   _bitL=_bitL.slice().sort(function(a,b){var sa=(a.a&&a.a.length)?(a.a[a.a.length-1].b||0):0,sb=(b.a&&b.a.length)?(b.a[b.a.length-1].b||0):0;return sb-sa});
+   h+='<div class="card"><h3>Tamamlanan işler ('+_bitL.length+')</h3>'+isTablo(_bitL)+'</div>';
+  }
   if(V=='bdet'){
    var h7=ago(7);
    h+='<div class="card"><h3>Personel ('+kis.length+')</h3>';
@@ -2085,7 +2096,7 @@ function ciz(){try{gozBanner()}catch(e){}
    kis.forEach(function(p){
     var rec=K.filter(function(r){return r.k==p[0]&&r.ts>=h7}),dk=0;
     rec.forEach(function(r){dk+=r.dk});
-    var n=L.filter(function(j){var c=cur(j);return c&&c.k==p[0]}).length;
+    var n=_acikL.filter(function(j){var c=cur(j);return c&&c.k==p[0]}).length;
     h+='<div class="li"><div class="h"><b>'+p[1]+'</b><i>'+(n?n+' iş':'—')+'</i></div>'+
       '<div class="s">'+p[2]+'</div>'+
       '<div class="s">son 7 gün: '+rec.length+' kayıt · '+sa(dk)+' saat</div>'+
@@ -2202,7 +2213,10 @@ function ciz(){try{gozBanner()}catch(e){}
     }
    }
   ekGetir(j.id);
-  var ek=ekListe(j),ims=ek.filter(function(x){return x.tur=='i'}),dcs=ek.filter(function(x){return x.tur!='i'});
+  var ekAll=ekListe(j);
+  var _gunekIds={};if(j.gunek){for(var _gd in j.gunek)(j.gunek[_gd]||[]).forEach(function(_id){_gunekIds[_id]=1})}
+  var ek=ekAll.filter(function(x){return !(x.id&&_gunekIds[x.id])});   /* güne bağlı ekler gün satırında görünür */
+  var ims=ek.filter(function(x){return x.tur=='i'}),dcs=ek.filter(function(x){return x.tur!='i'});
   h+='<div class="card"><h3>Ekler ('+ek.length+')</h3>';
   if(ims.length){h+='<div class="thm">';
    ims.forEach(function(x){h+='<img src="'+x.veri+'" data-a="fs" data-src="'+x.veri+'">'});
@@ -2221,7 +2235,7 @@ function ciz(){try{gozBanner()}catch(e){}
    j.uzama.slice().reverse().forEach(function(u){h+='<div class="li"><div class="h"><b>+'+u.gun+' gün</b><i>'+fmt(u.ts)+'</i></div><div class="s" style="color:#16202B;font-size:13px">'+esc(u.neden)+'</div><div class="s">'+ad(u.kim)+'</div></div>';});
    h+='<div class="note">Elindeki işe çalışmadığın (başka işe/çalışmaya ayırdığın) süre kadar termin otomatik uzar.</div></div>';}
   (function(){var steps=j.a||[],task=null;steps.forEach(function(x){if(stip(x)=='i'&&!task)task=x});var acilisTs=(task&&task.g)?task.g:j.bas;
-   if(acilisTs){var adet=task?(Math.round(task.t)||5):5;if(adet<1)adet=1;if(adet>90)adet=90;var gunler=isGunleri(zmn(acilisTs),adet);var owner=task?task.k:(cur(j)?cur(j).k:null);
+   if(acilisTs){var adet=task?(Math.round(task.t)||5):5;if(adet<1)adet=1;if(adet>90)adet=90;var gunler=isGunleri(zmn(acilisTs),adet);var owner=task?task.k:(cur(j)?cur(j).k:null);var _ekAll=ekListe(j);var _fullDocs=_ekAll.filter(function(y){return y.tur!='i'});
     h+='<div class="card"><h3>Gün gün iş dökümü</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
     gunler.forEach(function(d,gi){var kayit=K.filter(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});
      var txt=kayit.map(function(r){var rd=zmn(r.ts);return ii(rd.getHours())+':'+ii(rd.getMinutes())+'-'+(r.bit||'')+' '+esc(r.tip||'')+(r.ac?' — '+esc(r.ac):'')}).join('<br>');
@@ -2229,7 +2243,14 @@ function ciz(){try{gozBanner()}catch(e){}
      var nt=(j.gunluk&&j.gunluk[iso])?('<div style="color:#12315C;font-weight:600;margin-top:'+(txt?'5px':'0')+'">'+esc(j.gunluk[iso])+'</div>'):'';
      var bt='<button data-a="gunyaz" data-j="'+j.id+'" data-d="'+iso+'" style="margin-top:6px;border:1px solid #CDD9CF;background:#F4FBF6;color:#2E7D4B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer">\u270E '+((j.gunluk&&j.gunluk[iso])?'Düzenle':'Yaz')+'</button>';
      var _ext=task&&(gi>=(task.t-(j.ekgun||0)));
-     h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+bt+'</td></tr>';});
+     var _gid=(j.gunek&&j.gunek[iso])||[];var _gekHtml='';
+     if(_gid.length){_gekHtml+='<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">';
+      _gid.forEach(function(_eid){var x=null;for(var _q=0;_q<_ekAll.length;_q++)if(_ekAll[_q].id==_eid){x=_ekAll[_q];break}if(!x)return;
+       if(x.tur=='i'){_gekHtml+='<img src="'+x.veri+'" data-a="fs" data-src="'+x.veri+'" style="width:36px;height:36px;object-fit:cover;border-radius:6px;cursor:pointer">';}
+       else{var _di=_fullDocs.indexOf(x);_gekHtml+='<button data-a="ekac" data-j="'+j.id+'" data-x="'+_di+'" class="gekc">'+(x.tur=='x'?'📊':x.tur=='p'?'📄':'📎')+' '+esc(x.ad.length>16?x.ad.slice(0,14)+'…':x.ad)+'</button>';}
+      });_gekHtml+='</div>';}
+     var _upl='<label class="gupl">📎 Dosya<input type="file" class="gunfu" data-j="'+j.id+'" data-gun="'+iso+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label>';
+     h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+bt+_upl+'</div>'+_gekHtml+'</td></tr>';});
     h+='</table></div>'+(terminYetkisi()?'<button data-a="ekterm" data-j="'+j.id+'" class="b g" style="margin-top:10px;width:auto;padding:8px 14px;font-size:12px">＋ Ek termin talebi</button>':'')+'<div class="note">Çalışmalar, o günün süreç sahibinin çalışma kaydından gelir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (araya iş girmesi / ek termin talebi). İş günleri (hafta sonu hariç) listelenir.</div></div>';
    }})();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
@@ -3810,7 +3831,8 @@ document.addEventListener('change',function(e){
   });
   e.target.value='';return;
  }
- if(e.target.id!='fu')return;
+ if(e.target.id!='fu' && !(e.target.classList&&e.target.classList.contains('gunfu')))return;
+ var _gun=e.target.dataset.gun||null;
  var j=bul(+e.target.dataset.j),fs2=e.target.files;
  if(!j||!fs2.length)return;
  j.lg=j.lg||[];EKLER[j.id]=EKLER[j.id]||[];
@@ -3823,10 +3845,11 @@ document.addEventListener('change',function(e){
    var boy=by<1048576?Math.round(by/1024)+' KB':(by/1048576).toFixed(1).replace('.',',')+' MB';
    var kayit={id:'e'+Date.now()+Math.floor(Math.random()*999),is_id:String(j.id),
      ad:f.name,tur:tur,boyut:boy,kisi:ME,ts:ts4,veri:veri};
-   EKLER[j.id].push({ad:kayit.ad,tur:kayit.tur,boyut:kayit.boyut,k:ME,ts:ts4,veri:kayit.veri});
+   EKLER[j.id].push({id:kayit.id,ad:kayit.ad,tur:kayit.tur,boyut:kayit.boyut,k:ME,ts:ts4,veri:kayit.veri});
+   if(_gun){j.gunek=j.gunek||{};(j.gunek[_gun]=j.gunek[_gun]||[]).push(kayit.id);}   /* eki güne bağla (iş verisiyle senkronlanır) */
    if(dbClient)dbClient.from('ekler').insert(kayit).then(function(r){
      if(r&&r.error)say('Ek kaydedilemedi: '+r.error.message)},function(){});
-   if(!--kal){j.lg.push({ts:ts4,k:ME,tip:fs2.length+' ek yüklendi'});say('Ek eklendi');ciz()}
+   if(!--kal){j.lg.push({ts:ts4,k:ME,tip:(_gun?('gün eki ('+_gun+') · '):'')+fs2.length+' ek yüklendi'});if(_gun&&window.senkronCalistir)setTimeout(window.senkronCalistir,150);say('Ek eklendi');ciz()}
   }
   if(tur=='i'){
    if(mb>15){say(f.name+' çok büyük (15 MB üstü)');kal--;return}
