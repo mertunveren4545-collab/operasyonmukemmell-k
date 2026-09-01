@@ -295,6 +295,9 @@ body.dk .tip.o{background:#1D2A22;color:#8FD3AC}
 .upl{display:block;border:1.5px dashed #C3CAD1;border-radius:8px;padding:12px;text-align:center;
  color:#4C5966;font-size:13px;font-weight:600;background:#FAFBFC}
 .upl input{display:none}
+#bgkat{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;background-repeat:no-repeat;pointer-events:none}
+.motkart{text-align:center;font-style:italic;font-size:14.5px;color:#2E3D4A;margin:0 0 12px;padding:13px 16px;background:rgba(255,255,255,.58);border-radius:13px;border:1px dashed rgba(18,49,92,.28);line-height:1.55;font-weight:600}
+body.dk .motkart{color:#D7DEE6;background:rgba(20,25,32,.5);border-color:rgba(255,255,255,.16)}
 .gupl{display:inline-block;border:1px solid #CDD9CF;background:#F4FBF6;color:#2E7D4B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer}
 .gupl input{display:none}
 body.dk .gupl{background:#16241B;border-color:#2E5C40;color:#8FE0AA}
@@ -1030,6 +1033,20 @@ var PCV=false;function pcvUygula(){
  try{localStorage.setItem('opmuk_pcview',PCV?'1':'0')}catch(e){}
 }
 var TAKYIL=new Date().getFullYear(),TAKAY=null;var OZK='';
+/* Kişiye özel arka plan resmi (cihazda saklanır). Soyut ama görünür:
+   resmin üzerine yarı saydam bir örtü koyar, kartlar/yazılar okunur kalır. */
+function arkaPlanUygula(){
+ var img=null,op='0.40';
+ try{img=localStorage.getItem('opmuk_bg');op=localStorage.getItem('opmuk_bgop')||'0.40'}catch(e){}
+ var kat=document.getElementById('bgkat');
+ if(img){
+  if(!kat){kat=document.createElement('div');kat.id='bgkat';document.body.appendChild(kat)}
+  var o=parseFloat(op);if(isNaN(o))o=0.40;
+  var ort=DARK?('rgba(11,17,26,'+Math.min(0.92,(1-o+0.12)).toFixed(2)+')'):('rgba(240,242,241,'+(1-o).toFixed(2)+')');
+  kat.style.backgroundImage='linear-gradient('+ort+','+ort+'),url('+img+')';
+  kat.style.display='block';
+ } else if(kat){kat.style.display='none';}
+}
 var AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 /* Bir işin termin (bitiş) tarihini döndürür — takvim için */
 function isTermin(j){var tk=anaAdim(j);if(!tk)return null;var a=(tk.g)?tk.g:j.bas;if(!a)return null;var gl=isGunleri(zmn(a),Math.round(tk.t)||1);return gl.length?gl[gl.length-1]:null}
@@ -1970,6 +1987,8 @@ function ciz(){try{gozBanner()}catch(e){}
     '<div class="sol"><b>Bende bekleyen iş'+rz(BD.gec)+'</b>'+
     '<span>'+(gc?gc+' tanesi termini aştı':'termin aşımı yok')+'</span></div>'+
     '<div class="sy">'+mn.length+'</div></div></button>';
+  var _mot='';try{_mot=localStorage.getItem('opmuk_bgtext')||''}catch(e){}
+  if(_mot)h+='<div class="motkart">“'+esc(_mot)+'”</div>';
   if(('Notification' in window)&&Notification.permission!=='granted'){
    h+='<button data-a="bildirimac" style="display:block;width:100%;text-align:left;border:0;background:#FFF8E1;color:#8A6512;border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:13px;cursor:pointer;font-weight:600">\uD83D\uDD14 Bildirimler kapalı \u2014 açmak için dokun</button>';
   }
@@ -2745,6 +2764,18 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<div class="card"><h3>Gece modu</h3>'+
     '<button class="b '+(DARK?'':'g')+'" data-a="tema">'+(DARK?'☀ Gündüz moduna geç':'☾ Gece moduna geç')+'</button>'+
     '<div class="note">Seçimlerin bu cihazda hatırlanır, diğer kullanıcıları etkilemez.</div></div>';
+  var _bgVar=false,_bgtxt='',_bgop='0.40';try{_bgVar=!!localStorage.getItem('opmuk_bg');_bgtxt=localStorage.getItem('opmuk_bgtext')||'';_bgop=localStorage.getItem('opmuk_bgop')||'0.40'}catch(e){}
+  h+='<div class="card"><h3>Arka plan & motivasyon</h3>'+
+    '<div class="note" style="margin-top:0">Kendine bir arka plan resmi ve motivasyon yazısı ekle. Soyut ama görünür durur, yazıların okunmasını engellemez. Bu cihazda saklanır, başkasını etkilemez.</div>'+
+    '<label>Motivasyon yazısı</label>'+
+    '<input id="bgtext" maxlength="120" value="'+esc(_bgtxt).replace(/"/g,'&quot;')+'" placeholder="Örn. Bugün dünden daha iyisini yap.">'+
+    '<button class="b g" data-a="bgtext-kaydet" style="margin:8px 0 2px">Yazıyı kaydet</button>'+
+    '<div style="height:12px"></div>'+
+    '<label>Arka plan resmi'+(_bgVar?' — yüklü ✓':'')+'</label>'+
+    '<label class="upl">🖼 Resim seç (JPG / PNG)<input type="file" id="bgf" accept="image/*"></label>'+
+    (_bgVar?'<div style="height:10px"></div><label>Görünürlük (soyut ↔ belirgin)</label><input type="range" id="bgop" min="0.12" max="0.78" step="0.02" value="'+_bgop+'" style="width:100%">':'')+
+    (_bgVar?'<button class="b r" data-a="bg-kaldir" style="margin-top:10px">Arka planı kaldır</button>':'')+
+    '</div>';
   var _sec=sesTercih();
   h+='<div class="card"><h3>Bildirim sesi</h3>';
   Object.keys(SESLER).forEach(function(sk){
@@ -3098,6 +3129,8 @@ document.addEventListener('click',function(e){
  if(a=='bildirimac'){bildirimAc();return}
  if(a=='sifre'){V='sifre';HATA='';ciz();return}
  if(a=='gorunum'){V='gorunum';ciz();return}
+ if(a=='bgtext-kaydet'){var _bt=document.getElementById('bgtext');var _v=_bt?_bt.value.trim():'';try{if(_v)localStorage.setItem('opmuk_bgtext',_v);else localStorage.removeItem('opmuk_bgtext')}catch(e){}say(_v?'Motivasyon yazısı kaydedildi':'Yazı kaldırıldı');ciz();return}
+ if(a=='bg-kaldir'){try{localStorage.removeItem('opmuk_bg')}catch(e){}arkaPlanUygula();say('Arka plan kaldırıldı');ciz();return}
  if(a=='paylas'){
   var adres=location.href.split('?')[0].split('#')[0];
   var metin='OPEX — Operasyonel Mükemmellik\n\nKullanıcı adın: adının ilk kelimesi (küçük harf, Türkçe karaktersiz)\nİlk giriş şifresi: 123456\nSistem seni kendi şifreni belirlemeye yönlendirecek.\n\n'+adres;
@@ -3405,7 +3438,7 @@ document.addEventListener('click',function(e){
  if(a=='cekmeceac'){cekmece(true);return}
  if(a=='cekmecekapat'){cekmece(false);return}
  if(a=='ayarlar'){if(V!='ayarlar')GECMIS.push(_navPrev);V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
- if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';if(PCV)document.body.classList.add('pcview');temaUygula();ciz();return}
+ if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';if(PCV)document.body.classList.add('pcview');temaUygula();arkaPlanUygula();ciz();return}
  if(a=='pcview'){PCV=!PCV;pcvUygula();say(PCV?'Bilgisayar görünümü açıldı':'Bilgisayar görünümü kapandı');ciz();window.scrollTo(0,0);return}
  if(a=='ana'){V='ana';RED=0;ED=0;GECMIS=[];}
  else if(a=='geri'){if(GECMIS.length){navYukle(GECMIS.pop());RED=0;ED=0;}else{V='ana';RED=0;ED=0;}}
@@ -3868,6 +3901,18 @@ document.addEventListener('click',function(e){
  ciz();window.scrollTo(0,0);
 });
 document.addEventListener('change',function(e){
+ if(e.target.id=='bgf'){
+  var bf=e.target.files&&e.target.files[0];if(!bf){return}
+  if(!/^image\//.test(bf.type||'')){say('Lütfen bir resim seç.');e.target.value='';return}
+  gorselSikistir(bf,function(veri){
+    if(!veri){say('Resim işlenemedi.');return}
+    try{localStorage.setItem('opmuk_bg',veri);if(!localStorage.getItem('opmuk_bgop'))localStorage.setItem('opmuk_bgop','0.40');
+      arkaPlanUygula();say('Arka plan eklendi');ciz();}
+    catch(er){say('Resim kaydedilemedi (çok büyük olabilir, daha küçük bir resim dene).');}
+  });
+  e.target.value='';return;
+ }
+ if(e.target.id=='bgop'){try{localStorage.setItem('opmuk_bgop',e.target.value)}catch(e2){}arkaPlanUygula();return}
  if(e.target.id=='sesf'){
   var sf=e.target.files&&e.target.files[0];if(!sf){return}
   if(sf.size>1048576){say('Ses dosyası en fazla 1 MB olmalı.');e.target.value='';return}
@@ -3950,6 +3995,7 @@ try{
  var tt9=localStorage.getItem('opmuk_tema');if(tt9&&TEMALAR[tt9])TEMA=tt9;
  if(localStorage.getItem('opmuk_dark')=='1'){DARK=true;document.body.className='dk'}
  if(localStorage.getItem('opmuk_pcview')=='1'){PCV=true;pcvUygula();}
+ arkaPlanUygula();
 }catch(e){}
 temaUygula();
 menu();ciz();
