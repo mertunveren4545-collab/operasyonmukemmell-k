@@ -1022,6 +1022,15 @@ function temaUygula(){
  try{localStorage.setItem('opmuk_tema',TEMA);localStorage.setItem('opmuk_dark',DARK?'1':'0')}catch(e){}
 }
 var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0;
+/* Bilgisayar görünümü: telefonda geniş (masaüstü) viewport'a geçerek
+   mevcut min-width:900px masaüstü düzenini tetikler. Sadece Mert kullanır. */
+var PCV=false;
+function pcvUygula(){
+ var m=document.querySelector('meta[name=viewport]');if(!m)return;
+ if(PCV){m.setAttribute('content','width=1024');document.body.classList.add('pcview');}
+ else{m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');document.body.classList.remove('pcview');}
+ try{localStorage.setItem('opmuk_pcview',PCV?'1':'0')}catch(e){}
+}
 var TAKYIL=new Date().getFullYear(),TAKAY=null;
 var AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 /* Bir işin termin (bitiş) tarihini döndürür — takvim için */
@@ -2023,6 +2032,10 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
+  if(ME=='mert'){
+   h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
+   if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
+  }
   h+='<div class="note" style="margin:12px 0 0">sürüm s98-OPEXBUYUK · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
@@ -3349,7 +3362,8 @@ document.addEventListener('click',function(e){
  if(a=='cekmeceac'){cekmece(true);return}
  if(a=='cekmecekapat'){cekmece(false);return}
  if(a=='ayarlar'){if(V!='ayarlar')GECMIS.push(_navPrev);V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
- if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';temaUygula();ciz();return}
+ if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';if(PCV)document.body.classList.add('pcview');temaUygula();ciz();return}
+ if(a=='pcview'){PCV=!PCV;pcvUygula();say(PCV?'Bilgisayar görünümü açıldı':'Bilgisayar görünümü kapandı');ciz();window.scrollTo(0,0);return}
  if(a=='ana'){V='ana';RED=0;ED=0;GECMIS=[];}
  else if(a=='geri'){if(GECMIS.length){navYukle(GECMIS.pop());RED=0;ED=0;}else{V='ana';RED=0;ED=0;}}
  else if(a=='bdet'){V='bdet';OB=t.dataset.b}
@@ -3891,6 +3905,7 @@ function menu(){
 try{
  var tt9=localStorage.getItem('opmuk_tema');if(tt9&&TEMALAR[tt9])TEMA=tt9;
  if(localStorage.getItem('opmuk_dark')=='1'){DARK=true;document.body.className='dk'}
+ if(localStorage.getItem('opmuk_pcview')=='1'){PCV=true;pcvUygula();}
 }catch(e){}
 temaUygula();
 menu();ciz();
