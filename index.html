@@ -311,18 +311,24 @@ body.dk .pk-konu{color:#E7ECF1}
 .pk-bar i{display:block;height:100%;background:#1F6FB2;border-radius:4px}
 body.dk .pk-bar{background:#232B34}
 .pk-alt{font-size:11px;color:#8592A0;margin-top:5px}
-.prjadim{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #F0F2F4}
-body.dk .prjadim{border-color:#232B34}
-.prjadim:last-child{border-bottom:0}
-.pa-chk{flex:none;width:26px;height:26px;border-radius:14px;border:1.5px solid #C6D0DA;background:#fff;color:#8592A0;font-weight:800;font-size:12px;cursor:pointer}
-.prjadim.ok .pa-chk{background:#1B7A47;border-color:#1B7A47;color:#fff}
-body.dk .pa-chk{background:#161C24;border-color:#39424C;color:#8592A0}
-.pa-govde{flex:1;min-width:0}
-.pa-ad{font-size:13.5px;font-weight:700;color:#16202B}
-body.dk .pa-ad{color:#E7ECF1}
-.prjadim.ok .pa-ad{color:#1B7A47}
-.pa-not{font-size:12px;color:#5A6774;margin-top:3px;white-space:pre-wrap}
-.pa-not-b{flex:none;background:none;border:0;color:#B7C0C9;font-size:15px;cursor:pointer}
+.stepper{position:relative;margin-top:2px}
+.step{position:relative}
+.step::before{content:'';position:absolute;left:15px;top:40px;bottom:0;width:2px;background:#E4E9EE}
+.step:last-child::before{display:none}
+.step.ok::before{background:#BFE0CC}
+.step-bas{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:none;padding:9px 0;cursor:pointer}
+.step-no{position:relative;z-index:1;flex:none;width:32px;height:32px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:#EEF1F5;color:#8592A0;border:2px solid #E1E6EC;transition:all .15s}
+.step.ok .step-no{background:#1B7A47;border-color:#1B7A47;color:#fff}
+.step.acik .step-no{background:#1F6FB2;border-color:#1F6FB2;color:#fff;box-shadow:0 0 0 4px rgba(31,111,178,.15)}
+.step-ad{flex:1;min-width:0;font-size:14px;font-weight:700;color:#1B2735}
+body.dk .step-ad{color:#E7ECF1}
+.step.ok .step-ad{color:#1B7A47}
+.step.acik .step-ad{color:#1F6FB2}
+.step-ok-i{flex:none;color:#B7C0C9;font-size:15px}
+.step-icerik{padding:2px 2px 16px 44px;animation:stepin .18s ease}
+@keyframes stepin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.step-not{font-size:13px;color:#3A4A57;background:#F6F8FA;border:1px solid #EDF0F3;border-radius:9px;padding:11px;white-space:pre-wrap;line-height:1.5}
+body.dk .step-not{background:#12181F;border-color:#232B34;color:#C5CDD6}
 .kokblok{margin-top:8px;background:#F6F8FA;border:1px solid #E4E9EE;border-radius:10px;padding:10px}
 body.dk .kokblok{background:#12181F;border-color:#2A323C}
 .kok-bas{font-size:11px;font-weight:800;letter-spacing:.03em;color:#12315C;text-transform:uppercase}
@@ -1084,6 +1090,7 @@ var PCV=false;function pcvUygula(){
 var TAKYIL=new Date().getFullYear(),TAKAY=null;var OZK='';
 /* ---- Kaizen / İyileştirme Projeleri modülü (oneri.io benzeri) ---- */
 var PRJ=[],OPR=null,PAKS=null;   /* projeler, açık proje id, düzenlenen aksiyon (null|'yeni'|index) */
+var PADIM=-1;                     /* açık (genişletilmiş) adım indexi */
 var PRJBOL='';                    /* proje listesi bölüm filtresi (bdet'ten girilince) */
 var PRJADIM=['Kaizenin Konusu','Hedef Belirleme','Ekip Oluşturma','Mevcut Durum Değerlendirmesi','Proje Planı','Kök Neden Analizi','Çözümlerin Uygulanması','Hedef Sonuç Kontrolü','Standartlaştırma','Yaygınlaştırma'];
 var PRJKOK=['Makine','Metot','Malzeme','İnsan','Ölçüm','Çevre'];   /* 6M — balık kılçığı */
@@ -1375,7 +1382,6 @@ function cekmeceYaz(){
   ''+
   '<button class="mn" data-a="kayit"><em>✎</em>Çalışma kaydı</button>'+
   '<button class="mn" data-a="yeni"><em>＋</em>Yeni iş</button>'+(atamaYetkisi()?'<button class="mn" data-a="isata"><em>🎯</em>İş ata</button>':'')+
-  '<button class="mn" data-a="proje"><em>🎯</em>Kaizen / Projeler</button>'+
   '<button class="mn" data-a="veri"><em>📊</em>Veriler</button>'+
   '<button class="mn" data-a="org"><em>⌸</em>Organizasyon</button>'+
   '<button class="mn" data-a="tesis"><em>📍</em>Tesisler</button>'+
@@ -2181,7 +2187,6 @@ function ciz(){try{gozBanner()}catch(e){}
     '<button data-a="yeni"><i>＋</i>Yeni iş</button></div>';
   h+='<div class="acts">'+
     '<button data-a="akis"><i>⇉</i>Onay akışı</button>'+
-    '<button data-a="proje"><i>🎯</i>Kaizen / Projeler</button>'+
     '<button data-a="org"><i>⌸</i>Organizasyon</button>'+
     '<button data-a="tesis"><i>📍</i>Tesisler</button>'+
     '<button data-a="ayarlar"><i>⚙️</i>Ayarlar'+rz(BD.sifre)+'</button></div>';
@@ -2269,19 +2274,28 @@ function ciz(){try{gozBanner()}catch(e){}
     '<div class="pk-bar" style="margin-top:10px;background:rgba(255,255,255,.25)"><i style="width:'+pr+'%;background:#8FE0AA"></i></div>'+
     '<div style="font-size:11px;opacity:.85;margin-top:5px">%'+pr+' tamamlandı — '+pp.adimlar.filter(function(x){return x.ok}).length+'/10 adım</div></div>';
   if(pp.aciklama)h+='<div class="card"><h3>Açıklama</h3><div class="td" style="white-space:pre-wrap">'+esc(pp.aciklama)+'</div></div>';
-  /* 10 adımlık iş akışı */
-  h+='<div class="card"><h3>Proje / Problem adımları</h3>';
+  /* 10 adımlık iş akışı — profesyonel stepper, adımların içine girilebilir */
+  h+='<div class="card"><h3>Proje / Problem adımları</h3><div class="stepper">';
   pp.adimlar.forEach(function(a,i){
-   h+='<div class="prjadim'+(a.ok?' ok':'')+'">'+
-     '<button class="pa-chk" data-a="prj-adim" data-p="'+pp.id+'" data-i="'+i+'" title="Tamam işaretle">'+(a.ok?'✓':(i+1))+'</button>'+
-     '<div class="pa-govde"><div class="pa-ad">'+esc(a.ad)+'</div>'+
-      (a.not?'<div class="pa-not">'+esc(a.not)+'</div>':'')+
-      (i==5?prjKokHtml(pp):'')+
-     '</div>'+
-     '<button class="pa-not-b" data-a="prj-not" data-p="'+pp.id+'" data-i="'+i+'" title="Not ekle">✎</button>'+
-     '</div>';
+   var acik=(PADIM==i);
+   h+='<div class="step'+(a.ok?' ok':'')+(acik?' acik':'')+'">'+
+     '<button class="step-bas" data-a="prj-adim-ac" data-p="'+pp.id+'" data-i="'+i+'">'+
+       '<span class="step-no">'+(a.ok?'✓':(i+1))+'</span>'+
+       '<span class="step-ad">'+esc(a.ad)+'</span>'+
+       '<span class="step-ok-i">'+(acik?'▾':'›')+'</span>'+
+     '</button>';
+   if(acik){
+    h+='<div class="step-icerik">'+
+      '<div class="step-not">'+(a.not?esc(a.not):'<span style="color:#8592A0">Henüz not/açıklama eklenmedi.</span>')+'</div>';
+    if(i==5)h+=prjKokHtml(pp);
+    h+='<div class="two" style="margin-top:10px">'+
+       '<button class="b g" data-a="prj-not" data-p="'+pp.id+'" data-i="'+i+'">✎ Not / açıklama</button>'+
+       '<button class="b" data-a="prj-adim" data-p="'+pp.id+'" data-i="'+i+'" style="background:'+(a.ok?'#8592A0':'#1B7A47')+'">'+(a.ok?'↺ Geri al':'✓ Tamamlandı')+'</button>'+
+       '</div></div>';
+   }
+   h+='</div>';
   });
-  h+='</div>';
+  h+='</div></div>';
   /* Aksiyonlar */
   h+='<div class="card"><h3 style="display:flex;justify-content:space-between;align-items:center">Aksiyonlar ('+(pp.aksiyonlar||[]).length+')'+
     '<button class="lnk" data-a="prj-aks-yeni" data-p="'+pp.id+'">＋ Aksiyon</button></h3>';
@@ -2377,20 +2391,22 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<div class="card"><h3>Tamamlanan işler ('+_bitL.length+')</h3>'+isTablo(_bitL)+'</div>';
   }
   if(V=='bdet'){
-   var _bprj=PRJ.filter(function(p){return p.bolum==OB});
-   h+='<div class="card"><h3 style="display:flex;justify-content:space-between;align-items:center">🎯 Kaizen / İyileştirme projeleri ('+_bprj.length+')'+
-     '<button class="lnk" data-a="proje" data-b="'+OB+'">Tümü ›</button></h3>';
-   if(!_bprj.length){h+='<div class="td">Bu bölümde henüz proje yok.</div>';}
-   else{
-    _bprj.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0)}).slice(0,3).forEach(function(p){
-     var pr=prjIlerleme(p);
-     h+='<button class="prjkart" data-a="prj-ac" data-p="'+p.id+'" style="margin-bottom:8px">'+
-       '<div class="pk-ust"><span class="pk-no">#'+esc(p.no)+'</span><span class="pk-yuz">%'+pr+'</span></div>'+
-       '<div class="pk-konu">'+esc(p.konu)+'</div>'+
-       '<div class="pk-bar"><i style="width:'+pr+'%"></i></div></button>';
-    });
+   if(OB=='SI'){
+    var _bprj=PRJ.filter(function(p){return p.bolum==OB});
+    h+='<div class="card"><h3 style="display:flex;justify-content:space-between;align-items:center">🎯 Kaizen / İyileştirme projeleri ('+_bprj.length+')'+
+      '<button class="lnk" data-a="proje" data-b="'+OB+'">Tümü ›</button></h3>';
+    if(!_bprj.length){h+='<div class="td">Bu bölümde henüz proje yok.</div>';}
+    else{
+     _bprj.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0)}).slice(0,3).forEach(function(p){
+      var pr=prjIlerleme(p);
+      h+='<button class="prjkart" data-a="prj-ac" data-p="'+p.id+'" style="margin-bottom:8px">'+
+        '<div class="pk-ust"><span class="pk-no">#'+esc(p.no)+'</span><span class="pk-yuz">%'+pr+'</span></div>'+
+        '<div class="pk-konu">'+esc(p.konu)+'</div>'+
+        '<div class="pk-bar"><i style="width:'+pr+'%"></i></div></button>';
+     });
+    }
+    h+='<button class="b g" data-a="proje" data-b="'+OB+'" style="margin-top:4px">Kaizen modülünü aç</button></div>';
    }
-   h+='<button class="b g" data-a="proje" data-b="'+OB+'" style="margin-top:4px">Kaizen modülünü aç</button></div>';
    var h7=ago(7);
    h+='<div class="card"><h3>Personel ('+kis.length+')</h3>';
    if(!kis.length)h+='<div style="font-size:13px;color:#8592A0">Personel atanmamış.</div>';
@@ -3707,7 +3723,8 @@ document.addEventListener('click',function(e){
     ts:Date.now(),adimlar:prjYeniAdimlar(),kok:{},aksiyonlar:[]};
   PRJ.push(_p);prjKaydet();OPR=_p.id;V='projedet';say('Proje oluşturuldu — #'+_p.no);
  }
- else if(a=='prj-ac'){OPR=t.dataset.p;PAKS=null;V='projedet'}
+ else if(a=='prj-ac'){OPR=t.dataset.p;PAKS=null;var _op=prjBul(t.dataset.p),_fi=0;if(_op){_fi=-1;for(var _z=0;_z<_op.adimlar.length;_z++){if(!_op.adimlar[_z].ok){_fi=_z;break}}if(_fi<0)_fi=0}PADIM=_fi;V='projedet'}
+ else if(a=='prj-adim-ac'){var _i=+t.dataset.i;PADIM=(PADIM==_i)?-1:_i}
  else if(a=='prj-adim'){var _p=prjBul(t.dataset.p);if(_p){var _i=+t.dataset.i;_p.adimlar[_i].ok=!_p.adimlar[_i].ok;prjKaydet();}}
  else if(a=='prj-not'){var _p=prjBul(t.dataset.p);if(_p){var _i=+t.dataset.i;var _n=prompt('Adım notu — '+_p.adimlar[_i].ad+':',_p.adimlar[_i].not||'');if(_n!=null){_p.adimlar[_i].not=_n.trim();prjKaydet();}}}
  else if(a=='prj-kok-ekle'){var _p=prjBul(t.dataset.p);if(_p){var _kt=t.dataset.kat;var _n=prompt(_kt+' — kök neden ekle:','');if(_n&&_n.trim()){_p.kok=_p.kok||{};_p.kok[_kt]=_p.kok[_kt]||[];_p.kok[_kt].push(_n.trim());prjKaydet();}}}
