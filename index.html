@@ -1094,8 +1094,9 @@ function yonetici(){return ME=='mert'||ME=='mesut'}
 /* Termin (ek gün) ekleme yetkisi: yalnızca Mesut Bey ve Mert */
 function terminYetkisi(){return ME=='mert'||ME=='mesut'}
 /* Ek termin onayı: Süreç İyileştirme (SI) → Mesut, diğer tüm ekipler → Özkan.
-   Onaycının kendisi talep ederse (kendi kendini onaylamasın) üst onaya (Mert) düşer. */
-function terminOnayci(br,isteyen){var o=(br=='SI')?'mesut':'ozkan';if(isteyen&&isteyen==o)o='mert';return o}
+   Özkan en üst mevki (Direktörlük): kendi talebini kendi onaylar.
+   Onaycı (Mesut) kendi talep ederse üstü olan Özkan'a düşer — Mert'e düşmez. */
+function terminOnayci(br,isteyen){if(isteyen=='ozkan')return 'ozkan';var o=(br=='SI')?'mesut':'ozkan';if(isteyen&&isteyen==o)o='ozkan';return o}
 function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if((pn(ME)[4]||'')=='ust')return true;var _u=(pn(ME)[2]||'').toLocaleLowerCase('tr');if(_u.indexOf('müdür')>=0||_u.indexOf('mudur')>=0||_u.indexOf('direktör')>=0||_u.indexOf('direktor')>=0||_u.indexOf('şef')>=0||_u.indexOf('sef')>=0||_u.indexOf('yönetici')>=0||_u.indexOf('yonetici')>=0)return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function oncEt(o){if(o=='acil')return '<span style="flex:none;background:#C0392B;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">ACİL</span>';if(o=='yuksek')return '<span style="flex:none;background:#B9770E;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">YÜKSEK</span>';return ''}
 function bYetkiTum(){return sistemci()}
@@ -2492,6 +2493,24 @@ function ciz(){try{gozBanner()}catch(e){}
     '</select><label>Sıra (küçük değer üstte görünür)</label><input type="number" id="esira" min="0" step="1" value="'+ksira(pp[0])+'" placeholder="Örn. 5">'+
     '<div style="height:14px"></div>'+
     '<button class="b" data-a="psave" data-p="'+pp[0]+'">Kaydet</button></div>'+
+    (function(){
+      var _pid=pp[0];
+      var _hasJob=J.filter(gor).some(function(j){return (j.a||[]).some(function(x){return x.k==_pid})});
+      var _hasRec=K.some(function(r){return r.k==_pid});
+      var _core=['mert','ozkan','mesut'].indexOf(_pid)>=0;
+      var _safe=!_hasJob&&!_hasRec&&!_core&&_pid!=ME;
+      var o='<div class="card" style="margin-top:14px"><h3>Kullanıcı adı (giriş)</h3>'+
+        '<div class="td">Şu an: <b>'+esc(_pid)+'</b>@opmuk.com · şifre <b>123456</b></div>';
+      if(_safe){
+        o+='<label>Yeni kullanıcı adı (küçük harf, boşluksuz)</label>'+
+          '<input id="pku2" value="" placeholder="Örn. busrat" autocapitalize="none" spellcheck="false">'+
+          '<button class="b g" data-a="pkurename" data-p="'+_pid+'" style="margin-top:8px">Kullanıcı adını değiştir</button>'+
+          '<div class="note">Bu kişi henüz iş almadığı için kullanıcı adı güvenle değiştirilebilir. İki aynı ad olmasın (örn. busra ve busrat).</div>';
+      }else{
+        o+='<div class="note">'+(_core?'Bu bir sistem kullanıcısı, değiştirilemez.':(_pid==ME?'Kendi kullanıcı adını buradan değiştiremezsin.':'Bu kişinin işleri/kayıtları olduğundan kullanıcı adı değiştirilemez (bağlantılar bozulmasın).'))+'</div>';
+      }
+      return o+'</div>';
+    })()+
     (pp[0]!=ME?'<div class="card tehlike" style="margin-top:14px"><h3>\u26A0 Personeli sil</h3>'+
       '<div class="td">'+esc(pp[1])+' organizasyondan çıkarılır. Bu kişinin geçmiş işleri ve çalışma kayıtları silinmez, yerinde kalır.</div>'+
       '<button class="b r" data-a="psil" data-p="'+pp[0]+'">Bu personeli sil</button></div>':'');
@@ -2506,7 +2525,9 @@ function ciz(){try{gozBanner()}catch(e){}
     '<option value="c"'+(YP.rol=='c'?' selected':'')+'>Çalışan — sadece kendi işleri</option>'+
     '<option value="l"'+(YP.rol=='l'?' selected':'')+'>Ekip lideri — kendi bölümü</option>'+
     '<option value="ust"'+(YP.rol=='ust'?' selected':'')+'>Yönetici — tüm bölümler</option>'+
-    '</select><label>Sıra (küçük değer üstte görünür)</label><input type="number" id="psira" min="0" step="1" value="50" placeholder="Örn. 5">'+
+    '</select><label>Kullanıcı adı (giriş için — küçük harf, boşluksuz)</label><input id="pku" value="" placeholder="Örn. busrat" autocapitalize="none" spellcheck="false">'+
+    '<div class="note" style="margin-top:4px">Bu kişi <b>kullanıcıadı@opmuk.com</b> ve şifre <b>123456</b> ile giriş yapar. Boş bırakırsan otomatik atanır. Aynı ad iki kişide olamaz (örn. iki Büşra için busra ve busrat).</div>'+
+    '<label>Sıra (küçük değer üstte görünür)</label><input type="number" id="psira" min="0" step="1" value="50" placeholder="Örn. 5">'+
     '<div style="height:14px"></div><button class="b" data-a="pnew">Personeli ekle</button></div>';
  }
 
@@ -3710,10 +3731,17 @@ document.addEventListener('click',function(e){
   if(na.length<3){say('Ad soyad yaz.');return}
   if(nu.length<3){say('Unvan yaz.');return}
   var _ps=document.getElementById('psira'),_psv=(_ps&&_ps.value!=='')?+_ps.value:50;
-  var id='p'+Date.now();
+  var _kuE=document.getElementById('pku'),_ku=_kuE?_kuE.value.trim().toLocaleLowerCase('tr'):'';
+  _ku=_ku.replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]/g,'');
+  var id;
+  if(_ku){
+   if(_ku.length<3){say('Kullanıcı adı en az 3 harf olmalı.');return}
+   if(P.some(function(p){return String(p[0]).toLowerCase()==_ku})){say('"'+_ku+'" zaten kullanılıyor — başka bir kullanıcı adı seç (örn. '+_ku+'2).');return}
+   id=_ku;
+  } else { id='p'+Date.now(); }
   P.push([id,na,nu,nb,nr,_psv]);
   var _d=_pdFark();_d.sira[id]=_psv;var _si=_d.sil.indexOf(id);if(_si>=0)_d.sil.splice(_si,1);_pdYaz(_d);
-  say(na+' eklendi — '+bad(nb));V='org';menu();
+  say(na+' eklendi — giriş: '+id+'@opmuk.com / 123456');V='org';menu();
  }
  else if(a=='psil'){
   var _pid=t.dataset.p,_pp=pn(_pid);
@@ -3728,6 +3756,25 @@ document.addEventListener('click',function(e){
   _pdYaz(_pd);
   if(dbClient&&sistemci())dbClient.from('personel').delete().eq('id',_pid).then(function(){},function(){});
   say(_pp[1]+' silindi');V='org';menu();
+ }
+ else if(a=='pkurename'){
+  var _old=t.dataset.p,_e=document.getElementById('pku2'),_nu=_e?_e.value.trim().toLocaleLowerCase('tr'):'';
+  _nu=_nu.replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]/g,'');
+  if(_nu.length<3){say('Kullanıcı adı en az 3 harf olmalı.');return}
+  if(_nu==_old){say('Aynı kullanıcı adı.');return}
+  if(P.some(function(p){return String(p[0]).toLowerCase()==_nu})){say('"'+_nu+'" zaten kullanılıyor — başka bir ad seç.');return}
+  var _hasJob=J.filter(gor).some(function(j){return (j.a||[]).some(function(x){return x.k==_old})});
+  var _hasRec=K.some(function(r){return r.k==_old});
+  if(_hasJob||_hasRec||['mert','ozkan','mesut'].indexOf(_old)>=0){say('Bu kullanıcı adı değiştirilemez.');return}
+  for(var _pi=0;_pi<P.length;_pi++)if(P[_pi][0]==_old)P[_pi][0]=_nu;
+  var _pd2=_pdFark();
+  if(_pd2.sira[_old]!=null){_pd2.sira[_nu]=_pd2.sira[_old];delete _pd2.sira[_old]}
+  if(_pd2.sil.indexOf(_old)<0)_pd2.sil.push(_old);   /* eski id yenilemede geri gelmesin */
+  _pdYaz(_pd2);
+  if(dbClient&&sistemci())dbClient.from('personel').delete().eq('id',_old).then(function(){},function(){});
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
+  OP2=_nu;
+  say('Kullanıcı adı değişti → '+_nu+'@opmuk.com (şifre 123456)');V='org';menu();
  }
  else if(a=='knew'){
   var ac=document.getElementById('ka').value.trim();
