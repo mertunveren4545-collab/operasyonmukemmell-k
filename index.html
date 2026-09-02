@@ -1093,8 +1093,9 @@ var ETIKETLER=[
 function yonetici(){return ME=='mert'||ME=='mesut'}
 /* Termin (ek gün) ekleme yetkisi: yalnızca Mesut Bey ve Mert */
 function terminYetkisi(){return ME=='mert'||ME=='mesut'}
-/* Ek termin onayı: Süreç İyileştirme (SI) → Mesut, diğer tüm ekipler → Özkan */
-function terminOnayci(br){return br=='SI'?'mesut':'ozkan'}
+/* Ek termin onayı: Süreç İyileştirme (SI) → Mesut, diğer tüm ekipler → Özkan.
+   Onaycının kendisi talep ederse (kendi kendini onaylamasın) üst onaya (Mert) düşer. */
+function terminOnayci(br,isteyen){var o=(br=='SI')?'mesut':'ozkan';if(isteyen&&isteyen==o)o='mert';return o}
 function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if((pn(ME)[4]||'')=='ust')return true;var _u=(pn(ME)[2]||'').toLocaleLowerCase('tr');if(_u.indexOf('müdür')>=0||_u.indexOf('mudur')>=0||_u.indexOf('direktör')>=0||_u.indexOf('direktor')>=0||_u.indexOf('şef')>=0||_u.indexOf('sef')>=0||_u.indexOf('yönetici')>=0||_u.indexOf('yonetici')>=0)return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function oncEt(o){if(o=='acil')return '<span style="flex:none;background:#C0392B;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">ACİL</span>';if(o=='yuksek')return '<span style="flex:none;background:#B9770E;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">YÜKSEK</span>';return ''}
 function bYetkiTum(){return sistemci()}
@@ -1701,7 +1702,7 @@ function bittiBenim(){
 function bende(){var _r=J.filter(function(j){if(j.silindi)return false;var c=cur(j);return c&&c.k==ME&&j.kabul!==false});var _w={acil:0,yuksek:1,normal:2};return _r.sort(function(a,b){return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])})}
 function bekleyenAtama(){return J.filter(function(j){if(j.silindi)return false;var c=cur(j);return c&&c.k==ME&&j.kabul===false})}
 /* Bu kullanıcının onaylaması gereken bekleyen ek süre talepleri */
-function bekleyenTermin(){var r=[];J.filter(gor).forEach(function(j){(j.tal||[]).forEach(function(x){if(x.durum=='b'&&(terminOnayci(j.br)==ME||sistemci()))r.push({j:j,x:x})})});return r}
+function bekleyenTermin(){var r=[];J.filter(gor).forEach(function(j){(j.tal||[]).forEach(function(x){if(x.durum=='b'&&terminOnayci(j.br,x.k)==ME)r.push({j:j,x:x})})});return r}
 function bek(j){var w=0,b=0;j.a.forEach(function(s){if(!s.g)return;
  var d=s.d=='t'?gn(s.g,s.b):gec(s);w+=Math.min(d,s.t);b+=Math.max(0,d-s.t)});return[w,b]}
 function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return n}
@@ -2378,14 +2379,14 @@ function ciz(){try{gozBanner()}catch(e){}
   if(tlp.length){
    h+='<div class="card"><h3>Ek süre talebi</h3>';
    tlp.forEach(function(x,xi){
-    var yetkili=(terminOnayci(j.br)==ME)||sistemci();
+    var yetkili=(terminOnayci(j.br,x.k)==ME);
     h+='<div class="li"><div class="h"><b>+'+x.gun+' iş günü</b><i>'+fmt(x.ts)+'</i></div>'+
       '<div class="s">'+ad(x.k)+' · '+esc(x.adim)+'</div>'+
       '<div class="msg">'+esc(x.neden)+'</div>'+
       (yetkili?'<div class="two" style="margin-top:8px">'+
         '<button class="b" data-a="tkab" data-j="'+j.id+'" data-x="'+xi+'">Kabul et</button>'+
         '<button class="b g" data-a="tret" data-j="'+j.id+'" data-x="'+xi+'">Reddet</button></div>'
-       :'<div class="s" style="margin-top:6px">Onay bekleniyor: '+ad(terminOnayci(j.br))+'</div>')+
+       :'<div class="s" style="margin-top:6px">Onay bekleniyor: '+ad(terminOnayci(j.br,x.k))+'</div>')+
       '</div>';
    });
    h+='</div>';
@@ -3589,7 +3590,7 @@ document.addEventListener('click',function(e){
   jt.tal=jt.tal||[];jt.lg=jt.lg||[];
   jt.tal.push({ts:now(),k:ME,gun:eg,neden:en,adim:ct.a,durum:'b'});
   jt.lg.push({ts:now(),k:ME,tip:'Ek süre talep etti (+'+eg+' gün)',msg:en});
-  var _on=terminOnayci(jt.br);
+  var _on=terminOnayci(jt.br,ME);
   TAL=0;say('Talep gönderildi → '+ad(_on)+' onayına düştü');
   try{pushGonder([_on],'Ek süre talebi',ad(ME)+' +'+eg+' gün istedi — '+jt.ad);}catch(e){}
  }
@@ -3597,6 +3598,7 @@ document.addEventListener('click',function(e){
   var jk=bul(+t.dataset.j),xi=+t.dataset.x;
   var tl=(jk.tal||[]).filter(function(x){return x.durum=='b'})[xi];
   if(!tl)return;
+  if(terminOnayci(jk.br,tl.k)!=ME){say('Bu talebi onaylama yetkin yok — '+ad(terminOnayci(jk.br,tl.k))+' onaylamalı.');return}
   jk.lg=jk.lg||[];
   if(a=='tkab'){
    tl.durum='k';
