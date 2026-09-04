@@ -2218,12 +2218,15 @@ function ciz(){try{gozBanner()}catch(e){}
   if(_atn.length){
    h+='<div class="card atkart"><h3>\U0001F4E5 Sana atanan işler — kabul bekliyor ('+_atn.length+')</h3>';
    _atn.forEach(function(j){
+    var _plan=j.bas&&zmn(j.bas)>new Date();   /* planlı ileri başlangıç */
     h+='<div class="arow">'+
       '<div class="an">'+esc(j.ad)+oncEt(j.oncelik)+'</div>'+
-      '<div class="am">'+ad(j.atayan||'')+' atadı · '+tad(j.ts_)+'</div>'+
+      '<div class="am">'+ad(j.atayan||'')+' atadı · '+tad(j.ts_)+(_plan?' · <b style="color:#1E4A85">planlı: '+dtar(zmn(j.bas))+'</b>':'')+'</div>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-        '<button class="b r" data-a="kabulonc" data-j="'+j.id+'" style="margin:0;flex:1 1 100%">Öncelikli — şimdi başla</button>'+
-        '<button class="b" data-a="kabulsira" data-j="'+j.id+'" style="margin:0;flex:1">Sıraya al</button>'+
+        (_plan
+          ? '<button class="b r" data-a="kabulplan" data-j="'+j.id+'" style="margin:0;flex:1 1 100%">Kabul et — '+dtar(zmn(j.bas))+' başlar</button>'
+          : '<button class="b r" data-a="kabulonc" data-j="'+j.id+'" style="margin:0;flex:1 1 100%">Öncelikli — şimdi başla</button>'+
+            '<button class="b" data-a="kabulsira" data-j="'+j.id+'" style="margin:0;flex:1">Sıraya al</button>')+
         '<button class="b g" data-a="det" data-j="'+j.id+'" style="margin:0">Gör</button>'+
       '</div></div>';
    });
@@ -3465,7 +3468,7 @@ function ciz(){try{gozBanner()}catch(e){}
      return g5.length?'<optgroup label="'+B[bk].ad+'">'+g5.map(function(p){
       return '<option value="'+p[0]+'"'+(p[0]==ME&&!ATAMA?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</optgroup>':''}).join('')+
     '</select>'+
-    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Başlangıç / açılış tarihi</label><input type="date" id="jdate" value="'+new Date().toISOString().slice(0,10)+'" max="'+new Date().toISOString().slice(0,10)+'"><div class="note" style="margin:-6px 0 8px">Geç kalınan işi geriye dönük açmak için tarihi değiştir; termin bu tarihten sayılır.</div>'+
+    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Başlangıç / açılış tarihi</label><input type="date" id="jdate" value="'+new Date().toISOString().slice(0,10)+'"><div class="note" style="margin:-6px 0 8px">Geçmişe dönük (geç kalınan iş) veya ileri (planlı / gelecek) tarih seçebilirsin; termin bu tarihten sayılır. İleri tarihli işlerde süre, o gün gelene kadar işlemez.</div>'+
     '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
     '<div style="height:14px"></div><button class="b" data-a="new">'+(ATAMA?'İş ata':'İşi başlat')+'</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
@@ -4225,6 +4228,17 @@ document.addEventListener('click',function(e){
   /* otomatik termin uzaması kaldırıldı — diğer işler kendiliğinden ötelenmez */
   say('Öncelikli kabul — süre başladı');
  }
+ else if(a=='kabulplan'){
+  /* Planlı (ileri tarihli) kabul: işi kabul et ama başlangıcı PLANLI tarihte tut,
+     şimdiye çekme. Süre o gün gelene kadar işlemez. */
+  var _kj=bul(+t.dataset.j); if(!_kj){return}
+  var _ci=cur(_kj); if(!_ci||_ci.k!=ME){say('Bu iş sana atanmış değil.');return}
+  var _tn=now();_kj.kabul=true;
+  if(_kj.bas&&zmn(_kj.bas)>new Date()){isAdimHizala(_kj,_kj.bas);}   /* iş adımlarını planlı güne hizala */
+  else{_kj.bas=_tn;isAdimHizala(_kj,_tn);}                          /* tarih geçmişse normal başlat */
+  (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Kabul edildi — '+dtar(zmn(_kj.bas))+' başlar (planlı)'});
+  say('Kabul edildi — '+dtar(zmn(_kj.bas))+' tarihinde başlayacak');
+ }
  else if(a=='kabulsira'){
   /* Sıraya al: elindeki en geç biten işin ardına yerleştir, diğer işlere dokunma */
   var _kj=bul(+t.dataset.j); if(!_kj){return}
@@ -4285,11 +4299,13 @@ document.addEventListener('click',function(e){
  else if(a=='new'){
   var nm=document.getElementById('ja').value.trim();
   if(nm.length<4){say('İşe ad ver.');return}
-  var _jd=document.getElementById('jdate'),ts3=now();
+  var _jd=document.getElementById('jdate'),ts3=now(),_nowTs=now(),_ileri=false;
   if(_jd&&_jd.value){
    var _bugun=new Date().toISOString().slice(0,10);
    if(_jd.value===_bugun){ts3=now();}                 /* bugün açılıyorsa → GERÇEK saat (09:00 sabitlemesi kaldırıldı) */
-   else{var _dp=new Date(_jd.value+'T09:00');if(!isNaN(_dp)&&_dp<new Date())ts3=yer(_dp);}  /* geçmişe dönük → o günün mesai başı */
+   else{var _dp=new Date(_jd.value+'T09:00');
+    if(!isNaN(_dp)){ts3=yer(_dp);                      /* geçmiş VEYA ileri tarih → o günün mesai başı (09:00) */
+     if(_dp>new Date())_ileri=true;}}                  /* ileri tarih → planlı iş (süre o güne kadar işlemez) */
   }
   var kk=document.getElementById('jk').value,gg9=+document.getElementById('jg').value||5;
   var anaK=kk, ekK=[];
@@ -4322,7 +4338,7 @@ document.addEventListener('click',function(e){
      ============================================================ */
   var _yeniSure=gg9;                 /* yeni işin süresi (gün) = eklenecek ek termin miktarı */
   var _elde=[];                      /* elimdeki devam eden AÇIK işler (süreç bende, 'i' adımı) */
-  if(anaK==ME){bende().forEach(function(j){var c=cur(j);if(c&&stip(c)=='i')_elde.push(j);});}
+  if(anaK==ME && !_ileri){bende().forEach(function(j){var c=cur(j);if(c&&stip(c)=='i')_elde.push(j);});}
   var _sched='onc';                  /* varsayılan karar: öncelikli */
   if(_elde.length){                  /* elimde iş varsa SOR */
    _sched = confirm('Elinde devam eden '+_elde.length+' iş var.\n\nTAMAM → Bu YENİ işe şimdi başla (öncelikli). Elindeki işlere +'+_yeniSure+' gün ek termin eklenir.\n\nİPTAL → Sıraya al. Yaptığına devam et; bu iş son işinin ardından başlar.') ? 'onc' : 'sira';
@@ -4339,8 +4355,8 @@ document.addEventListener('click',function(e){
     for(var _ai=0;_ai<adm.length;_ai++){if(adm[_ai].tp=='i')adm[_ai].g=_yjBas;}}   /* iş adımlarının başlangıcını da ötele */
   }
 
-  J.unshift({id:Date.now()*1000+Math.floor(Math.random()*1000),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:_yjBas,a:adm,oncelik:onc,kabul:(anaK==ME),atandi:ts3,atayan:ME,
-   lg:[{ts:ts3,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'+(onc!='normal'?' · '+(onc=='acil'?'ACİL':'YÜKSEK')+' öncelik':'')+(_elde.length?(_sched=='onc'?' · öncelikli — elindekilere +'+_yeniSure+'g':' · sıraya alındı'):'')}]});
+  J.unshift({id:Date.now()*1000+Math.floor(Math.random()*1000),ad:nm,ts_:document.getElementById('jt').value,br:brr,bas:_yjBas,a:adm,oncelik:onc,kabul:(anaK==ME),atandi:_nowTs,atayan:ME,
+   lg:[{ts:_nowTs,k:ME,tip:'İş açıldı ('+kisiler.length+' kişi)'+(onc!='normal'?' · '+(onc=='acil'?'ACİL':'YÜKSEK')+' öncelik':'')+(_ileri?' · planlı — '+dtar(zmn(_yjBas))+' başlar':'')+(_elde.length?(_sched=='onc'?' · öncelikli — elindekilere +'+_yeniSure+'g':' · sıraya alındı'):'')}]});
   var _newId=J[0].id;
 
   /* ÖNCELİKLİ dalı → yeni iş eklendikten SONRA elimdeki her açık işe ek termin uygula */
