@@ -1026,6 +1026,11 @@ function bad(k){return (B[k]||{ad:k}).ad}
 function ii(n){return(n<10?'0':'')+n}
 function isGunu(d){var g=d.getDay();return g!==0&&g!==6}
 function isGunleri(bas,adet){var out=[],d=new Date(bas.getFullYear(),bas.getMonth(),bas.getDate()),i=0;while(out.length<adet&&i<500){if(isGunu(d))out.push(new Date(d));d.setDate(d.getDate()+1);i++}return out}
+/* İki tarih arası İŞ GÜNÜ sayısı (başlangıç ve bitiş dahil, hafta sonu hariç).
+   Termin artık takvimden açılış+bitiş seçilerek bu fonksiyonla iş gününe çevrilir. */
+function isGunSayisi(bas,bit){var d=new Date(bas.getFullYear(),bas.getMonth(),bas.getDate());var e=new Date(bit.getFullYear(),bit.getMonth(),bit.getDate());if(e<d)return 0;var n=0,i=0;while(d<=e&&i<3650){if(isGunu(d))n++;d.setDate(d.getDate()+1);i++}return n}
+/* Yeni iş formunda açılış+bitiş seçilince iş gününü canlı göster */
+function _terminHesapla(){try{var a=document.getElementById('jdate'),b=document.getElementById('jbit'),o=document.getElementById('jgun');if(!o)return;if(!a||!a.value||!b||!b.value){o.textContent='İş günü: — (bitiş tarihi seç)';return}var ad2=new Date(a.value+'T09:00'),bd=new Date(b.value+'T09:00');if(isNaN(ad2)||isNaN(bd)){o.textContent='İş günü: —';return}if(bd<new Date(ad2.getFullYear(),ad2.getMonth(),ad2.getDate())){o.textContent='⚠ Termin, açılıştan önce olamaz';o.style.color='#C0392B';return}var g=isGunSayisi(ad2,bd);o.textContent='= '+g+' iş günü (hafta sonu hariç)';o.style.color='#1E4A85'}catch(e){}}
 function dtar(d){return ii(d.getDate())+'.'+ii(d.getMonth()+1)+'.'+d.getFullYear()}
 function dataURLBlob(du){try{var a=du.split(','),m=(a[0].match(/:(.*?);/)||[])[1]||'application/octet-stream',b=atob(a[1]),n=b.length,u=new Uint8Array(n);while(n--)u[n]=b.charCodeAt(n);return new Blob([u],{type:m})}catch(e){return null}}
 /* ---- Dosya önizleme (salt okunur; istenirse indir) ---- */
@@ -1148,7 +1153,7 @@ function temaUygula(){
   '.obas{color:'+c.ana+'}';
  try{localStorage.setItem('opmuk_tema',TEMA);localStorage.setItem('opmuk_dark',DARK?'1':'0')}catch(e){}
 }
-var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0;
+var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0,TERMED=0;
 /* Bilgisayar görünümü: telefonda geniş (masaüstü) viewport'a geçerek
    mevcut min-width:900px masaüstü düzenini tetikler. Sadece Mert kullanır. */
 var PCV=false;function pcvUygula(){
@@ -2625,6 +2630,27 @@ function ciz(){try{gozBanner()}catch(e){}
     h+='<button class="b g" data-a="atadegis" data-j="'+j.id+'">Atanan kişiyi değiştir</button></div>';
    }
   })();
+  /* ---- Termini düzelt — yetkili (Mert / Mesut / sistemci) HER işin terminini değiştirebilir ---- */
+  (function(){
+   if(!(terminYetkisi()||sistemci()))return;
+   var _ta=anaAdim(j); if(!_ta)return;
+   var _acTs=_ta.g||j.bas;
+   var _acISO=_acTs?(function(){var d=zmn(_acTs);return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())})():'';
+   var _bd=null;try{_bd=isTermin(j)}catch(e){}
+   var _bitISO=_bd?(_bd.getFullYear()+'-'+ii(_bd.getMonth()+1)+'-'+ii(_bd.getDate())):'';
+   h+='<div class="card"><h3>Termini düzelt</h3>';
+   if(TERMED==j.id){
+    h+='<label>Açılış tarihi</label><input type="date" id="ted_ac" value="'+_acISO+'">'+
+       '<label>Termin (bitiş) tarihi</label><input type="date" id="ted_bit" value="'+_bitISO+'">'+
+       '<div style="height:10px"></div><div class="two">'+
+       '<button class="b" data-a="termeddgo" data-j="'+j.id+'">Kaydet</button>'+
+       '<button class="b g" data-a="termedno">Vazgeç</button></div>'+
+       '<div class="note">Açılış ve bitiş tarihinden iş günü otomatik hesaplanır (hafta sonu hariç) ve işteki <b>tüm personele</b> uygulanır. Tahmini gün eklenmez — ne seçersen o.</div></div>';
+   }else{
+    h+='<div style="font-size:13px;color:#5A6A63;margin-bottom:8px">Açılış: <b>'+(_acTs?dtar(zmn(_acTs)):'—')+'</b> · Termin: <b>'+(_bd?dtar(_bd):'—')+'</b></div>'+
+       '<button class="b g" data-a="termedac" data-j="'+j.id+'">Termini düzelt (açılış / bitiş)</button></div>';
+   }
+  })();
    if(c&&as(c)>0){
     var _srm=c.k;
     var _dk=K.filter(function(kk){return kk.k==_srm&&(!j.bas||String(kk.ts)>=String(j.bas))}).sort(function(a,b){return (String(b.ts)>String(a.ts))?1:-1});
@@ -3437,9 +3463,6 @@ function ciz(){try{gozBanner()}catch(e){}
     '<label>Faaliyet</label><select class="n" id="kt">'+
     ls.map(function(x){return '<option>'+esc(x)+'</option>'}).join('')+'</select>'+
     '<div style="display:flex;gap:6px;margin:4px 0 10px"><button class="b g" data-a="faalekle" style="margin:0;flex:1;padding:7px;font-size:12px">＋ Faaliyet ekle</button>'+(_oz.length?'<button class="b g" data-a="faalsil" style="margin:0;flex:1;padding:7px;font-size:12px">－ Özel faaliyet kaldır</button>':'')+'</div>'+
-    '<label>Bu çalışma hangi işin sürecini uzattı? (o işe ek termin eklenir)</label><select class="n" id="kis_is">'+
-    '<option value="">— Genel / hepsini geciktirdi (tüm açık işlere eklenir)</option>'+
-    bende().filter(function(j){var c=cur(j);return c&&stip(c)=='i'}).map(function(j){return '<option value="'+j.id+'">'+esc(j.ad)+'</option>'}).join('')+'</select>'+
     '<label>Ne yaptın</label><textarea id="ka" placeholder="Kısaca yaz."></textarea>'+
     '<div style="height:12px"></div><button class="b" data-a="knew">Kaydet</button>'+
     '<div class="note">Süre, başlangıç ve bitiş saatinden otomatik hesaplanır.</div></div>';
@@ -3468,8 +3491,9 @@ function ciz(){try{gozBanner()}catch(e){}
      return g5.length?'<optgroup label="'+B[bk].ad+'">'+g5.map(function(p){
       return '<option value="'+p[0]+'"'+(p[0]==ME&&!ATAMA?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</optgroup>':''}).join('')+
     '</select>'+
-    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Başlangıç / açılış tarihi</label><input type="date" id="jdate" value="'+new Date().toISOString().slice(0,10)+'"><div class="note" style="margin:-6px 0 8px">Geçmişe dönük (geç kalınan iş) veya ileri (planlı / gelecek) tarih seçebilirsin; termin bu tarihten sayılır. İleri tarihli işlerde süre, o gün gelene kadar işlemez.</div>'+
-    '<label>Termin (iş günü)</label><input type="number" id="jg" min="1" value="5">'+
+    (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Başlangıç / açılış tarihi</label><input type="date" id="jdate" value="'+new Date().toISOString().slice(0,10)+'" oninput="try{_terminHesapla()}catch(e){}"><div class="note" style="margin:-6px 0 8px">Geçmişe dönük (geç kalınan iş) veya ileri (planlı / gelecek) tarih seçebilirsin; termin bu tarihten sayılır. İleri tarihli işlerde süre, o gün gelene kadar işlemez.</div>'+
+    '<label>Termin (bitiş) tarihi</label><input type="date" id="jbit" value="" oninput="try{_terminHesapla()}catch(e){}">'+
+    '<div class="note" id="jgun" style="margin:-6px 0 8px;font-weight:600">İş günü: — (bitiş tarihi seç)</div>'+
     '<div style="height:14px"></div><button class="b" data-a="new">'+(ATAMA?'İş ata':'İşi başlat')+'</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
@@ -3497,7 +3521,7 @@ document.addEventListener('click',function(e){
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
-  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1};
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1};
   if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
  }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
@@ -3972,6 +3996,24 @@ document.addEventListener('click',function(e){
  else if(a=='dst'){DST=+t.dataset.j}
  else if(a=='dno'){DST=0}
  else if(a=='atadegis'){ATAND=+t.dataset.j}
+ else if(a=='termedac'){TERMED=+t.dataset.j}
+ else if(a=='termedno'){TERMED=0}
+ else if(a=='termeddgo'){
+  var _tj=bul(+t.dataset.j); if(!_tj)return;
+  if(!(terminYetkisi()||sistemci())){say('Termin düzeltme yetkisi yalnızca Mert ve Mesut’ta.');return}
+  var _acV=(document.getElementById('ted_ac')||{}).value,_bitV=(document.getElementById('ted_bit')||{}).value;
+  if(!_acV||!_bitV){say('Açılış ve bitiş tarihini seç.');return}
+  var _acD=new Date(_acV+'T09:00'),_bitD=new Date(_bitV+'T09:00');
+  if(isNaN(_acD)||isNaN(_bitD)){say('Tarih geçersiz.');return}
+  if(_bitD<new Date(_acD.getFullYear(),_acD.getMonth(),_acD.getDate())){say('Termin, açılış tarihinden önce olamaz.');return}
+  var _gun=isGunSayisi(_acD,_bitD); if(_gun<1)_gun=1;
+  var _acTs=yer(_acD),_n=0;
+  (_tj.a||[]).forEach(function(x){if(stip(x)=='i'){x.g=_acTs;x.t=_gun;_n++}});   /* işteki tüm personele uygula */
+  _tj.bas=_acTs;
+  (_tj.lg=_tj.lg||[]).push({ts:now(),k:ME,tip:'Termin düzeltildi → açılış '+dtar(_acD)+' · termin '+dtar(_bitD)+' ('+_gun+' iş günü)'});
+  TERMED=0;say('Termin güncellendi — '+dtar(_acD)+' → '+dtar(_bitD)+' ('+_gun+' iş günü)');
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,200);
+ }
  else if(a=='takay'){var _m=+t.dataset.m;TAKAY=(TAKAY===_m)?null:_m} else if(a=='atadno'){ATAND=0}
  else if(a=='atadgo'){
   var _aj=bul(+t.dataset.j); if(!_aj){return}
@@ -4307,7 +4349,13 @@ document.addEventListener('click',function(e){
     if(!isNaN(_dp)){ts3=yer(_dp);                      /* geçmiş VEYA ileri tarih → o günün mesai başı (09:00) */
      if(_dp>new Date())_ileri=true;}}                  /* ileri tarih → planlı iş (süre o güne kadar işlemez) */
   }
-  var kk=document.getElementById('jk').value,gg9=+document.getElementById('jg').value||5;
+  var kk=document.getElementById('jk').value;
+  var _bitEl=document.getElementById('jbit');
+  if(!_bitEl||!_bitEl.value){say('Termin (bitiş) tarihini seç.');return}
+  var _basD=zmn(ts3),_bitD=new Date(_bitEl.value+'T09:00');
+  if(isNaN(_bitD)){say('Termin tarihi geçersiz.');return}
+  if(_bitD<new Date(_basD.getFullYear(),_basD.getMonth(),_basD.getDate())){say('Termin, açılış tarihinden önce olamaz.');return}
+  var gg9=isGunSayisi(_basD,_bitD); if(gg9<1)gg9=1;   /* kullanıcının seçtiği bitişe göre iş günü — tahmin yok */
   var anaK=kk, ekK=[];
   if(ATAMA&&!anaK){say('Önce kime atayacağını seç.');return}
   var _cbs=document.querySelectorAll('.ekk:checked');
