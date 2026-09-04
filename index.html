@@ -1834,12 +1834,9 @@ function siralaP(arr){return arr.slice().sort(function(a,b){var d=ksira(a[0])-ks
    isteğini cihazda (localStorage) tutar ve her açılışta uygular. */
 function _pdFark(){var d;try{d=JSON.parse(localStorage.getItem('opmuk_pers_fark')||'{}')||{}}catch(e){d={}}d.sil=d.sil||[];d.sira=d.sira||{};return d}
 function _pdYaz(d){try{localStorage.setItem('opmuk_pers_fark',JSON.stringify(d))}catch(e){}}
-function persFarkUygula(arr){
- var d=_pdFark();
- arr=arr.filter(function(p){return d.sil.indexOf(p[0])<0});        /* silinenleri gizle */
- arr.forEach(function(p){if(d.sira[p[0]]!=null)p[5]=+d.sira[p[0]]}); /* sıra değerlerini uygula */
- return arr;
-}
+/* Personel artık BULUT'tan yönetilir. Silme ve sıra buluta yazılır; cihaza özel
+   katman UYGULANMAZ — yoksa isimler/sıra cihazdan cihaza kayardı. (no-op) */
+function persFarkUygula(arr){return arr}
 function kisiStat(k,kisi){
   var mine=J.filter(gor).filter(function(j){if(j.br!=k)return false;var steps=j.a||[],task=null;steps.forEach(function(x){if(stip(x)=='i'&&!task)task=x});return task&&task.k==kisi});
   return {toplam:mine.length,
@@ -3637,8 +3634,6 @@ document.addEventListener('click',function(e){
   var zamanAsimi=setTimeout(function(){
    HATA='Sunucu yanıt vermedi. Tekrar dene.';GIRIS=false;ciz();},15000);
   var mail=ku+'@opmuk.com';
-  var kisiVar=false;for(var i8=0;i8<P.length;i8++)if(P[i8][0]==ku)kisiVar=true;
-  if(!kisiVar){HATA='Bu kullanıcı adı personel listesinde yok.';GIRIS=false;ciz();return}
 
   function basarili(u){
    clearTimeout(zamanAsimi);
@@ -3672,25 +3667,36 @@ document.addEventListener('click',function(e){
    else HATA='Giriş hatası: '+((e&&e.message)||'bilinmiyor');
    console.log('AUTH:',e);GIRIS=false;ciz();
   }
-
-  dbClient.auth.signInWithPassword({email:mail,password:sf}).then(function(r){
-   if(!r.error){OTURUM=r.data.user;basarili(r.data.user);return}
-   var m=(r.error.message||'').toLowerCase();
-   /* hesap yoksa ve varsayılan şifreyle giriliyorsa otomatik oluştur */
-   if(m.indexOf('invalid login')>=0 && sf=='123456'){
-    dbClient.auth.signUp({email:mail,password:'123456'}).then(function(r2){
-     if(r2.error){hataGoster(r2.error);return}
-     if(!r2.data.session){
-      HATA='Hesap oluşturuldu ama giriş yapılamadı. Supabase → Authentication → Providers → Email → "Confirm email" kapatılmalı.';
-      GIRIS=false;ciz();return}
-     OTURUM=r2.data.user;
-     say('Hesabın oluşturuldu');
-     basarili(r2.data.user);
-    });
-    return;
-   }
-   hataGoster(r.error);
-  }).catch(function(e){ hataGoster(e); });
+  function _girisDevam(){
+   dbClient.auth.signInWithPassword({email:mail,password:sf}).then(function(r){
+    if(!r.error){OTURUM=r.data.user;basarili(r.data.user);return}
+    var m=(r.error.message||'').toLowerCase();
+    /* hesap yoksa ve varsayılan şifreyle giriliyorsa otomatik oluştur */
+    if(m.indexOf('invalid login')>=0 && sf=='123456'){
+     dbClient.auth.signUp({email:mail,password:'123456'}).then(function(r2){
+      if(r2.error){hataGoster(r2.error);return}
+      if(!r2.data.session){
+       HATA='Hesap oluşturuldu ama giriş yapılamadı. Supabase → Authentication → Providers → Email → "Confirm email" kapatılmalı.';
+       GIRIS=false;ciz();return}
+      OTURUM=r2.data.user;
+      say('Hesabın oluşturuldu');
+      basarili(r2.data.user);
+     });
+     return;
+    }
+    hataGoster(r.error);
+   }).catch(function(e){ hataGoster(e); });
+  }
+  function _yok(){clearTimeout(zamanAsimi);HATA='Bu kullanıcı adı personel listesinde yok.';GIRIS=false;ciz();}
+  function _yerelVar(){for(var i8=0;i8<P.length;i8++)if(String(P[i8][0]).toLowerCase()==ku)return true;return false}
+  /* Giriş anında personel listesini BULUTTAN tazele — başka cihazda eklenen/
+     yeniden adlandırılan kullanıcı (örn. busrat) bayat yerel listede olmasa da bulunur. */
+  dbClient.from('personel').select('id').then(function(pf){
+   var ids=(pf&&pf.data&&pf.data.length)?pf.data.map(function(r){return String(r.id).toLowerCase()}):null;
+   var kisiVar = ids ? (ids.indexOf(ku)>=0) : _yerelVar();
+   if(!kisiVar){_yok();return}
+   _girisDevam();
+  },function(){ if(!_yerelVar()){_yok();return} _girisDevam(); });
   return;
  }
  if(a=='cikis'){
@@ -3997,7 +4003,9 @@ document.addEventListener('click',function(e){
    id=_ku;
   } else { id='p'+Date.now(); }
   P.push([id,na,nu,nb,nr,_psv]);
-  var _d=_pdFark();_d.sira[id]=_psv;var _si=_d.sil.indexOf(id);if(_si>=0)_d.sil.splice(_si,1);_pdYaz(_d);
+  if(dbClient&&sistemci())dbClient.from('personel').upsert({id:id,ad:na,unvan:nu,bolum:nb,rol:nr}).then(function(r){
+    if(r&&r.error)say('Not: buluta yazılamadı ('+r.error.message+') — kişi girişte bulunmayabilir.');},function(){});
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,300);
   say(na+' eklendi — giriş: '+id+'@opmuk.com / 123456');V='org';menu();
  }
  else if(a=='psil'){
@@ -4006,12 +4014,8 @@ document.addEventListener('click',function(e){
   if(_pid==ME){say('Kendini silemezsin.');return}
   if(!confirm(_pp[1]+' organizasyondan silinecek.\n\nGeçmiş işleri ve çalışma kayıtları KORUNUR. Emin misin?'))return;
   P=P.filter(function(p){return p[0]!=_pid});
-  /* cihazda kalıcı sil → yenilemede geri gelmez (bulut DELETE kapalı olsa bile) */
-  var _pd=_pdFark();
-  if(_pd.sil.indexOf(_pid)<0)_pd.sil.push(_pid);
-  if(_pd.sira[_pid]!=null)delete _pd.sira[_pid];
-  _pdYaz(_pd);
-  if(dbClient&&sistemci())dbClient.from('personel').delete().eq('id',_pid).then(function(){},function(){});
+  if(dbClient&&sistemci())dbClient.from('personel').delete().eq('id',_pid).then(function(r){
+    if(r&&r.error)say('Uyarı: buluttan silinemedi ('+r.error.message+') — diğer cihazlarda görünebilir.');},function(){});
   say(_pp[1]+' silindi');V='org';menu();
  }
  else if(a=='pkurename'){
@@ -4023,13 +4027,16 @@ document.addEventListener('click',function(e){
   var _hasJob=J.filter(gor).some(function(j){return (j.a||[]).some(function(x){return x.k==_old})});
   var _hasRec=K.some(function(r){return r.k==_old});
   if(_hasJob||_hasRec||['mert','ozkan','mesut'].indexOf(_old)>=0){say('Bu kullanıcı adı değiştirilemez.');return}
-  for(var _pi=0;_pi<P.length;_pi++)if(P[_pi][0]==_old)P[_pi][0]=_nu;
-  var _pd2=_pdFark();
-  if(_pd2.sira[_old]!=null){_pd2.sira[_nu]=_pd2.sira[_old];delete _pd2.sira[_old]}
-  if(_pd2.sil.indexOf(_old)<0)_pd2.sil.push(_old);   /* eski id yenilemede geri gelmesin */
-  _pdYaz(_pd2);
-  if(dbClient&&sistemci())dbClient.from('personel').delete().eq('id',_old).then(function(){},function(){});
-  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
+  var _prow=null;for(var _pi=0;_pi<P.length;_pi++)if(P[_pi][0]==_old){P[_pi][0]=_nu;_prow=P[_pi]}
+  if(dbClient&&sistemci()&&_prow){
+   /* yeni kaydı hemen buluta yaz + eski kaydı sil (çift kayıt / "bulunamadı" olmasın) */
+   dbClient.from('personel').upsert({id:_nu,ad:_prow[1],unvan:_prow[2],bolum:_prow[3],rol:_prow[4]}).then(function(r){
+     if(r&&r.error){say('Buluta yazılamadı: '+r.error.message);return}
+     dbClient.from('personel').delete().eq('id',_old).then(function(r2){
+       if(r2&&r2.error)say('Yeni ad kaydedildi ama eski kayıt silinemedi ('+r2.error.message+').');},function(){});
+   },function(){});
+  }
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,300);
   OP2=_nu;
   say('Kullanıcı adı değişti → '+_nu+'@opmuk.com (şifre 123456)');V='org';menu();
  }
@@ -4347,8 +4354,9 @@ function talepleriGetir(){
     /* tesisler ARTIK burada toplu yazılmıyor — ekleme/düzenleme anında tekil upsert
        ediliyor (tnew/tsave). Böylece her senkronda listenin ezilip yeniden yazılması
        ve bayat/varsayılan T'nin buluta basılıp eklenenlerin kaybolması sorunu biter. */
-    await guvenliYaz('personel',P.map(function(p){
-      return {id:p[0],ad:p[1],unvan:p[2],bolum:p[3],rol:p[4]}}));
+    var _pmap=function(ws){return P.map(function(p){var o={id:p[0],ad:p[1],unvan:p[2],bolum:p[3],rol:p[4]};if(ws)o.sira=(p[5]!=null&&p[5]!=='')?+p[5]:50;return o})};
+    var _pOK=await guvenliYaz('personel',_pmap(true));            /* sıra dahil dene */
+    if(_pOK===false)await guvenliYaz('personel',_pmap(false));    /* sira kolonu yoksa sırasız yaz — sync bozulmasın */
     await guvenliYaz('bolumler',Object.keys(B).map(function(k,i){
       return {id:k,ad:B[k].ad,sef:B[k].sef,ust:B[k].ust,ust_gerek:!!B[k].ug,sira:i}}));
    }
