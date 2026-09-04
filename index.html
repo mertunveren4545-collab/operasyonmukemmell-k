@@ -2694,10 +2694,11 @@ function ciz(){try{gozBanner()}catch(e){}
   if(!ek.length)h+='<div style="font-size:13px;color:#8592A0;margin-bottom:9px">Henüz ek yok.</div>';
   h+='<div style="height:8px"></div><label class="upl">Excel, PDF veya fotoğraf ekle'+
     '<input type="file" id="fu" data-j="'+j.id+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label></div>';
-  if(j.uzama&&j.uzama.length){var _tuz=0;j.uzama.forEach(function(u){_tuz+=(u.gun||0)});_tuz=Math.round(_tuz*100)/100;
+  if(j.uzama&&j.uzama.length){var _uzL=j.uzama.filter(function(u){return !/Öncelikli iş araya girdi/.test(u.neden||'')});
+   if(_uzL.length){var _tuz=0;_uzL.forEach(function(u){_tuz+=(u.gun||0)});_tuz=Math.round(_tuz*100)/100;
    h+='<div class="card"><h3>Termin uzamaları (+'+_tuz+' gün)</h3>';
-   j.uzama.slice().reverse().forEach(function(u){h+='<div class="li"><div class="h"><b>+'+u.gun+' gün</b><i>'+fmt(u.ts)+'</i></div><div class="s" style="color:#16202B;font-size:13px">'+esc(u.neden)+'</div><div class="s">'+ad(u.kim)+'</div></div>';});
-   h+='<div class="note">Termin yalnızca onaylı ek süre talepleriyle uzar; otomatik uzatma yok.</div></div>';}
+   _uzL.slice().reverse().forEach(function(u){h+='<div class="li"><div class="h"><b>+'+u.gun+' gün</b><i>'+fmt(u.ts)+'</i></div><div class="s" style="color:#16202B;font-size:13px">'+esc(u.neden)+'</div><div class="s">'+ad(u.kim)+'</div></div>';});
+   h+='<div class="note">Termin yalnızca onaylı ek süre talepleriyle uzar; otomatik uzatma yok.</div></div>';}}
   /* ---- Bu işe bağlı çalışma kayıtları ----
      Çalışma kaydında bu iş seçildiğinde buraya düşer; işe giren (yönetici dahil) görür. */
   (function(){
@@ -2752,7 +2753,9 @@ function ciz(){try{gozBanner()}catch(e){}
    });
   })();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
-  var _lg=(j.lg||[]).slice().sort(function(a,b){return zmn(a.ts)-zmn(b.ts)});
+  /* Eski (kaldırılan) otomatik uzatma kayıtlarını gösterme */
+  var _otoLog=function(l){return (/^Termin \+/.test(l.tip||'')&&/Öncelikli yeni iş/.test(l.msg||''))||/Öncelikli iş araya girdi/.test(l.msg||'')||/Bekleme telafisi/.test(l.tip||'');};
+  var _lg=(j.lg||[]).filter(function(l){return !_otoLog(l)}).slice().sort(function(a,b){return zmn(a.ts)-zmn(b.ts)});
   if(!_lg.length)h+='<div style="font-size:13px;color:#8592A0">Henüz hareket yok.</div>';
   var _gun='';
   _lg.forEach(function(l){
