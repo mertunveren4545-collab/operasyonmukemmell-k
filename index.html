@@ -4580,13 +4580,8 @@ function talepleriGetir(){
    if(tL&&tL.length)T=tL.map(function(x){return {id:x.id,ad:x.ad}});
    try{T=tesisFarkUygula(T)}catch(e){}
    if(pL&&pL.length)P=pL.map(function(x){return [x.id,x.ad,x.unvan,x.bolum,x.rol].concat(x.sira!=null?[+x.sira]:[])});
-   /* Büşra ve Batuhan bulutta yoksa da her zaman listede olsun (Veri Analitiği) */
-   ['busra','batuhan'].forEach(function(_id){
-     if(!P.some(function(p){return p[0]==_id})){
-       var _v=P_VARSAYILAN.filter(function(p){return p[0]==_id})[0];
-       if(_v)P.push(_v.slice());
-     }
-   });
+   /* NOT: Büşra/Batuhan'ı zorla geri ekleyen blok kaldırıldı — personel artık
+      yalnızca buluttan yönetilir; silinen kişi yenilemede geri gelmez. */
    try{P=persFarkUygula(P)}catch(e){}
    if(bL&&bL.length)bL.forEach(function(x){
      if(B[x.id])B[x.id]={ad:x.ad,sef:x.sef,ust:x.ust,ug:x.ust_gerek?1:0}});
