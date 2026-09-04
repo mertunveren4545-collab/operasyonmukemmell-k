@@ -2616,6 +2616,9 @@ function ciz(){try{gozBanner()}catch(e){}
           : 'plan '+s.t+' gün')+
          (s.ekg?' · +'+s.ekg+' ek':'')+
        '</div>'+
+       ((s.d=='t'&&tp2=='i'&&(s.k==ME||sistemci()||terminYetkisi())&&!j.a.some(function(x){return stip(x)!='i'&&x.d!='b'}))
+         ? '<button data-a="geriac" data-j="'+j.id+'" data-si="'+si+'" style="margin-top:6px;border:1px solid #E3B7B7;background:#FDF3F3;color:#C0392B;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer">\u21A9 Bu adımı geri aç (yanlış tamamlandıysa)</button>'
+         : '')+
      '</div>'+
    '</div>';
   });
@@ -2736,8 +2739,8 @@ function ciz(){try{gozBanner()}catch(e){}
     var _bas=(ti===0);                /* birincil kişi → eski ortak (tarih) anahtarlı notları da göster */
     var _c2=cur(j);
     var _benimAktif=(owner==ME && _c2 && _c2.k==ME && stip(_c2)=='i');   /* bu benim, hâlâ süren iş adımım mı */
-    var _sonKay=-1;                   /* çalışma kaydı olan SON gün (devret butonu orada çıkar) */
-    gunler.forEach(function(d,gi){var has=K.some(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});if(has)_sonKay=gi;});
+    var _sonKay=-1;                   /* SADECE bu işe bağlı (is_id) çalışma kaydı olan son gün */
+    gunler.forEach(function(d,gi){var has=K.some(function(r){var rd=zmn(r.ts);return r.k==owner&&String(r.is_id||'')==String(j.id)&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});if(has)_sonKay=gi;});
     h+='<div class="card"><h3>Gün gün iş dökümü'+(_cok?' <span style="font-weight:600;color:#1E4A85">— '+esc(ad(owner))+'</span>':'')+'</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
     gunler.forEach(function(d,gi){
      var kayit=K.filter(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});
@@ -3565,7 +3568,7 @@ document.addEventListener('click',function(e){
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
-  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1};
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1};
   if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
  }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
@@ -4142,7 +4145,18 @@ document.addEventListener('click',function(e){
    say('Talep reddedildi');
   }
  }
- else if(a=='rno'){RED=0}
+ else if(a=='geriac'){
+  var _gj=bul(+t.dataset.j),_gsi=+t.dataset.si,_gs=_gj&&_gj.a?_gj.a[_gsi]:null;
+  if(!_gs){return}
+  if(!(_gs.k==ME||sistemci()||terminYetkisi())){say('Bu adımı geri açma yetkin yok.');return}
+  if(stip(_gs)!='i'||_gs.d!='t'){say('Yalnızca tamamlanmış iş adımı geri açılır.');return}
+  if(_gj.a.some(function(x){return stip(x)!='i'&&x.d!='b'})){say('Onay aşaması başladığı için geri açılamaz — yöneticine başvur.');return}
+  _gs.d='a';_gs.b=0;if(!_gs.g)_gs.g=now();
+  try{isAdimHizala(_gj,_gj.bas||_gs.g)}catch(e){}   /* iş adımlarını işin başlangıcına hizala */
+  (_gj.lg=_gj.lg||[]).push({ts:now(),k:ME,tip:'Adım geri açıldı (yanlış tamamlama düzeltildi) — '+ad(_gs.k)});
+  say('Adım geri açıldı');
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
+ }
  else if(a=='ok'&&as(cur(bul(+t.dataset.j)))>0){GEC2=+t.dataset.j}
  else if(a=='ok'||a=='gok'){
   var j=bul(+t.dataset.j),c=cur(j),ix=j.a.indexOf(c),ts=now();
@@ -4152,12 +4166,23 @@ document.addEventListener('click',function(e){
    j.lg=j.lg||[];j.lg.push({ts:ts,k:ME,tip:'Gecikme nedeni — '+c.a,msg:gm});
    GEC2=0;
   }
-  c.d='t';c.b=ts;var n=j.a[ix+1];j.lg=j.lg||[];
-  if(n&&n.a=='Bölüm onayı')n.k=bolumOnayci(j.br);   /* onay doğru kişiye: SI → Mesut */
-  if(n){n.d='a';n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k));try{if(n.k!=ME)pushGonder([n.k],'Sana iş düştü',j.ad)}catch(e){}}
-  else{j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı — kapandı'});
-   konfeti();bip();say('🎉 İş tamamlandı — katılan herkese düştü')}
+  c.d='t';c.b=ts;j.lg=j.lg||[];
+  /* ÇOK KİŞİLİ İŞ: bu bir iş adımıysa ve hâlâ TAMAMLANMAMIŞ başka iş adımı varsa,
+     onaya GÖNDERME — sadece bu kişinin payı biter, diğer personel sürer. */
+  var _kalanIs=j.a.filter(function(x){return stip(x)=='i'&&x.d!='t'});
+  if(stip(c)=='i' && _kalanIs.length){
+   j.lg.push({ts:ts,k:ME,tip:'Kendi payını tamamladı — diğer personel sürüyor'});
+   say('Payın tamamlandı — işteki diğer personel devam ediyor');
+  }else{
+   /* Tüm iş adımları bitti (veya bu bir onay adımı) → sıradaki tamamlanmamış onay adımına geç */
+   var n=null;for(var _ni=0;_ni<j.a.length;_ni++){if(j.a[_ni].d!='t'){n=j.a[_ni];break;}}
+   if(n&&n.a=='Bölüm onayı')n.k=bolumOnayci(j.br);   /* onay doğru kişiye: SI → Mesut */
+   if(n){n.d='a';if(!n.g)n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k));try{if(n.k!=ME)pushGonder([n.k],'Sana iş düştü',j.ad)}catch(e){}}
+   else{j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı — kapandı'});
+    konfeti();bip();say('🎉 İş tamamlandı — katılan herkese düştü')}
+  }
   V='ana';RED=0;
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
  }
  else if(a=='rgo'){
   var el2=document.getElementById('rt'),m=el2?el2.value.trim():'';
