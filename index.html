@@ -1255,6 +1255,7 @@ var OP2='mert';
 var GIRIS=false,HATA='',OTURUM=null,ZORUNLU=false,UNUT=false,TALEPLER=[],DURUMLAR=[];
 var MESAJLAR=[],SON_OKUMA=null,MHEDEF=null,MZAMAN=null;
 var FILT='',GFILT='',GBOL='',GKIS='',ILKCEK=true,MTASLAK='',MSAYI=0,SES=true,KAYITCI=null,KAYITTA=false,KPARCA=[],YZ_SON=0,DZAMAN=null;
+var VERI_YUKLENDI=false;   /* bulut verisi ilk kez yüklenene kadar senkron YAZMAZ — yoksa yeni index varsayılanları buluta basıp ayarları siler */
 var ETIKET=false,BAHSET=false;
 var ETIKETLER=[
  ['♻️','KAİZEN','sürekli iyileştirme'],
@@ -4397,12 +4398,19 @@ document.addEventListener('change',function(e){
 document.addEventListener('input',function(e){var t=e.target;
  if(t.id=='mm'){MTASLAK=t.value;yaziyorBildir();return}
  if(t.dataset&&t.dataset.f&&NS)NS[+t.dataset.i][t.dataset.f]=t.dataset.f=='t'?+t.value:t.value});
+function _bolumYaz(bid){
+ if(!dbClient||!sistemci()||!B[bid])return;
+ var x=B[bid];
+ dbClient.from('bolumler').upsert({id:bid,ad:x.ad,sef:x.sef,ust:x.ust,ust_gerek:!!x.ug}).then(function(r){
+   if(r&&r.error)say('Uyarı: onay ayarı buluta yazılamadı ('+r.error.message+').');},function(){});
+ if(window.senkronCalistir)setTimeout(window.senkronCalistir,300);
+}
 document.addEventListener('change',function(e){
  var q=e.target;
- if(q.dataset&&q.dataset.a=='sset'){B[q.dataset.b].sef=q.value;say('1. onay güncellendi');ciz();return}
+ if(q.dataset&&q.dataset.a=='sset'){B[q.dataset.b].sef=q.value;_bolumYaz(q.dataset.b);say('1. onay güncellendi');ciz();return}
  if(q.dataset&&q.dataset.a=='uset'){var c3=B[q.dataset.b];
   if(q.value=='0'){c3.ug=0}else{c3.ug=1;c3.ust=q.value}
-  say('2. onay güncellendi');ciz();return}
+  _bolumYaz(q.dataset.b);say('2. onay güncellendi');ciz();return}
  if(e.target.id=='who'){ME=e.target.value;NS=null;V='ana';RED=0;ciz();window.scrollTo(0,0);say(ad(ME)+' olarak bakıyorsun')}});
 
 function menu(){
@@ -4458,6 +4466,7 @@ function talepleriGetir(){
  }
  async function senkron(){
   if(GERCEK_ME)return;
+  if(!VERI_YUKLENDI)return;   /* bulut henüz yüklenmedi → yazma (varsayılanları buluta basma) */
   try{
    var _dg=[];
     J.forEach(function(j){var sat=isSatiri(j);var str=JSON.stringify(sat);
@@ -4493,15 +4502,18 @@ function talepleriGetir(){
 
  (async function(){
   try{
-   var r=await Promise.all([
+   var rs=await Promise.allSettled([
      dbClient.from('isler').select('*'),
      dbClient.from('tesisler').select('*'),
      dbClient.from('personel').select('*'),
      dbClient.from('bolumler').select('*').order('sira'),
      dbClient.from('kayitlar').select('*').order('baslangic',{ascending:false}).limit(500)]);
-   var iL=r[0].data,tL=r[1].data,pL=r[2].data,bL=r[3].data,kL=r[4].data;
+   function _d(i){return (rs[i]&&rs[i].status=='fulfilled'&&rs[i].value&&!rs[i].value.error)?rs[i].value.data:null}
+   var iL=_d(0),tL=_d(1),pL=_d(2),bL=_d(3),kL=_d(4);
+   /* personel okuması gerçekten başarılıysa (hata yok) veri yüklenmiş sayılır;
+      aksi halde senkron kapalı kalır ki buluttaki gerçek veri ezilmesin */
+   var _personelOK=!!(rs[2]&&rs[2].status=='fulfilled'&&rs[2].value&&!rs[2].value.error);
    if(iL&&iL.length){var g=iL.map(function(x){return x.veri}).filter(Boolean);if(g.length)J=g}
-   try{var _onar=0;J.forEach(function(j){if(isBaslangicOnar(j))_onar++});if(_onar&&window.senkronCalistir)setTimeout(window.senkronCalistir,1200);}catch(e){}
    if(tL&&tL.length)T=tL.map(function(x){return {id:x.id,ad:x.ad}});
    try{T=tesisFarkUygula(T)}catch(e){}
    if(pL&&pL.length)P=pL.map(function(x){return [x.id,x.ad,x.unvan,x.bolum,x.rol].concat(x.sira!=null?[+x.sira]:[])});
@@ -4512,7 +4524,6 @@ function talepleriGetir(){
        if(_v)P.push(_v.slice());
      }
    });
-   /* cihazda saklanan silme + sıra farkını uygula (bulut şeması/izni ne olursa olsun) */
    try{P=persFarkUygula(P)}catch(e){}
    if(bL&&bL.length)bL.forEach(function(x){
      if(B[x.id])B[x.id]={ad:x.ad,sef:x.sef,ust:x.ust,ug:x.ust_gerek?1:0}});
@@ -4521,6 +4532,9 @@ function talepleriGetir(){
       tip:x.faaliyet,ac:x.aciklama,dk:x.dakika,ts_:x.tesis}});
     K.forEach(function(x){yazilan[x.id]=1});
    }
+   if(_personelOK)VERI_YUKLENDI=true;   /* artık senkron güvenle yazabilir */
+   /* iş başlangıç onarımı: sadece veri yüklendikten SONRA */
+   try{if(VERI_YUKLENDI){var _onar=0;J.forEach(function(j){if(isBaslangicOnar(j))_onar++});if(_onar&&window.senkronCalistir)setTimeout(window.senkronCalistir,1200);}}catch(e){}
   }catch(e){ console.log('Yukleme hatasi:',e.message||e); }
   menu();
   try{
