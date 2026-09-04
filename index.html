@@ -3674,7 +3674,14 @@ document.addEventListener('click',function(e){
     /* hesap yoksa ve varsayılan şifreyle giriliyorsa otomatik oluştur */
     if(m.indexOf('invalid login')>=0 && sf=='123456'){
      dbClient.auth.signUp({email:mail,password:'123456'}).then(function(r2){
-      if(r2.error){hataGoster(r2.error);return}
+      if(r2.error){
+       var em=((r2.error.message)||'').toLowerCase();
+       if(em.indexOf('already')>=0||em.indexOf('registered')>=0||em.indexOf('exists')>=0){
+        HATA='Bu kullanıcının hesabı VAR ama girilemiyor. Sebep: ya "Confirm email" açık (hesap doğrulanmadı) ya da şifresi 123456 değil. Çözüm: Supabase → Authentication → Providers → Email → "Confirm email" KAPAT; sonra Authentication → Users → '+mail+' kullanıcısını SİL — kişi tekrar 123456 ile girsin. (Şifre unutulduysa Users\'tan şifreyi 123456 yapman da yeter.)';
+        GIRIS=false;ciz();return;
+       }
+       hataGoster(r2.error);return;
+      }
       if(!r2.data.session){
        HATA='Hesap oluşturuldu ama giriş yapılamadı. Supabase → Authentication → Providers → Email → "Confirm email" kapatılmalı.';
        GIRIS=false;ciz();return}
