@@ -295,6 +295,14 @@ body.dk .tip.o{background:#1D2A22;color:#8FD3AC}
 .upl{display:block;border:1.5px dashed #C3CAD1;border-radius:8px;padding:12px;text-align:center;
  color:#4C5966;font-size:13px;font-weight:600;background:#FAFBFC}
 .upl input{display:none}
+#kurbar{background:linear-gradient(90deg,#1B7A47,#2E9E5B);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.kb-ic{display:flex;align-items:center;gap:11px;max-width:620px;margin:0 auto;padding:9px 12px}
+.kb-ikon{font-size:21px;flex:none}
+.kb-yazi{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.kb-yazi b{font-size:13.5px;font-weight:800}
+.kb-yazi span{font-size:11px;opacity:.92}
+.kb-kur{flex:none;background:#fff;color:#12603A;border:0;border-radius:9px;padding:8px 16px;font-weight:800;font-size:13px;cursor:pointer}
+.kb-x{flex:none;background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:9px;width:32px;height:32px;font-size:13px;cursor:pointer}
 #bgkat{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;background-repeat:no-repeat;pointer-events:none}
 .motkart{text-align:center;font-style:italic;font-size:14.5px;color:#2E3D4A;margin:0 0 12px;padding:13px 16px;background:rgba(255,255,255,.58);border-radius:13px;border:1px dashed rgba(18,49,92,.28);line-height:1.55;font-weight:600}
 body.dk .motkart{color:#D7DEE6;background:rgba(20,25,32,.5);border-color:rgba(255,255,255,.16)}
@@ -1304,6 +1312,30 @@ if('serviceWorker' in navigator){
  /* uygulama öne gelince güncelleme kontrolü */
  document.addEventListener('visibilitychange',function(){if(!document.hidden&&SW){try{SW.update()}catch(e){}}});
 }
+/* ---- Uygulamayı indir (PWA kurulum çubuğu) ---- */
+var _kurEvent=null;
+function _kuruluMu(){try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true}catch(e){return false}}
+function _iosCihaz(){return /iphone|ipad|ipod/i.test(navigator.userAgent||'')}
+function _kurKapatildi(){try{var t=+localStorage.getItem('opmuk_kurbar_kapat')||0;return (Date.now()-t)<7*864e5}catch(e){return false}}
+function kurBarGizle(){var b=document.getElementById('kurbar');if(b&&b.parentNode)b.parentNode.removeChild(b)}
+function kurBarGoster(zorla){
+ if(_kuruluMu()){kurBarGizle();return}
+ if(!zorla&&_kurKapatildi())return;
+ if(document.getElementById('kurbar'))return;
+ var ios=_iosCihaz();
+ if(!_kurEvent&&!ios){ if(zorla)say('Bu tarayıcıda otomatik yükleme yok. Menü → "Uygulamayı yükle / Ana ekrana ekle" ile ekleyebilirsin.'); return; }
+ var b=document.createElement('div');b.id='kurbar';
+ if(ios&&!_kurEvent){
+  b.innerHTML='<div class="kb-ic"><span class="kb-ikon">📲</span><div class="kb-yazi"><b>Uygulamayı telefonuna ekle</b><span>Safari\u2019de <b>Paylaş</b> \u2934 \u2192 <b>Ana Ekrana Ekle</b></span></div><button class="kb-x" data-a="kurbar-kapat">\u2715</button></div>';
+ }else{
+  b.innerHTML='<div class="kb-ic"><span class="kb-ikon">📲</span><div class="kb-yazi"><b>Uygulamayı indir</b><span>Telefon veya bilgisayarına kur \u2014 tek dokunuşla açılır</span></div><button class="kb-kur" data-a="kurbar-kur">İndir</button><button class="kb-x" data-a="kurbar-kapat">\u2715</button></div>';
+ }
+ var hdr=document.querySelector('header');
+ if(hdr&&hdr.parentNode)hdr.parentNode.insertBefore(b,hdr); else document.body.insertBefore(b,document.body.firstChild);
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_kurEvent=e;try{kurBarGoster()}catch(x){}});
+window.addEventListener('appinstalled',function(){_kurEvent=null;try{localStorage.setItem('opmuk_kurbar_kapat',String(Date.now()))}catch(x){}kurBarGizle();try{say('Uygulama kuruldu 🎉')}catch(x){}});
+setTimeout(function(){try{kurBarGoster()}catch(x){}},1500);
 function swReg(){
  if('serviceWorker' in navigator && navigator.serviceWorker.ready) return navigator.serviceWorker.ready;
  return Promise.resolve(SW);
@@ -1383,6 +1415,7 @@ function cekmeceYaz(){
   '<button class="mn" data-a="kayit"><em>✎</em>Çalışma kaydı</button>'+
   '<button class="mn" data-a="yeni"><em>＋</em>Yeni iş</button>'+(atamaYetkisi()?'<button class="mn" data-a="isata"><em>🎯</em>İş ata</button>':'')+
   '<button class="mn" data-a="veri"><em>📊</em>Veriler</button>'+
+  '<button class="mn" data-a="kur-indir"><em>📲</em>Uygulamayı indir</button>'+
   '<button class="mn" data-a="org"><em>⌸</em>Organizasyon</button>'+
   '<button class="mn" data-a="tesis"><em>📍</em>Tesisler</button>'+
   '<div class="ayirac"></div>'+
@@ -3369,6 +3402,13 @@ document.addEventListener('click',function(e){
   d.innerHTML='<button data-a="fsx">Kapat</button><img src="'+t.dataset.src+'">';
   document.body.appendChild(d);return}
  if(a=='fsx'){var e2=document.getElementById('fsv');if(e2)e2.parentNode.removeChild(e2);return}
+ if(a=='kurbar-kur'){
+  if(_kurEvent){_kurEvent.prompt();try{_kurEvent.userChoice.then(function(c){if(c&&c.outcome=='accepted')kurBarGizle();_kurEvent=null})}catch(x){}}
+  else if(_iosCihaz()){say('Safari → Paylaş ⤴ → "Ana Ekrana Ekle"');}
+  else{say('Tarayıcı menüsünden "Uygulamayı yükle / Ana ekrana ekle" seç.');}
+  return;}
+ if(a=='kurbar-kapat'){try{localStorage.setItem('opmuk_kurbar_kapat',String(Date.now()))}catch(e){}kurBarGizle();return}
+ if(a=='kur-indir'){kurBarGoster(true);cekmece(false);return}
  if(a=='unut'){UNUT=true;HATA='';ciz();return}
  if(a=='girisdon'){UNUT=false;HATA='';ciz();return}
  if(a=='unutgo'){
