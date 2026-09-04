@@ -2731,6 +2731,10 @@ function ciz(){try{gozBanner()}catch(e){}
     var owner=task.k;
     var _pekg=task.ekg||0;            /* bu kişinin ek termin günü */
     var _bas=(ti===0);                /* birincil kişi → eski ortak (tarih) anahtarlı notları da göster */
+    var _c2=cur(j);
+    var _benimAktif=(owner==ME && _c2 && _c2.k==ME && stip(_c2)=='i');   /* bu benim, hâlâ süren iş adımım mı */
+    var _sonKay=-1;                   /* çalışma kaydı olan SON gün (devret butonu orada çıkar) */
+    gunler.forEach(function(d,gi){var has=K.some(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});if(has)_sonKay=gi;});
     h+='<div class="card"><h3>Gün gün iş dökümü'+(_cok?' <span style="font-weight:600;color:#1E4A85">— '+esc(ad(owner))+'</span>':'')+'</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
     gunler.forEach(function(d,gi){
      var kayit=K.filter(function(r){var rd=zmn(r.ts);return r.k==owner&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});
@@ -2748,8 +2752,9 @@ function ciz(){try{gozBanner()}catch(e){}
        else{_gekHtml+='<button data-a="eku" data-j="'+j.id+'" data-x="'+_ekAll.indexOf(x)+'" class="gekc">'+(x.tur=='x'?'📊':x.tur=='p'?'📄':'📎')+' '+esc(x.ad.length>16?x.ad.slice(0,14)+'…':x.ad)+'</button>';}
       });_gekHtml+='</div>';}
      var _upl='<label class="gupl">📎 Dosya<input type="file" class="gunfu" data-j="'+j.id+'" data-gun="'+gkey+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label>';
-     h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+bt+_upl+'</div>'+_gekHtml+'</td></tr>';});
-    h+='</table></div>'+'<div class="note">Çalışmalar '+(_cok?'<b>'+esc(ad(owner))+'</b> kişisinin':'süreç sahibinin')+' kendi çalışma kaydından gelir; her personelin günü kendine özeldir. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (onaylı ek termin — işteki tüm personele uygulanır). Ek süre gerekiyorsa, işi yapan kişi aşağıdan <b>"Ek süre talep et"</b> ile ister; yöneticisi onaylayınca termin işteki herkes için uzar. İş günleri (hafta sonu hariç) listelenir.</div></div>';
+     var _devBtn=(_benimAktif && gi==_sonKay && kayit.length)?'<button data-a="ok" data-j="'+j.id+'" style="margin-top:8px;display:block;width:100%;background:#1B7A45;color:#fff;border:0;border-radius:8px;padding:9px 10px;font-size:12px;font-weight:700;cursor:pointer">✓ Bu işi bitirdim → yöneticiye devret</button>':'';
+     h+='<tr'+(_ext?' class="extgun"':'')+'><td>'+(gi+1)+'</td><td>'+dtar(d)+(_ext?'<div style="font-size:10px;color:#C0392B;font-weight:700;margin-top:2px">⏱ termin uzaması</div>':'')+'</td><td>'+txt+nt+'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+bt+_upl+'</div>'+_gekHtml+_devBtn+'</td></tr>';});
+    h+='</table></div>'+'<div class="note">Çalışmalar '+(_cok?'<b>'+esc(ad(owner))+'</b> kişisinin':'süreç sahibinin')+' kendi çalışma kaydından gelir; her personelin günü kendine özeldir. İşi bitirince son çalışma günündeki <b style="color:#1B7A45">"Bu işi bitirdim → yöneticiye devret"</b> ile onaya gönderirsin; yöneticin onaylayınca iş <b>Tamamlanan işler</b>e düşer. <b style="color:#C0392B">Pembe günler termin uzamasıdır</b> (onaylı ek termin). Ek süre gerekiyorsa <b>"Ek süre talep et"</b> ile istenir. İş günleri (hafta sonu hariç) listelenir.</div></div>';
    });
   })();
   h+='<div class="card"><h3>Gün gün hareket</h3>';
