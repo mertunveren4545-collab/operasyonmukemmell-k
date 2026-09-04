@@ -3767,10 +3767,16 @@ document.addEventListener('click',function(e){
   var na2=document.getElementById('ea').value.trim(),nu2=document.getElementById('eu').value.trim();
   if(na2.length<3||nu2.length<3){say('Ad ve unvan boş olamaz.');return}
   var _es=document.getElementById('esira'),_esv=(_es&&_es.value!=='')?+_es.value:null;
+  var _prow=null;
   for(var y=0;y<P.length;y++)if(P[y][0]==t.dataset.p){
    P[y][1]=na2;P[y][2]=nu2;P[y][3]=document.getElementById('eb').value;P[y][4]=document.getElementById('er').value;
-   if(_esv!=null)P[y][5]=_esv;}
-  if(_esv!=null){var _d=_pdFark();_d.sira[t.dataset.p]=_esv;_pdYaz(_d);}
+   if(_esv!=null)P[y][5]=_esv;_prow=P[y];}
+  if(dbClient&&sistemci()&&_prow){
+   /* değişikliği HEMEN buluta yaz — yenilemede eski isme geri dönmesin */
+   dbClient.from('personel').upsert({id:_prow[0],ad:_prow[1],unvan:_prow[2],bolum:_prow[3],rol:_prow[4]}).then(function(r){
+     if(r&&r.error)say('Uyarı: buluta yazılamadı ('+r.error.message+') — değişiklik kalıcı olmayabilir.');},function(){});
+  }
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,300);
   say('Güncellendi');V='org';menu();
  }
  else if(a=='kayit'){V='kayit'}
