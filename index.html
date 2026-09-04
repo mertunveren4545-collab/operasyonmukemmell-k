@@ -1282,6 +1282,9 @@ function terminYetkisi(){return ME=='mert'||ME=='mesut'}
    Özkan en üst mevki (Direktörlük): kendi talebini kendi onaylar.
    Onaycı (Mesut) kendi talep ederse üstü olan Özkan'a düşer — Mert'e düşmez. */
 function terminOnayci(br,isteyen){if(isteyen=='ozkan')return 'ozkan';var o=(br=='SI')?'mesut':'ozkan';if(isteyen&&isteyen==o)o='ozkan';return o}
+/* İş tamamlanınca "Bölüm onayı" kime gider: Süreç İyileştirme (SI) → Mesut,
+   diğer tüm bölümler → o bölümün şefi. (Ek termin onayıyla aynı mantık.) */
+function bolumOnayci(br){return br=='SI'?'mesut':((B[br]&&B[br].sef)||'mesut')}
 function atamaYetkisi(){if(sistemci())return true;if(KEY.indexOf(ME)>=0)return true;if((pn(ME)[4]||'')=='ust')return true;var _u=(pn(ME)[2]||'').toLocaleLowerCase('tr');if(_u.indexOf('müdür')>=0||_u.indexOf('mudur')>=0||_u.indexOf('direktör')>=0||_u.indexOf('direktor')>=0||_u.indexOf('şef')>=0||_u.indexOf('sef')>=0||_u.indexOf('yönetici')>=0||_u.indexOf('yonetici')>=0)return true;for(var _k in B){if(B[_k].sef==ME)return true}return false}
 function oncEt(o){if(o=='acil')return '<span style="flex:none;background:#C0392B;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">ACİL</span>';if(o=='yuksek')return '<span style="flex:none;background:#B9770E;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px">YÜKSEK</span>';return ''}
 function bYetkiTum(){return sistemci()}
@@ -4150,6 +4153,7 @@ document.addEventListener('click',function(e){
    GEC2=0;
   }
   c.d='t';c.b=ts;var n=j.a[ix+1];j.lg=j.lg||[];
+  if(n&&n.a=='Bölüm onayı')n.k=bolumOnayci(j.br);   /* onay doğru kişiye: SI → Mesut */
   if(n){n.d='a';n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k));try{if(n.k!=ME)pushGonder([n.k],'Sana iş düştü',j.ad)}catch(e){}}
   else{j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı — kapandı'});
    konfeti();bip();say('🎉 İş tamamlandı — katılan herkese düştü')}
@@ -4411,7 +4415,7 @@ document.addEventListener('click',function(e){
   var brr=pn(anaK)[3]||'SI',cf2=B[brr];
   var adm=[];
   for(var _pk=0;_pk<kisiler.length;_pk++)adm.push({a:nm,k:kisiler[_pk],t:gg9,tp:'i',o:0,d:'a',g:ts3,b:0});
-  adm.push({a:'Bölüm onayı',k:cf2.sef,t:1,tp:'o',o:1,d:'b',g:0,b:0});
+  adm.push({a:'Bölüm onayı',k:bolumOnayci(brr),t:1,tp:'o',o:1,d:'b',g:0,b:0});
   if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   var onc=(document.getElementById('jonc')&&document.getElementById('jonc').value)||'normal';
 
@@ -4655,6 +4659,8 @@ function talepleriGetir(){
    if(_personelOK)VERI_YUKLENDI=true;   /* artık senkron güvenle yazabilir */
    /* iş başlangıç onarımı: sadece veri yüklendikten SONRA */
    try{if(VERI_YUKLENDI){var _onar=0;J.forEach(function(j){if(isBaslangicOnar(j))_onar++});if(_onar&&window.senkronCalistir)setTimeout(window.senkronCalistir,1200);}}catch(e){}
+   /* Mevcut işlerde aktif "Bölüm onayı" adımını doğru onaycıya çek (SI → Mesut) */
+   try{if(VERI_YUKLENDI){var _oy=0;J.forEach(function(j){var c=cur(j);if(c&&c.a=='Bölüm onayı'&&c.d=='a'){var oo=bolumOnayci(j.br);if(oo&&c.k!=oo){c.k=oo;(j.lg=j.lg||[]).push({ts:now(),k:'mert',tip:'Onay doğru kişiye yönlendirildi → '+ad(oo)});_oy++;}}});if(_oy&&window.senkronCalistir)setTimeout(window.senkronCalistir,1600);}}catch(e){}
   }catch(e){ console.log('Yukleme hatasi:',e.message||e); }
   menu();
   try{
