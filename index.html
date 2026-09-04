@@ -1377,6 +1377,8 @@ if('serviceWorker' in navigator){
  },function(){});
  navigator.serviceWorker.ready.then(function(r){SW=r}).catch(function(){});
  navigator.serviceWorker.addEventListener('controllerchange',_swTazele);
+ /* yeni sürüm aktif olunca SW haber verir → sayfayı bir kez tazele (çift yenileme koruması _swTazele'de) */
+ navigator.serviceWorker.addEventListener('message',function(ev){if(ev&&ev.data==='yeni-surum')_swTazele();});
  /* uygulama öne gelince güncelleme kontrolü */
  document.addEventListener('visibilitychange',function(){if(!document.hidden&&SW){try{SW.update()}catch(e){}}});
 }
