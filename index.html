@@ -2510,6 +2510,7 @@ function ciz(){try{gozBanner()}catch(e){}
   }
   /* işler kimde */
   if(V=='bende'&&FILT=='bit'){
+   var _onK=K.filter(function(r){return r.k==ME&&r.onay=='t'}).sort(function(a,b){return (a.onayts||a.ts)<(b.onayts||b.ts)?1:-1});
    h='<div class="card"><h3>Tamamlanan işler ('+L.length+')</h3>';
    if(!L.length)h+='<div style="font-size:13px;color:#8592A0">Henüz tamamlanan işin yok.</div>';
    L.forEach(function(j){
@@ -2520,7 +2521,19 @@ function ciz(){try{gozBanner()}catch(e){}
       '<span>tamamlandı '+fmt(son9.b)+' · '+gr9+'/'+pl9+' gün'+(bl9[1]?' · bekleme '+bl9[1]+' g':'')+'</span>'+
       '</button>';
    });
-   h+='</div>';el.innerHTML=h;return;
+   h+='</div>';
+   if(_onK.length){
+    h+='<div class="card"><h3>Onaylanan çalışma kayıtları ('+_onK.length+')</h3>';
+    _onK.forEach(function(r){var _rd=zmn(r.ts);
+     h+='<button class="sub" data-a="kayit" style="margin-bottom:8px">'+esc(r.tip||'Çalışma kaydı')+
+       '<span>📍 '+tad(r.ts_)+' · '+sa(r.dk)+' sa</span>'+
+       '<span>'+dtar(_rd)+' · ✓ '+esc(ad(r.onayci))+' onayladı</span>'+
+       (r.ac?'<span style="color:#16202B">'+esc(r.ac.length>44?r.ac.slice(0,42)+'…':r.ac)+'</span>':'')+
+       '</button>';
+    });
+    h+='</div>';
+   }
+   el.innerHTML=h;return;
   }
   var _w={acil:0,yuksek:1,normal:2};
   function _srtAcik(arr){return arr.slice().sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});}
