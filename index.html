@@ -2060,7 +2060,7 @@ function ekGetir(jid){
  if(!dbClient||EKYUK[jid])return;
  EKYUK[jid]=1;
  dbClient.from('ekler').select('*').eq('is_id',String(jid)).then(function(r){
-  if(r.data){EKLER[jid]=r.data;if(V=='det'&&OJ==jid)ciz();else if(V=='kayit'&&r.data.length)ciz()}
+  if(r.data){EKLER[jid]=r.data.map(function(x){return {id:x.id,ad:x.ad,tur:x.tur,boyut:x.boyut,k:x.kisi||x.k||'',ts:x.ts,veri:x.veri,is_id:x.is_id}});if(V=='det'&&OJ==jid)ciz();else if(V=='kayit'&&r.data.length)ciz()}
  },function(){EKYUK[jid]=0});
 }
 /* Çalışma kaydına eklenmiş dosyalar (ekler.is_id = kayıt id). */
@@ -2277,6 +2277,21 @@ function ciz(){try{gozBanner()}catch(e){}
    });
    h+='</div>';
   }
+  var _kbek=K.filter(function(r){return r.onay=='b'&&r.onayci==ME}).sort(function(a,b){return a.ts<b.ts?1:-1});
+  if(_kbek.length){
+   h+='<div class="card atkart"><h3>\u23F3 Onayına gelen çalışma kayıtları ('+_kbek.length+')</h3>';
+   _kbek.forEach(function(r){var _rd=zmn(r.ts);
+    h+='<div class="arow">'+
+      '<div class="an">'+esc(ad(r.k))+' · '+esc(r.tip||'')+'</div>'+
+      '<div class="am">'+dtar(_rd)+' · '+ii(_rd.getHours())+':'+ii(_rd.getMinutes())+(r.bit?'–'+r.bit:'')+' · '+sa(r.dk)+' sa · '+tad(r.ts_)+'</div>'+
+      (r.ac?'<div class="msg" style="margin:4px 0 6px">'+esc(r.ac)+'</div>':'')+
+      _kayEkHtml(r.id)+
+      '<div class="two" style="margin-top:8px"><button class="b" data-a="kayonayla" data-k="'+r.id+'">Onayla</button>'+
+      '<button class="b g" data-a="kayred" data-k="'+r.id+'">Reddet</button></div>'+
+      '</div>';
+   });
+   h+='</div>';
+  }
   var _acil=bende().filter(function(j){return j.oncelik=='acil'});
   var _yuk=bende().filter(function(j){return j.oncelik=='yuksek'});
   if(_acil.length){
@@ -2336,7 +2351,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
    if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
   }
-  h+='<div class="note" style="margin:12px 0 0">sürüm s102-PLANLI-BASLA · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s103-ONAY-DUZELT · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -4749,7 +4764,7 @@ function talepleriGetir(){
 /* ---------- BULUT SENKRONU ---------- */
 (function(){
  if(!dbClient){console.log('Cevrimdisi mod — veriler kaydedilmeyecek');return}
- var yazilan={},_kSig={},zaman=null,ilk=true;
+ var yazilan={},_kSig={},_onayKolonUyari=false,zaman=null,ilk=true;
 
  var _isHash={};
  function isSatiri(j){
@@ -4797,7 +4812,10 @@ function talepleriGetir(){
    var yeni=K.filter(function(r){return !yazilan[r.id]||_kSig[r.id]!==_ksig(r)});
    if(yeni.length){
     var ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,true)}));   /* onay kolonlarıyla dene */
-    if(ok2===false)ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,false)}),'Çalışma kayıtları');  /* kolon yoksa onaysız yaz — sync bozulmasın */
+    if(ok2===false){
+     if(!_onayKolonUyari && yeni.some(function(r){return r.onay})){_onayKolonUyari=true;say('⚠ Çalışma kaydı onayı buluta yazılamıyor — kayitlar tablosuna onay kolonları eklenmeli.');}
+     ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,false)}),'Çalışma kayıtları');  /* kolon yoksa onaysız yaz — sync bozulmasın */
+    }
     if(ok2)yeni.forEach(function(r){yazilan[r.id]=1;_kSig[r.id]=_ksig(r)});
    }
   }catch(e){ console.log('Senkron hatasi:',e.message||e);say('Kaydetme hatası: '+(e.message||e)); }
