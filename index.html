@@ -1852,9 +1852,6 @@ function navYukle(s){V=s.V;OJ=s.OJ;OB=s.OB;FILT=s.FILT;GFILT=s.GFILT;GBOL=s.GBOL
 function stip(x){return x.tp||(x.o?'o':'i')}
 function tipAd(t){return t=='o'?'ONAY':t=='k'?'KONTROL':'İŞ'}
 function cur(j){for(var i=0;i<j.a.length;i++)if(j.a[i].d=='a')return j.a[i];return null}
-/* Bu kullanıcıya ait AKTİF adım (iş ya da onay). cur() işin ilk aktif adımını verir;
-   çok kişili işte başkasının adımı önde olsa da senin kendi aktif adımını bulur. */
-function mineStep(j){if(!j||!j.a)return null;for(var i=0;i<j.a.length;i++)if(j.a[i].d=='a'&&j.a[i].k==ME)return j.a[i];return null}
 /* Ana (asıl işi yapan) 'i' adımı: önce aktif iş adımı, yoksa ilk tamamlanmamış iş adımı, yoksa ilk iş adımı */
 function anaAdim(j){var c=cur(j);if(c&&stip(c)=='i')return c;var t=null;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&x.d!='t'&&!t)t=x});if(t)return t;(j.a||[]).forEach(function(x){if(stip(x)=='i'&&!t)t=x});return t}
 /* Çok kişili işte tüm aktif iş adımlarını aynı başlangıca çeker → aynı iş = aynı gün.
@@ -1924,7 +1921,7 @@ function bittiBenim(){
    var sa=a.a[a.a.length-1].b||'',sb=b.a[b.a.length-1].b||'';
    return sa<sb?1:-1});
 }
-function bende(){var _r=J.filter(function(j){if(j.silindi)return false;return mineStep(j)&&j.kabul!==false});var _w={acil:0,yuksek:1,normal:2};return _r.sort(function(a,b){return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])})}
+function bende(){var _r=J.filter(function(j){if(j.silindi)return false;var c=cur(j);return c&&c.k==ME&&j.kabul!==false});var _w={acil:0,yuksek:1,normal:2};return _r.sort(function(a,b){return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])})}
 function bekleyenAtama(){return J.filter(function(j){if(j.silindi)return false;var c=cur(j);return c&&c.k==ME&&j.kabul===false})}
 /* Bu kullanıcının onaylaması gereken bekleyen ek süre talepleri */
 function bekleyenTermin(){var r=[];J.filter(gor).forEach(function(j){(j.tal||[]).forEach(function(x){if(x.durum=='b'&&terminOnayci(j.br,x.k)==ME)r.push({j:j,x:x})})});return r}
@@ -2325,7 +2322,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
    if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
   }
-  h+='<div class="note" style="margin:12px 0 0">sürüm s99-KISIYE-ONAY · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s99-EKIP-TEKONAY · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2741,7 +2738,7 @@ function ciz(){try{gozBanner()}catch(e){}
     var _pekg=task.ekg||0;            /* bu kişinin ek termin günü */
     var _bas=(ti===0);                /* birincil kişi → eski ortak (tarih) anahtarlı notları da göster */
     var _c2=cur(j);
-    var _benimAktif=(owner==ME && task.d=='a');   /* kendi iş adımım hâlâ açık mı — başkasını beklemeden bitirebilirim */
+    var _benimAktif=(owner==ME && _c2 && _c2.k==ME && stip(_c2)=='i');   /* bu benim, hâlâ süren iş adımım mı */
     var _sonKay=-1;                   /* SADECE bu işe bağlı (is_id) çalışma kaydı olan son gün */
     gunler.forEach(function(d,gi){var has=K.some(function(r){var rd=zmn(r.ts);return r.k==owner&&String(r.is_id||'')==String(j.id)&&rd.getDate()==d.getDate()&&rd.getMonth()==d.getMonth()&&rd.getFullYear()==d.getFullYear()});if(has)_sonKay=gi;});
     h+='<div class="card"><h3>Gün gün iş dökümü'+(_cok?' <span style="font-weight:600;color:#1E4A85">— '+esc(ad(owner))+'</span>':'')+'</h3><div style="overflow-x:auto"><table class="gtab"><tr><th>Gün</th><th>Tarih</th><th>Yapılan Çalışmalar</th></tr>';
@@ -2813,8 +2810,7 @@ function ciz(){try{gozBanner()}catch(e){}
    });
    h+='</div>';
   }
-  var _act=mineStep(j);
-  if(_act){
+  if(c&&c.k==ME){
    if(DST==j.id){
     h+='<div class="card"><h3>Veri / destek iste</h3>'+
       '<label>Kimden</label><select class="n" id="dk">'+
@@ -2848,10 +2844,10 @@ function ciz(){try{gozBanner()}catch(e){}
       '<button class="b r" data-a="rgo" data-j="'+j.id+'">Gönder</button>'+
       '<button class="b g" data-a="rno">Vazgeç</button></div></div>';
    }else{
-    var tc=stip(_act);
+    var tc=stip(c);
     h+='<button class="b" data-a="ok" data-j="'+j.id+'">'+
       (tc=='o'?'Onayla':tc=='k'?'Kontrol ettim':'Bitirdim')+' ve devret</button>';
-    if(stip(_act)!='i' && j.a.indexOf(_act)>0)h+='<div style="height:8px"></div><button class="b g" data-a="red" data-j="'+j.id+'">Geri gönder</button>';
+    if(j.a.indexOf(c)>0)h+='<div style="height:8px"></div><button class="b g" data-a="red" data-j="'+j.id+'">Geri gönder</button>';
     h+='<div style="height:8px"></div><button class="b g" data-a="dst" data-j="'+j.id+'">Birinden veri / destek iste</button>';
     h+='<div style="height:8px"></div><button class="b g" data-a="tal" data-j="'+j.id+'">Ek süre talep et</button>';
    }
@@ -4161,12 +4157,9 @@ document.addEventListener('click',function(e){
   say('Adım geri açıldı');
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
  }
- else if(a=='ok'&&(function(){var _jj=bul(+t.dataset.j);var _ms=mineStep(_jj)||cur(_jj);return _ms&&as(_ms)>0;})()){GEC2=+t.dataset.j}
+ else if(a=='ok'&&as(cur(bul(+t.dataset.j)))>0){GEC2=+t.dataset.j}
  else if(a=='ok'||a=='gok'){
-  var j=bul(+t.dataset.j);
-  var c=mineStep(j)||cur(j);           /* KENDİ aktif adımım (başkasının adımını bitirmem imkânsız) */
-  var ix=j.a.indexOf(c),ts=now();
-  if(!c){say('Bu işte senin aktif adımın yok.');return}
+  var j=bul(+t.dataset.j),c=cur(j),ix=j.a.indexOf(c),ts=now();
   if(a=='gok'){
    var gm=document.getElementById('gn').value.trim();
    if(gm.length<10){say('Gecikme nedenini yaz.');return}
@@ -4174,40 +4167,15 @@ document.addEventListener('click',function(e){
    GEC2=0;
   }
   c.d='t';c.b=ts;j.lg=j.lg||[];
-  var _isSteps=j.a.filter(function(x){return stip(x)=='i'});
-  var _multi=_isSteps.length>1;
-  if(_multi){
-   /* ÇOK KİŞİLİ İŞ — HER PERSONEL KENDİ YÖNETİCİSİNE:
-      Payını bitiren kişi, diğerlerini BEKLEMEDEN kendi yöneticisinin onayına gönderir. */
-   if(stip(c)=='i'){
-    var _mgr=bolumOnayci(pn(ME)[3]||j.br);   /* bu kişinin bölüm yöneticisi (SI → Mesut) */
-    j.a.push({a:'Bölüm onayı',k:_mgr,t:1,tp:'o',o:1,d:'a',g:ts,b:0,sahip:ME});
-    j.lg.push({ts:ts,k:ME,tip:'Kendi payını tamamladı → '+ad(_mgr)+' onayına gönderildi'});
-    say('Payın tamamlandı → '+ad(_mgr)+' onayına gönderildi');
-    try{if(_mgr!=ME)pushGonder([_mgr],'Onayına iş düştü',j.ad)}catch(e){}
-   }else{
-    /* Bir onay adımı onaylandı → herkesin payı + tüm bölüm onayları bitti mi? */
-    var _isK=j.a.filter(function(x){return stip(x)=='i'&&x.d!='t'});
-    var _bolK=j.a.filter(function(x){return x.a=='Bölüm onayı'&&x.d!='t'});
-    var _cf=B[j.br]||{};
-    if(!_isK.length && !_bolK.length){
-     var _ustVar=j.a.some(function(x){return x.a=='Üst onay'});
-     if(_cf.ug && _cf.ust && !_ustVar){
-      j.a.push({a:'Üst onay',k:_cf.ust,t:1,tp:'o',o:1,d:'a',g:ts,b:0});
-      j.lg.push({ts:ts,k:ME,tip:'Bölüm onayları tamam → '+ad(_cf.ust)+' üst onayına gönderildi'});
-      say('Üst onaya gönderildi → '+ad(_cf.ust));
-      try{if(_cf.ust!=ME)pushGonder([_cf.ust],'Üst onayına iş düştü',j.ad)}catch(e){}
-     }else if(!j.a.some(function(x){return x.d!='t'})){
-      j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı — kapandı'});
-      konfeti();bip();say('🎉 İş tamamlandı — katılan herkese düştü');
-     }else{say('Onaylandı');}
-    }else{
-     j.lg.push({ts:ts,k:ME,tip:'Onayladı'+(c.sahip?' — '+ad(c.sahip)+' payı':'')});
-     say('Onaylandı — diğer paylar sürüyor');
-    }
-   }
+  /* ÇOK KİŞİLİ İŞ: bu bir iş adımıysa ve hâlâ TAMAMLANMAMIŞ başka iş adımı varsa,
+     onaya GÖNDERME — sadece bu kişinin payı biter, diğer personel sürer.
+     Onaya ancak İŞTEKİ HERKES payını bitirince tek iş olarak gider. */
+  var _kalanIs=j.a.filter(function(x){return stip(x)=='i'&&x.d!='t'});
+  if(stip(c)=='i' && _kalanIs.length){
+   j.lg.push({ts:ts,k:ME,tip:'Kendi payını tamamladı — diğer personel sürüyor'});
+   say('Payın tamamlandı — işteki diğer personel devam ediyor');
   }else{
-   /* TEK KİŞİLİK İŞ: baştan kurulu onay zinciri (Bölüm onayı → Üst onay) */
+   /* Tüm iş adımları bitti (veya bu bir onay adımı) → sıradaki tamamlanmamış onay adımına geç */
    var n=null;for(var _ni=0;_ni<j.a.length;_ni++){if(j.a[_ni].d!='t'){n=j.a[_ni];break;}}
    if(n&&n.a=='Bölüm onayı')n.k=bolumOnayci(j.br);   /* onay doğru kişiye: SI → Mesut */
    if(n){n.d='a';if(!n.g)n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k));try{if(n.k!=ME)pushGonder([n.k],'Sana iş düştü',j.ad)}catch(e){}}
@@ -4220,22 +4188,11 @@ document.addEventListener('click',function(e){
  else if(a=='rgo'){
   var el2=document.getElementById('rt'),m=el2?el2.value.trim():'';
   if(m.length<10){say('Nedenini yaz — en az bir cümle.');return}
-  var j2=bul(+t.dataset.j),c2=mineStep(j2)||cur(j2),ts2=now();j2.lg=j2.lg||[];
-  if(!c2){say('Geri gönderilecek adım yok');return}
-  if(c2.sahip){
-   /* Kişiye özel onay reddi → o kişinin iş adımını yeniden aç, bu onay adımını kaldır */
-   var _os=null;for(var _oi=0;_oi<j2.a.length;_oi++){if(stip(j2.a[_oi])=='i'&&j2.a[_oi].k==c2.sahip){_os=j2.a[_oi];break}}
-   if(_os){_os.d='a';_os.b=0;if(!_os.g)_os.g=ts2;}
-   j2.a=j2.a.filter(function(x){return x!==c2});
-   j2.lg.push({ts:ts2,k:ME,hedef:c2.sahip,tip:'Geri gönderdi → '+ad(c2.sahip),msg:m});
-   say('Geri gönderildi → '+ad(c2.sahip));V='ana';RED=0;
-  }else{
-   var i2=j2.a.indexOf(c2),p2=j2.a[i2-1];
-   if(!p2){say('Önceki adım yok');return}
-   c2.d='b';c2.g=0;p2.d='a';p2.b=0;p2.g=ts2;
-   j2.lg.push({ts:ts2,k:ME,hedef:p2.k,tip:'Geri gönderdi → '+ad(p2.k),msg:m});
-   say('Geri gönderildi → '+ad(p2.k));V='ana';RED=0;
-  }
+  var j2=bul(+t.dataset.j),c2=cur(j2),i2=j2.a.indexOf(c2),p2=j2.a[i2-1],ts2=now();
+  if(!p2){say('Önceki adım yok');return}
+  c2.d='b';c2.g=0;p2.d='a';p2.b=0;p2.g=ts2;j2.lg=j2.lg||[];
+  j2.lg.push({ts:ts2,k:ME,hedef:p2.k,tip:'Geri gönderdi → '+ad(p2.k),msg:m});
+  say('Geri gönderildi → '+ad(p2.k));V='ana';RED=0;
  }
  else if(a=='demosil'){
   if(!sistemci()){say('Bu işlem için yetkin yok.');return}
@@ -4484,12 +4441,8 @@ document.addEventListener('click',function(e){
   var brr=pn(anaK)[3]||'SI',cf2=B[brr];
   var adm=[];
   for(var _pk=0;_pk<kisiler.length;_pk++)adm.push({a:nm,k:kisiler[_pk],t:gg9,tp:'i',o:0,d:'a',g:ts3,b:0});
-  /* Tek kişilik işte onay zinciri baştan kurulur. Çok kişilikte her personel payını
-     bitirince KENDİ yöneticisinin onayı ayrı açılır (bkz. tamamlama mantığı). */
-  if(kisiler.length<=1){
-   adm.push({a:'Bölüm onayı',k:bolumOnayci(brr),t:1,tp:'o',o:1,d:'b',g:0,b:0});
-   if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
-  }
+  adm.push({a:'Bölüm onayı',k:bolumOnayci(brr),t:1,tp:'o',o:1,d:'b',g:0,b:0});
+  if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   var onc=(document.getElementById('jonc')&&document.getElementById('jonc').value)||'normal';
 
   /* ============================================================
@@ -4734,31 +4687,27 @@ function talepleriGetir(){
    try{if(VERI_YUKLENDI){var _onar=0;J.forEach(function(j){if(isBaslangicOnar(j))_onar++});if(_onar&&window.senkronCalistir)setTimeout(window.senkronCalistir,1200);}}catch(e){}
    /* Mevcut işlerde aktif "Bölüm onayı" adımını doğru onaycıya çek (SI → Mesut) */
    try{if(VERI_YUKLENDI){var _oy=0;J.forEach(function(j){var c=cur(j);if(c&&c.a=='Bölüm onayı'&&c.d=='a'&&!c.sahip){var oo=bolumOnayci(j.br);if(oo&&c.k!=oo){c.k=oo;(j.lg=j.lg||[]).push({ts:now(),k:'mert',tip:'Onay doğru kişiye yönlendirildi → '+ad(oo)});_oy++;}}});if(_oy&&window.senkronCalistir)setTimeout(window.senkronCalistir,1600);}}catch(e){}
-   /* Süren ÇOK KİŞİLİ işleri "her personel kendi yöneticisine" modeline taşı:
-      eski ortak (sahipsiz) bekleyen/açık onayı kaldır; biten her iş adımı için sahibinin
-      yöneticisine giden onay adımı yoksa aç. Kapanmış işlere dokunma. Idempotent. */
-   try{if(VERI_YUKLENDI){var _my=0;J.forEach(function(j){
+   /* Yanlışlıkla kişiye özel onaya bölünmüş çok kişili işleri TEK ONAY moduna geri al:
+      sahipli (kişiye özel) onay adımlarını kaldır; herkes payını bitmeden onay açılmaz.
+      Tek ortak "Bölüm onayı" (+ug ise "Üst onay") yoksa ekle. Idempotent. */
+   try{if(VERI_YUKLENDI){var _rv=0;J.forEach(function(j){
      if(j.silindi)return;
      var _is=(j.a||[]).filter(function(x){return stip(x)=='i'});
-     if(_is.length<2)return;                                   /* yalnız çok kişili */
-     var _pendingIs=_is.some(function(x){return x.d!='t'});
-     var _anyAct=(j.a||[]).some(function(x){return x.d=='a'});
-     if(!_pendingIs && !_anyAct)return;                        /* kapanmış → dokunma */
-     var _degis=false;
-     var _yeni=[];j.a.forEach(function(x){
-       if((x.a=='Bölüm onayı'||x.a=='Üst onay')&&!x.sahip&&x.d!='t'){_degis=true;return;} /* eski ortak onayı at */
-       _yeni.push(x);
-     });j.a=_yeni;
-     _is.forEach(function(w){
-       if(w.d!='t')return;
-       var _has=j.a.some(function(x){return x.a=='Bölüm onayı'&&x.sahip==w.k});
-       if(!_has){var _m=bolumOnayci(pn(w.k)[3]||j.br);
-         j.a.push({a:'Bölüm onayı',k:_m,t:1,tp:'o',o:1,d:'a',g:now(),b:0,sahip:w.k});
-         (j.lg=j.lg||[]).push({ts:now(),k:'mert',tip:ad(w.k)+' payı → '+ad(_m)+' onayına yönlendirildi'});
-         _degis=true;}
-     });
-     if(_degis)_my++;
-   });if(_my&&window.senkronCalistir)setTimeout(window.senkronCalistir,1900);}}catch(e){}
+     if(_is.length<2)return;                                        /* yalnız çok kişili */
+     var _hadSahip=(j.a||[]).some(function(x){return x.sahip&&(x.a=='Bölüm onayı'||x.a=='Üst onay')});
+     if(!_hadSahip)return;                                          /* zaten tek onay — dokunma */
+     j.a=j.a.filter(function(x){return !(x.sahip&&(x.a=='Bölüm onayı'||x.a=='Üst onay'))});
+     var _cf=B[j.br]||{};
+     var _allDone=_is.every(function(x){return x.d=='t'});
+     if(!j.a.some(function(x){return x.a=='Bölüm onayı'})){
+       j.a.push({a:'Bölüm onayı',k:bolumOnayci(j.br),t:1,tp:'o',o:1,d:(_allDone?'a':'b'),g:(_allDone?now():0),b:0});
+     }
+     if(_cf.ug&&_cf.ust&&!j.a.some(function(x){return x.a=='Üst onay'})){
+       j.a.push({a:'Üst onay',k:_cf.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
+     }
+     (j.lg=j.lg||[]).push({ts:now(),k:'mert',tip:'Ekip işi tek onaya alındı — herkes bitince '+ad(bolumOnayci(j.br))+' onayına gider'});
+     _rv++;
+   });if(_rv&&window.senkronCalistir)setTimeout(window.senkronCalistir,1900);}}catch(e){}
   }catch(e){ console.log('Yukleme hatasi:',e.message||e); }
   menu();
   try{
