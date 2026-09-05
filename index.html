@@ -1153,7 +1153,7 @@ function temaUygula(){
   '.obas{color:'+c.ana+'}';
  try{localStorage.setItem('opmuk_tema',TEMA);localStorage.setItem('opmuk_dark',DARK?'1':'0')}catch(e){}
 }
-var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0,TERMED=0,KDUZ=0;
+var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0,TERMED=0,KDUZ=0,BASED=0;
 /* Bilgisayar görünümü: telefonda geniş (masaüstü) viewport'a geçerek
    mevcut min-width:900px masaüstü düzenini tetikler. Sadece Mert kullanır. */
 var PCV=false;function pcvUygula(){
@@ -1862,6 +1862,7 @@ function isAdimHizala(j,ts){if(!ts)return;(j.a||[]).forEach(function(x){if(stip(
    iş adımı FARKLI başlangıç taşıyorsa hepsini işin başlangıcına (yoksa en erken güne) eşitler. */
 function isBaslangicOnar(j){
  if(!j||j.kabul===false)return false;
+ if(j.basSerbest)return false;   /* yönetici kişi başlangıçlarını elle ayarladıysa hizalama yapma */
  var akt=(j.a||[]).filter(function(x){return stip(x)=='i'&&x.d=='a'});
  if(akt.length<2)return false;
  var gset={};akt.forEach(function(x){gset[x.g||0]=1});
@@ -2335,7 +2336,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
    if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
   }
-  h+='<div class="note" style="margin:12px 0 0">sürüm s100-KAYIT-ONAY · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s101-KISI-BASLANGIC · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2691,6 +2692,28 @@ function ciz(){try{gozBanner()}catch(e){}
    }else{
     h+='<div style="font-size:13px;color:#5A6A63;margin-bottom:8px">Açılış: <b>'+(_acTs?dtar(zmn(_acTs)):'—')+'</b> · Termin: <b>'+(_bd?dtar(_bd):'—')+'</b></div>'+
        '<button class="b g" data-a="termedac" data-j="'+j.id+'">Termini düzelt (açılış / bitiş)</button></div>';
+   }
+  })();
+  /* ---- Kişi başlangıç günleri — ekip işinde her personelin başlangıcı ayrı ayarlanır (yönetici) ---- */
+  (function(){
+   if(!(terminYetkisi()||atamaYetkisi()||sistemci()))return;
+   var _isS=(j.a||[]).filter(function(x){return stip(x)=='i'});
+   if(_isS.length<2)return;                       /* yalnız ekip işi */
+   h+='<div class="card"><h3>Kişi başlangıç günleri</h3>';
+   if(BASED==j.id){
+    h+='<div class="note" style="margin:0 0 10px">Ekipte biri sonradan katıldıysa / farklı günde başladıysa, o kişinin başlangıcını değiştir. Her kişinin termini kendi başlangıcından sayılır.</div>';
+    j.a.forEach(function(s,si){
+     if(stip(s)!='i')return;
+     var _g=s.g||j.bas,_iso=_g?(function(){var d=zmn(_g);return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())})():'';
+     h+='<label>'+esc(ad(s.k))+'</label><input type="date" id="bg_'+si+'" value="'+_iso+'">';
+    });
+    h+='<div style="height:10px"></div><div class="two">'+
+       '<button class="b" data-a="basgunkaydet" data-j="'+j.id+'">Kaydet</button>'+
+       '<button class="b g" data-a="basgunno">Vazgeç</button></div></div>';
+   }else{
+    j.a.forEach(function(s){if(stip(s)!='i')return;
+     h+='<div style="font-size:13px;color:#5A6A63;margin-bottom:4px">'+esc(ad(s.k))+': <b>'+(s.g?dtar(zmn(s.g)):(j.bas?dtar(zmn(j.bas)):'—'))+'</b></div>';});
+    h+='<div style="height:6px"></div><button class="b g" data-a="basgunac" data-j="'+j.id+'">Başlangıç günlerini düzelt</button></div>';
    }
   })();
    if(c&&as(c)>0){
@@ -3599,7 +3622,7 @@ document.addEventListener('click',function(e){
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
-  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1};
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1};
   if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
  }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
@@ -4076,6 +4099,28 @@ document.addEventListener('click',function(e){
  else if(a=='atadegis'){ATAND=+t.dataset.j}
  else if(a=='termedac'){TERMED=+t.dataset.j}
  else if(a=='termedno'){TERMED=0}
+ else if(a=='basgunac'){BASED=+t.dataset.j}
+ else if(a=='basgunno'){BASED=0}
+ else if(a=='basgunkaydet'){
+  var _bj=bul(+t.dataset.j); if(!_bj)return;
+  if(!(terminYetkisi()||atamaYetkisi()||sistemci())){say('Bunun için yetkin yok.');return}
+  var _degn=0;
+  _bj.a.forEach(function(s,si){
+   if(stip(s)!='i')return;
+   var el2=document.getElementById('bg_'+si); if(!el2||!el2.value)return;
+   var d=new Date(el2.value+'T09:00'); if(isNaN(d))return;
+   var yeni=yer(d);
+   if(String(s.g||'')!=String(yeni)){s.g=yeni;_degn++;
+    (_bj.lg=_bj.lg||[]).push({ts:now(),k:ME,tip:ad(s.k)+' başlangıcı → '+dtar(d)});}
+  });
+  if(_degn){_bj.basSerbest=true;
+   /* en erken başlangıç işin genel açılışı olsun */
+   var _mn=null;_bj.a.forEach(function(x){if(stip(x)=='i'&&x.g&&(_mn===null||x.g<_mn))_mn=x.g});if(_mn)_bj.bas=_mn;
+   say(_degn+' kişinin başlangıcı güncellendi');
+   if(window.senkronCalistir)setTimeout(window.senkronCalistir,200);
+  }else say('Değişiklik yok');
+  BASED=0;
+ }
  else if(a=='termeddgo'){
   var _tj=bul(+t.dataset.j); if(!_tj)return;
   if(!(terminYetkisi()||sistemci())){say('Termin düzeltme yetkisi yalnızca Mert ve Mesut’ta.');return}
