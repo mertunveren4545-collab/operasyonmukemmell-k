@@ -1032,6 +1032,8 @@ function isGunSayisi(bas,bit){var d=new Date(bas.getFullYear(),bas.getMonth(),ba
 /* Yeni iş formunda açılış+bitiş seçilince iş gününü canlı göster */
 function _terminHesapla(){try{var a=document.getElementById('jdate'),b=document.getElementById('jbit'),o=document.getElementById('jgun');if(!o)return;if(!a||!a.value||!b||!b.value){o.textContent='İş günü: — (bitiş tarihi seç)';return}var ad2=new Date(a.value+'T09:00'),bd=new Date(b.value+'T09:00');if(isNaN(ad2)||isNaN(bd)){o.textContent='İş günü: —';return}if(bd<new Date(ad2.getFullYear(),ad2.getMonth(),ad2.getDate())){o.textContent='⚠ Termin, açılıştan önce olamaz';o.style.color='#C0392B';return}var g=isGunSayisi(ad2,bd);o.textContent='= '+g+' iş günü (hafta sonu hariç)';o.style.color='#1E4A85'}catch(e){}}
 function dtar(d){return ii(d.getDate())+'.'+ii(d.getMonth()+1)+'.'+d.getFullYear()}
+/* Tesisler ekranı canlı arama — ciz() çağırmadan DOM'da filtreler (odak kaybolmaz) */
+function _tesisAra(q){try{q=(q||'').toLocaleLowerCase('tr').trim();var els=document.querySelectorAll('.tesrow');for(var i=0;i<els.length;i++){var a=els[i].getAttribute('data-ad')||'';els[i].style.display=(!q||a.indexOf(q)>=0)?'':'none';}var bos=document.getElementById('tesbos');if(bos){var gorunen=0;for(var j2=0;j2<els.length;j2++)if(els[j2].style.display!=='none')gorunen++;bos.style.display=(els.length&&gorunen===0)?'':'none';}}catch(e){}}
 function dataURLBlob(du){try{var a=du.split(','),m=(a[0].match(/:(.*?);/)||[])[1]||'application/octet-stream',b=atob(a[1]),n=b.length,u=new Uint8Array(n);while(n--)u[n]=b.charCodeAt(n);return new Blob([u],{type:m})}catch(e){return null}}
 /* ---- Dosya önizleme (salt okunur; istenirse indir) ---- */
 var _onizBloblar=[];
@@ -2351,7 +2353,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
    if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
   }
-  h+='<div class="note" style="margin:12px 0 0">sürüm s103-ONAY-DUZELT · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s104-TESIS-ARA · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -3135,11 +3137,13 @@ function ciz(){try{gozBanner()}catch(e){}
  else if(V=='tesis'){
   var vj=J.filter(gor);
   h='<div class="card"><h3>Tesisler ('+T.length+')</h3>';
+  h+='<input id="tsara" placeholder="🔍 Tesis ara…" autocomplete="off" oninput="try{_tesisAra(this.value)}catch(e){}" style="margin-bottom:8px">';
   T.forEach(function(x){
    var n=vj.filter(function(j){return j.ts_==x.id}).length;
    var dk=0;K.forEach(function(r){if(r.ts_==x.id)dk+=r.dk});
+   var _adl=esc(x.ad.toLocaleLowerCase('tr')).replace(/"/g,'&quot;');
    if(ED===x.id){
-    h+='<div class="li"><input id="te" value="'+esc(x.ad).replace(/"/g,'&quot;')+'">'+
+    h+='<div class="li tesrow" data-ad="'+_adl+'"><input id="te" value="'+esc(x.ad).replace(/"/g,'&quot;')+'">'+
       '<div style="height:8px"></div><div class="two">'+
       '<button class="b" data-a="tsave" data-i="'+x.id+'">Kaydet</button>'+
       '<button class="b g" data-a="tcancel">Vazgeç</button></div>'+
@@ -3147,12 +3151,13 @@ function ciz(){try{gozBanner()}catch(e){}
       (n||dk?'Yine de sil ('+(n?n+' iş':'')+(n&&dk?', ':'')+(dk?sa(dk)+' saat kayıt':'')+')':'Tesisi sil')+'</button>'+
       '</div>';
    }else{
-    h+='<button class="li" style="display:block;width:100%;text-align:left;background:none;border:0;'+
+    h+='<button class="li tesrow" data-ad="'+_adl+'" style="display:block;width:100%;text-align:left;background:none;border:0;'+
       'border-bottom:1px solid #F0F2F4" data-a="tedit" data-i="'+x.id+'">'+
       '<div class="h"><b>'+esc(x.ad)+'</b><i>'+(n?n+' iş':'—')+' ✎</i></div>'+
       '<div class="s">'+(dk?sa(dk)+' saat kayıtlı çalışma':'kayıt yok')+'</div></button>';
    }
   });
+  h+='<div id="tesbos" style="display:none;font-size:13px;color:#8592A0;padding:10px 2px">Eşleşen tesis yok.</div>';
   h+='<div class="note">Adı değiştirmek için tesise dokun. Şu an herkes düzenleyebilir; '+
     'ileride bu yetki anahtar kullanıcılara alınacak.</div></div>';
   h+='<div class="card"><h3>Yeni tesis ekle</h3>'+
