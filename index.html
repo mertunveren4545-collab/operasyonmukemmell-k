@@ -1872,8 +1872,8 @@ function isBaslangicOnar(j){
  akt.forEach(function(x){x.g=hedef});
  return true;
 }
-function gec(s){return s.g?gn(s.g,TODAY):0}
-function as(s){return gec(s)-s.t}
+function gec(s){if(s&&s.basladi===false)return 0;return s.g?gn(s.g,TODAY):0}
+function as(s){if(s&&s.basladi===false)return 0;return gec(s)-s.t}
 function gor(j){if(j&&j.silindi)return false;var p=pn(ME);
  if(p[4]=='ust'||sistemci())return true;
  return j.br==p[3]||j.a.some(function(s){return s.k==ME})}
@@ -2336,7 +2336,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
    if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
   }
-  h+='<div class="note" style="margin:12px 0 0">sürüm s101-KISI-BASLANGIC · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s102-PLANLI-BASLA · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -2622,6 +2622,7 @@ function ciz(){try{gozBanner()}catch(e){}
    var tp2=stip(s),bl2=pn(s.k)[3];
    var durum,ikon,renk;
    if(s.d=='t'){durum='tamamlandı';ikon='\u2713';renk='#2E7D4B'}
+   else if(s.d=='a'&&s.basladi===false){durum='planlı';ikon='\u25CB';renk='#1E7AAE'}
    else if(s.d=='a'){durum=lt?'gecikmede':'sürüyor';ikon='\u25CF';renk=lt?'#C0392B':'#B9770E'}
    else {durum='sırada';ikon='\u25CB';renk='#B7C0BB'}
    var son=(si==j.a.length-1);
@@ -2639,6 +2640,7 @@ function ciz(){try{gozBanner()}catch(e){}
        '<div style="font-size:12px;color:#5A6A63;margin-top:3px">'+ad(s.k)+(bl2?' · '+bad(bl2):'')+'</div>'+
        '<div style="font-size:11px;color:#8592A0;margin-top:2px">'+
          (s.d=='t'? fmt(s.g)+' \u2192 '+fmt(s.b)+' · '+gn(s.g,s.b)+'/'+s.t+' gün'
+          : (s.d=='a'&&s.basladi===false)? (s.g?fmt(s.g):'—')+' başlar (planlı) · '+s.t+' gün'
           : s.d=='a'? fmt(s.g)+' gönderildi · '+gec(s)+'/'+s.t+' gün'+(lt?' · +'+as(s)+' aşım':'')
           : 'plan '+s.t+' gün')+
          (s.ekg?' · +'+s.ekg+' ek':'')+
@@ -2876,11 +2878,16 @@ function ciz(){try{gozBanner()}catch(e){}
       '<button class="b g" data-a="rno">Vazgeç</button></div></div>';
    }else{
     var tc=stip(c);
-    h+='<button class="b" data-a="ok" data-j="'+j.id+'">'+
-      (tc=='o'?'Onayla':tc=='k'?'Kontrol ettim':'Bitirdim')+' ve devret</button>';
-    if(j.a.indexOf(c)>0)h+='<div style="height:8px"></div><button class="b g" data-a="red" data-j="'+j.id+'">Geri gönder</button>';
-    h+='<div style="height:8px"></div><button class="b g" data-a="dst" data-j="'+j.id+'">Birinden veri / destek iste</button>';
-    h+='<div style="height:8px"></div><button class="b g" data-a="tal" data-j="'+j.id+'">Ek süre talep et</button>';
+    if(tc=='i' && c.basladi===false){
+     h+='<button class="b" data-a="isbasla" data-j="'+j.id+'">▶ İşe başladım</button>'+
+        '<div class="note">Bu iş planlı ('+(c.g?dtar(zmn(c.g)):'—')+'). Fiilen başladığın gün bu butona bas — termin o günden itibaren yeniden hesaplanır.</div>';
+    }else{
+     h+='<button class="b" data-a="ok" data-j="'+j.id+'">'+
+       (tc=='o'?'Onayla':tc=='k'?'Kontrol ettim':'Bitirdim')+' ve devret</button>';
+     if(j.a.indexOf(c)>0)h+='<div style="height:8px"></div><button class="b g" data-a="red" data-j="'+j.id+'">Geri gönder</button>';
+     h+='<div style="height:8px"></div><button class="b g" data-a="dst" data-j="'+j.id+'">Birinden veri / destek iste</button>';
+     h+='<div style="height:8px"></div><button class="b g" data-a="tal" data-j="'+j.id+'">Ek süre talep et</button>';
+    }
    }
   }else if(c)h+='<div class="emp">Şu an '+ad(c.k)+' üzerinde — '+fmt(c.g)+' tarihinden beri.</div>';
   if(sistemci())h+='<div class="card tehlike" style="margin-top:14px">'+'<h3>\u26A0 Yönetici — Tehlikeli bölge</h3>'+'<div class="td">Bu işi ekrandan ve veritabanından kalıcı olarak siler. Geri alınamaz.</div>'+'<button class="b r" data-a="issil" data-j="'+j.id+'">Bu işi kalıcı sil</button></div>';
@@ -3622,7 +3629,7 @@ document.addEventListener('click',function(e){
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
-  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1};
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1,'isbasla':1};
   if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
  }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
@@ -4438,11 +4445,24 @@ document.addEventListener('click',function(e){
   delete yazilan[_r.id];
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
  }
+ else if(a=='isbasla'){
+  var _bj=bul(+t.dataset.j); if(!_bj)return;
+  var _s=null;(_bj.a||[]).forEach(function(x){if(stip(x)=='i'&&x.d=='a'&&x.k==ME&&!_s)_s=x});
+  if(!_s){var _cc=cur(_bj);if(_cc&&stip(_cc)=='i'&&_cc.k==ME)_s=_cc;}
+  if(!_s){say('Başlatılacak iş adımın yok.');return}
+  var _tn=now();_s.g=_tn;_s.basladi=true;_bj.kabul=true;
+  var _mn=null;_bj.a.forEach(function(x){if(stip(x)=='i'&&x.g&&(_mn===null||x.g<_mn))_mn=x.g});if(_mn)_bj.bas=_mn;
+  var _term=null;try{var gl=isGunleri(zmn(_tn),Math.round(_s.t)||1);if(gl.length)_term=gl[gl.length-1]}catch(e){}
+  (_bj.lg=_bj.lg||[]).push({ts:_tn,k:ME,tip:'İşe başlandı'+(_term?' — termin '+dtar(_term):'')});
+  say('İşe başlandı'+(_term?' — termin '+dtar(_term):''));
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
+ }
  else if(a=='kabulonc'){
   /* Öncelikli kabul: işi hemen başlat. Başka işlerin terminine DOKUNULMAZ (oto-uzatma yok). */
   var _kj=bul(+t.dataset.j); if(!_kj){return}
   var _ci=cur(_kj); if(!_ci||_ci.k!=ME){say('Bu iş sana atanmış değil.');return}
   var _tn=now(); _kj.kabul=true; _kj.bas=_tn; isAdimHizala(_kj,_tn);
+  (_kj.a||[]).forEach(function(x){if(stip(x)=='i'&&x.d=='a')x.basladi=true});
   if(_kj.oncelik!='acil')_kj.oncelik='yuksek';
   (_kj.lg=_kj.lg||[]).push({ts:_tn,k:ME,tip:'Öncelikli kabul — hemen başladı'});
   /* otomatik termin uzaması kaldırıldı — diğer işler kendiliğinden ötelenmez */
@@ -4548,7 +4568,7 @@ document.addEventListener('click',function(e){
   for(var _h=0;_h<_hep.length;_h++){if(!_gr[_hep[_h]]){_gr[_hep[_h]]=1;kisiler.push(_hep[_h])}}
   var brr=pn(anaK)[3]||'SI',cf2=B[brr];
   var adm=[];
-  for(var _pk=0;_pk<kisiler.length;_pk++)adm.push({a:nm,k:kisiler[_pk],t:gg9,tp:'i',o:0,d:'a',g:ts3,b:0});
+  for(var _pk=0;_pk<kisiler.length;_pk++)adm.push({a:nm,k:kisiler[_pk],t:gg9,tp:'i',o:0,d:'a',g:ts3,b:0,basladi:(_ileri?false:true)});
   adm.push({a:'Bölüm onayı',k:bolumOnayci(brr),t:1,tp:'o',o:1,d:'b',g:0,b:0});
   if(cf2.ug)adm.push({a:'Üst onay',k:cf2.ust,t:1,tp:'o',o:1,d:'b',g:0,b:0});
   var onc=(document.getElementById('jonc')&&document.getElementById('jonc').value)||'normal';
