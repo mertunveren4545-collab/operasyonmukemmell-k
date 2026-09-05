@@ -2355,7 +2355,7 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<button class="b" data-a="pcview" style="margin:2px 0 0;background:'+(PCV?'#12315C':'#3A4756')+'">🖥 Bilgisayar görünümü: '+(PCV?'AÇIK — telefonda masaüstü düzeni':'kapalı')+'</button>';
    if(PCV)h+='<div class="note" style="margin:6px 0 0">Masaüstü düzenini görüyorsun. Parmakla yakınlaştırıp uzaklaştırabilir, her yeri telefondan kullanabilirsin. Kapatmak için tekrar dokun.</div>';
   }
-  h+='<div class="note" style="margin:12px 0 0">sürüm s105-KABUL-DEVAM · '+
+  h+='<div class="note" style="margin:12px 0 0">sürüm s106-GECMIS-KOTA · '+
     (sistemci()?'Sistem sorumlusu — tüm bölümleri ve tüm kayıtları görüyorsun.':
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
@@ -3621,7 +3621,8 @@ function ciz(){try{gozBanner()}catch(e){}
     (atamaYetkisi()?'<label>Ek kişiler (isteğe bağlı)</label><div class="ekkbox" style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px">'+P.map(function(p){return '<label class="ekkc" style="display:flex;align-items:center;gap:5px;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:5px 10px;border-radius:9px;cursor:pointer;border:1px solid rgba(0,0,0,.06)'+(p[0]==ME?';opacity:.4':'')+'"><input type="checkbox" class="ekk" value="'+p[0]+'"'+(p[0]==ME?' disabled':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>':'<div class="note">Sadece kendine iş açabilirsin. Başkasına iş atama yetkisi yönetici, şef ve direktördedir.<br><span style="opacity:.55;font-size:11px">(oturum: '+ME+' · rol: '+(pn(ME)[4]||'?')+' · '+(pn(ME)[2]||'-')+')</span></div>')+    (ATAMA?'<label>Öncelik / Önem</label><select class="n" id="jonc"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option></select>':'')+'<label>Başlangıç / açılış tarihi</label><input type="date" id="jdate" value="'+new Date().toISOString().slice(0,10)+'" oninput="try{_terminHesapla()}catch(e){}"><div class="note" style="margin:-6px 0 8px">Geçmişe dönük (geç kalınan iş) veya ileri (planlı / gelecek) tarih seçebilirsin; termin bu tarihten sayılır. İleri tarihli işlerde süre, o gün gelene kadar işlemez.</div>'+
     '<label>Termin (bitiş) tarihi</label><input type="date" id="jbit" value="" oninput="try{_terminHesapla()}catch(e){}">'+
     '<div class="note" id="jgun" style="margin:-6px 0 8px;font-weight:600">İş günü: — (bitiş tarihi seç)</div>'+
-    '<label class="ekkc" style="display:flex;align-items:center;gap:8px;margin:2px 0 12px;cursor:pointer;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:8px 10px;border-radius:9px;border:1px solid rgba(0,0,0,.06)"><input type="checkbox" id="jbitti"> Bu iş geçmişte yapıldı ve <b>tamamlandı</b> (kayıt için — kapanış: termin tarihi). Gecikme/aşım göstermez.</label>'+
+    '<label class="ekkc" style="display:flex;align-items:center;gap:8px;margin:2px 0 4px;cursor:pointer;font-size:13px;background:var(--yzem,#F2F4F3);color:inherit;padding:8px 10px;border-radius:9px;border:1px solid rgba(0,0,0,.06)"><input type="checkbox" id="jbitti"> Bu iş geçmişte yapıldı ve <b>tamamlandı</b> (kayıt için — kapanış: termin tarihi). Gecikme/aşım göstermez.</label>'+
+    '<div class="note" style="margin:0 0 12px">Geçmiş (tamamlandı) kaydı yalnızca <b>1 Eylül 2026</b>\u2019ya kadar eklenebilir. Devam eden iş için bu kutuyu işaretleme — tarih ileri de olsa açılır.</div>'+
     '<div style="height:14px"></div><button class="b" data-a="new">'+(ATAMA?'İş ata':'İşi başlat')+'</button>'+
     '<div class="note">Onay adımı otomatik eklenir: <b>'+ad(cf.sef)+'</b>'+(cf.ug?' → '+ad(cf.ust):'')+'. '+
     'Başka birinden veri veya destek gerekiyorsa, işi açtıktan sonra iş detayından talep edersin.</div></div>';
@@ -4580,6 +4581,13 @@ document.addEventListener('click',function(e){
      tüm adımlar termin tarihinde KAPANMIŞ sayılır → gecikme/aşım göstermez. */
   var _bittiCB=document.getElementById('jbitti');
   var _bitti=!!(_bittiCB&&_bittiCB.checked) && (_bitD < new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()+1));
+  /* GEÇİCİ KOTA: geçmişe dönük "tamamlandı" iş kaydı yalnızca 1 Eylül 2026'ya kadar eklenebilir.
+     Devam eden işler (tamamlandı kutusu işaretsiz) bu sınıra takılmaz — tarih ne olursa olsun açılır. */
+  var _GECMIS_KOTA='2026-09-01';
+  if(_bitti && _bitEl.value > _GECMIS_KOTA){
+   say('Geçmiş (tamamlandı) iş kaydı yalnızca 1 Eylül 2026\u2019ya kadar eklenebilir. Devam eden iş için "tamamlandı" kutusunu işaretleme.');
+   return;
+  }
   var _bitTs=yer(new Date(_bitEl.value+'T17:00'));   /* kapanış: termin günü mesai bitişi */
   var anaK=kk, ekK=[];
   if(ATAMA&&!anaK){say('Önce kime atayacağını seç.');return}
