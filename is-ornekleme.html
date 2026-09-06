@@ -35,6 +35,7 @@
       }
       var col={ok:'#146B45',warn:'#D97400',err:'#A8271E',info:'#1F5C7D'}[cls]||'#1F5C7D';
       el.style.background=col;el.textContent=txt;el.style.opacity='1';
+      el.style.whiteSpace=(cls==='err')?'normal':'nowrap';
       clearTimeout(el.__t);
       if(cls==='ok'||cls==='info')el.__t=setTimeout(function(){try{el.style.opacity='0'}catch(e){}},2500);
     }catch(e){}
@@ -94,11 +95,10 @@
           body:JSON.stringify([{id:rowId(DBKEY),kisi:U,ad:UAD,k:DBKEY,veri:ms,upd:new Date().toISOString()}])});
       })
       .then(function(r){
-        _pushing=false;
-        if(r&&r.ok){pill('☁︎ kaydedildi ✓','ok');clearTimeout(_phTimer);_phTimer=setTimeout(function(){syncPhotos(false)},3000);}
-        else pill('⚠ bulut hatası — tekrar denenecek','err');
+        if(r&&r.ok){_pushing=false;pill('☁︎ kaydedildi ✓','ok');clearTimeout(_phTimer);_phTimer=setTimeout(function(){syncPhotos(false)},3000);return;}
+        return r.text().then(function(tx){_pushing=false;var msg=(tx||'').replace(/\s+/g,' ').slice(0,120);pill('⚠ bulut hatası '+(r&&r.status||'?')+(msg?' — '+msg:''),'err');try{console.warn('isorn push fail',r&&r.status,tx)}catch(e){}});
       })
-      .catch(function(){_pushing=false;pill('⚠ çevrimdışı — kayıt bekliyor','err')});
+      .catch(function(e){_pushing=false;pill('⚠ çevrimdışı — ağ hatası'+(e&&e.message?' ('+e.message+')':''),'err');try{console.warn('isorn push net',e)}catch(e){}});
   }
 
   window.storage={
