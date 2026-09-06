@@ -257,6 +257,14 @@ body.dk .ptk-ozet{border-color:#2A353D;color:#9FB0C2}
 .ptk-ozet em{display:inline-block;width:8px;height:8px;border-radius:5px;margin-right:4px}
 .ptk-ozet em.is{background:#12315C}
 .ptk-ozet em.ka{background:#1B7A47}
+/* ---- İş Örneklemesi tam ekran overlay ---- */
+.ornek-ov{position:fixed;inset:0;z-index:400;background:#fff;display:none;flex-direction:column}
+body.dk .ornek-ov{background:#10161C}
+.ornek-bar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:calc(9px + env(safe-area-inset-top)) 12px 9px;background:#12315C;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.ornek-x{background:rgba(255,255,255,.16);border:0;color:#fff;font:700 14px inherit;padding:9px 13px;border-radius:9px;cursor:pointer;flex:0 0 auto}
+.ornek-tt{flex:1;min-width:0;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ornek-yeni{flex:0 0 auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.16);border-radius:9px;padding:9px 12px;font-size:15px;line-height:1}
+.ornek-if{flex:1;width:100%;border:0;display:block}
 /* PC'de sol altta, dar ve şık dursun */
 @media(min-width:900px){.takvim{max-width:360px;margin-right:auto}}
 .itab tr.gecsat td{background:#FDEEEC;box-shadow:inset 3px 0 0 #C0392B}
@@ -1641,6 +1649,8 @@ function cekmeceYaz(){
   '<button class="mn" data-a="kur-indir"><em>📲</em>Uygulamayı indir</button>'+
   '<button class="mn" data-a="org"><em>⌸</em>Organizasyon</button>'+
   '<button class="mn" data-a="tesis"><em>📍</em>Tesisler</button>'+
+  '<div class="ayirac"></div><h4>Süreç İyileştirme</h4>'+
+  '<button class="mn" data-a="ornekleme"><em>🧮</em>İş Örneklemesi <span style="flex:none;font-size:9px;font-weight:800;letter-spacing:.04em;background:#EAF0F7;color:#12315C;padding:2px 7px;border-radius:8px;margin-left:auto">ANALİZ</span></button>'+
   '<div class="ayirac"></div>'+
   '<button class="mn" data-a="ayarlar"><em>⚙️</em>Ayarlar</button>'+
   '<button class="mn" data-a="cikis"><em>⏻</em>Çıkış</button>'+
@@ -1652,6 +1662,27 @@ function cekmece(ac){
  if(!c||!p)return;
  if(ac){cekmeceYaz();c.className='cekmece on';p.className='perde2 on'}
  else{c.className='cekmece';p.className='perde2'}
+}
+/* İş Örneklemesi analiz aracı — index'e gömülmez, ayrı dosya tam ekran iframe'de açılır. */
+var ORNEK_DOSYA='is-ornekleme.html';
+function ornekAc(){
+ var o=document.getElementById('ornekOverlay');
+ if(!o){
+  o=document.createElement('div');o.id='ornekOverlay';o.className='ornek-ov';
+  o.innerHTML='<div class="ornek-bar">'+
+    '<button class="ornek-x" data-a="ornek-kapat">‹ Kapat</button>'+
+    '<span class="ornek-tt">İş Örneklemesi — Analiz aracı</span>'+
+    '<a class="ornek-yeni" href="'+ORNEK_DOSYA+'" target="_blank" rel="noopener" title="Yeni sekmede aç">⤢</a>'+
+    '</div><iframe class="ornek-if" title="İş Örneklemesi"></iframe>';
+  document.body.appendChild(o);
+ }
+ var ifr=o.querySelector('.ornek-if');
+ if(ifr&&!ifr.getAttribute('src'))ifr.setAttribute('src',ORNEK_DOSYA);   /* tembel yükle */
+ o.style.display='flex';document.body.style.overflow='hidden';
+}
+function ornekKapat(){
+ var o=document.getElementById('ornekOverlay');if(!o)return;
+ o.style.display='none';document.body.style.overflow='';   /* iframe açık kalır — analiz kaybolmasın */
 }
 function seritYaz(){
  var e=document.getElementById('serit');if(!e)return;
@@ -4199,6 +4230,8 @@ document.addEventListener('click',function(e){
  }
  if(a=='cekmeceac'){cekmece(true);return}
  if(a=='cekmecekapat'){cekmece(false);return}
+ if(a=='ornekleme'){ornekAc();cekmece(false);return}
+ if(a=='ornek-kapat'){ornekKapat();return}
  if(a=='ayarlar'){if(V!='ayarlar')GECMIS.push(_navPrev);V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
  if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';if(PCV)document.body.classList.add('pcview');temaUygula();arkaPlanUygula();ciz();return}
  if(a=='pcview'){PCV=!PCV;pcvUygula();say(PCV?'Bilgisayar görünümü açıldı':'Bilgisayar görünümü kapandı');ciz();window.scrollTo(0,0);return}
