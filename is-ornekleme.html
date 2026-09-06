@@ -75,6 +75,23 @@
       var tomb=tk[id]||0; if(tomb&&tomb>=+(pick.upd||0))return; /* silinmiş */
       out.st[id]=pick;
     });
+    /* boş "YENİ ÇALIŞMA" kopyalarını ayıkla: her açılışta yeni id'li boş çalışma
+       birikip sig'i değiştiriyor ve gereksiz yenilemeye yol açıyordu. En yenisini tut. */
+    try{
+      var blanks=Object.keys(out.st).filter(function(id){
+        var s=out.st[id]; if(!s||!s.meta)return false;
+        var b=String(s.meta.birim||'').trim().toLocaleLowerCase('tr');
+        var noName=(b===''||b==='yeni çalışma');
+        var empty=!(s.cats&&s.cats.length)&&!(s.people&&s.people.length)
+          &&!(s.data&&Object.keys(s.data).length)&&!(s.assign&&Object.keys(s.assign).length)
+          &&!(s.spans&&s.spans.length);
+        return noName&&empty;
+      });
+      if(blanks.length>1){
+        blanks.sort(function(a,b){return (+(out.st[b].upd||0))-(+(out.st[a].upd||0))});
+        for(var bi=1;bi<blanks.length;bi++){out.__tomb[blanks[bi]]=Date.now();delete out.st[blanks[bi]];}
+      }
+    }catch(e){}
     return out;
   }
   function sig(obj){if(!obj)return '';var st=obj.st||{};return Object.keys(st).sort().map(function(id){return id+':'+(+(st[id].upd||0))}).join('|')}
@@ -153,25 +170,48 @@
       window.__ISORN_CLOUD=_ms;_cache[DBKEY]=_ms;_prevIds=Object.keys(_merged.st||{});
       /* birleşik hali buluta geri yaz ki iki cihaz aynılaşsın */
       if(_ms!==JSON.stringify(safeParse(_cloud)))setTimeout(function(){pushMerged(_ms)},1800);
+      /* teşhis: buluttan kaç çalışma geldi + hangi kullanıcı */
+      try{var _cc=safeParse(_cloud);var _n=_cc&&_cc.st?Object.keys(_cc.st).length:0;setTimeout(function(){pill('☁︎ bulut: '+_n+' çalışma · kullanıcı '+(U.length>14?U.slice(0,14)+'…':U),'info')},900);}catch(e){}
     }
     try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}
   }catch(e){}
 
-  /* ---- canlı izleme: 10 sn'de bir buluttan çek, birleştir, değiştiyse tazele ---- */
+  /* ---- "yeni veri geldi" çubuğu (sayfayı kendi kendine yenilemez; sen dokununca yeniler) ---- */
+  function newDataBanner(){
+    try{
+      if(!document.body){document.addEventListener('DOMContentLoaded',newDataBanner);return;}
+      var b=document.getElementById('__isorn_new');
+      if(!b){
+        b=document.createElement('div');b.id='__isorn_new';
+        b.style.cssText='position:fixed;left:8px;right:8px;bottom:64px;z-index:9999;background:#1F5C7D;color:#fff;font:600 13px -apple-system,Arial,sans-serif;padding:11px 14px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.35);text-align:center;cursor:pointer';
+        b.onclick=function(){location.reload()};
+        document.body.appendChild(b);
+      }
+      b.textContent='☁︎ Yeni veri geldi — göstermek için dokun';
+      b.style.display='block';
+    }catch(e){}
+  }
+
+  /* ---- canlı izleme: 10 sn'de bir buluttan çek, birleştir; değiştiyse sessizce yaz + çubuk göster ---- */
   setInterval(function(){
     try{
-      if(Date.now()-_lastSet<15000)return; if(_pushing)return; if(document.hidden)return;
+      if(_pushing)return; if(document.hidden)return;
       fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rowId(DBKEY))+'&select=veri',{headers:hdr()})
         .then(function(r){return r.ok?r.json():[]})
         .then(function(rows){
           var cloud=(rows&&rows[0]&&rows[0].veri)||null; if(cloud==null)return;
           var local=null;try{local=localStorage.getItem(DBKEY)}catch(e){}
+          var lp=safeParse(local),cp=safeParse(cloud);
+          /* uzakta bizde olmayan ya da daha yeni bir çalışma var mı? (yalnızca o zaman haber ver) */
+          var remoteNewer=false,ls=(lp&&lp.st)||{},cs=(cp&&cp.st)||{};
+          for(var id in cs){ if(!ls[id]){remoteNewer=true;break;} if(+(cs[id].upd||0)>+(ls[id].upd||0)){remoteNewer=true;break;} }
+          if(!remoteNewer)return;
           var merged=mergeDb(local,cloud);
-          if(sig(merged)!==sig(safeParse(local))){
-            var ms=JSON.stringify(merged);_cache[DBKEY]=ms;
-            try{localStorage.setItem(DBKEY,ms)}catch(e){}
-            location.reload();
-          }
+          if(sig(merged)===sig(lp))return;
+          var ms=JSON.stringify(merged);_cache[DBKEY]=ms;
+          try{localStorage.setItem(DBKEY,ms)}catch(e){}
+          if(Date.now()-_lastSet<15000)return; /* aktif yazıyorsan çubuğu erteleme dışında gösterme */
+          newDataBanner();
         }).catch(function(){});
     }catch(e){}
   },10000);
