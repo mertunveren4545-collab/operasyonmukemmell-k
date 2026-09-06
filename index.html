@@ -1651,6 +1651,7 @@ function cekmeceYaz(){
   '<button class="mn" data-a="tesis"><em>📍</em>Tesisler</button>'+
   '<div class="ayirac"></div><h4>Süreç İyileştirme</h4>'+
   '<button class="mn" data-a="ornekleme"><em>🧮</em>İş Örneklemesi <span style="flex:none;font-size:9px;font-weight:800;letter-spacing:.04em;background:#EAF0F7;color:#12315C;padding:2px 7px;border-radius:8px;margin-left:auto">ANALİZ</span></button>'+
+  (silmeYetkisi()?'<button class="mn" data-a="ornekyonet"><em>👥</em>Örnekleme — Kullanıcılar</button>':'')+
   '<div class="ayirac"></div>'+
   '<button class="mn" data-a="ayarlar"><em>⚙️</em>Ayarlar</button>'+
   '<button class="mn" data-a="cikis"><em>⏻</em>Çıkış</button>'+
@@ -1666,23 +1667,34 @@ function cekmece(ac){
 /* İş Örneklemesi analiz aracı — index'e gömülmez, ayrı dosya tam ekran iframe'de açılır. */
 var ORNEK_DOSYA='is-ornekleme.html';
 function ornekAc(){
+ var u=ME;
+ var src=ORNEK_DOSYA+'?u='+encodeURIComponent(u)+'&ad='+encodeURIComponent(ad(u))+'&opex=1';
  var o=document.getElementById('ornekOverlay');
  if(!o){
   o=document.createElement('div');o.id='ornekOverlay';o.className='ornek-ov';
   o.innerHTML='<div class="ornek-bar">'+
     '<button class="ornek-x" data-a="ornek-kapat">‹ Kapat</button>'+
     '<span class="ornek-tt">İş Örneklemesi — Analiz aracı</span>'+
-    '<a class="ornek-yeni" href="'+ORNEK_DOSYA+'" target="_blank" rel="noopener" title="Yeni sekmede aç">⤢</a>'+
+    '<a class="ornek-yeni" target="_blank" rel="noopener" title="Yeni sekmede aç">⤢</a>'+
     '</div><iframe class="ornek-if" title="İş Örneklemesi"></iframe>';
   document.body.appendChild(o);
  }
  var ifr=o.querySelector('.ornek-if');
- if(ifr&&!ifr.getAttribute('src'))ifr.setAttribute('src',ORNEK_DOSYA);   /* tembel yükle */
+ if(ifr&&ifr.getAttribute('data-u')!==u){ifr.setAttribute('data-u',u);ifr.setAttribute('src',src)}   /* kullanıcı bazlı, tembel yükle */
+ var yl=o.querySelector('.ornek-yeni');if(yl)yl.setAttribute('href',src);
  o.style.display='flex';document.body.style.overflow='hidden';
 }
 function ornekKapat(){
  var o=document.getElementById('ornekOverlay');if(!o)return;
  o.style.display='none';document.body.style.overflow='';   /* iframe açık kalır — analiz kaybolmasın */
+}
+/* Mert: herkesin buluttaki iş örneklemesi verisini listele/sil */
+var ORNEK_KAYIT=null;
+function ornekYonetGetir(){
+ if(!dbClient){ORNEK_KAYIT=[];if(V=='ornekyonet')ciz();return}
+ dbClient.from('isorn_kayit').select('id,kisi,ad,k,veri,upd').eq('k','isorn_db').then(function(r){
+   ORNEK_KAYIT=(r&&r.data)||[];if(V=='ornekyonet')ciz();
+ },function(){ORNEK_KAYIT=[];if(V=='ornekyonet')ciz();});
 }
 function seritYaz(){
  var e=document.getElementById('serit');if(!e)return;
@@ -2424,7 +2436,7 @@ function ciz(){try{gozBanner()}catch(e){}
  var t=document.getElementById('top');
  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',genliste:'İşler',kayit:'Çalışma kaydı',
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:(FILT=='bit'?'Tamamlanan işlerim':'Bende bekleyenler'),
-   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',kozet:'Kişi özeti',proje:'Kaizen / Projeler',projeyeni:'Yeni proje',projedet:'Proje / Problem Detayı',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik'};
+   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',kozet:'Kişi özeti',proje:'Kaizen / Projeler',projeyeni:'Yeni proje',projedet:'Proje / Problem Detayı',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik',ornekyonet:'İş Örneklemesi — Kullanıcılar'};
  t.innerHTML='<button class="mnb" data-a="cekmeceac">☰</button>'+
    (V=='ana'?'':'<button class="bk" data-a="geri">‹ Geri</button>')+
    (V=='ana'?'':'<button class="bk anab" data-a="ana" title="Ana sayfa">⌂<span class="anab-t"> Ana Sayfa</span></button>')+
@@ -2603,6 +2615,30 @@ function ciz(){try{gozBanner()}catch(e){}
    h+='<div class="card"><h3>Yapılan işler ('+oz.yap.length+')</h3>';oz.yap.forEach(function(j){h+=_ozsat(j)});h+='</div>';
   }
   if(!oz.toplam)h+='<div class="emp">Bu kişiye atanmış iş yok.</div>';
+ }
+
+ else if(V=='ornekyonet'){
+  h='<div class="card"><h3>İş Örneklemesi — Kullanıcı çalışmaları</h3>'+
+    '<div class="note" style="margin-top:0">Herkesin buluttaki iş örneklemesi verileri burada. İncele, gerekmeyeni sil — yer açılır. (Fotoğraflar kullanıcının cihazında kalır, buluta yazılmaz.)</div>'+
+    '<button class="b g" data-a="ornekyonet" style="width:auto;padding:7px 12px;font-size:12px">↻ Yenile</button></div>';
+  if(ORNEK_KAYIT===null){h+='<div class="emp">Yükleniyor…</div>';}
+  else if(!ORNEK_KAYIT.length){h+='<div class="emp">Henüz kayıtlı çalışma yok.</div>';}
+  else{
+   ORNEK_KAYIT.slice().sort(function(a,b){return (b.upd||'')<(a.upd||'')?-1:1}).forEach(function(row){
+    var d=null;try{d=JSON.parse(row.veri||'{}')}catch(e){}
+    var stw=(d&&d.st)?Object.keys(d.st).map(function(id){return d.st[id]}):[];
+    var kb=Math.round(((row.veri||'').length)/1024);
+    var son=row.upd?dtar(zmn(row.upd))+' '+fmt(row.upd).slice(-5):'';
+    h+='<div class="card"><h3>'+esc(row.ad||row.kisi)+' <span style="font-weight:600;color:#8592A0;font-size:12px">'+stw.length+' çalışma · '+kb+' KB'+(son?' · '+son:'')+'</span></h3>';
+    if(!stw.length)h+='<div style="font-size:13px;color:#8592A0;padding:0 13px 8px">İçerik boş.</div>';
+    stw.sort(function(a,b){return ((b.meta&&b.meta.tarih)||'')<((a.meta&&a.meta.tarih)||'')?-1:1}).slice(0,25).forEach(function(s){
+     var mt=s.meta||{};var goz=0;try{for(var _c in (s.data||{}))for(var _sl in s.data[_c])goz+=s.data[_c][_sl];for(var _a in (s.assign||{}))goz+=Object.keys(s.assign[_a]).length;goz+=((s.spans||[]).filter(function(x){return x.e}).length);}catch(e){}
+     h+='<div class="li"><div class="h"><b>'+esc(mt.birim||'—')+'</b><i>'+esc((mt.tarih||'').split('-').reverse().join('.'))+'</i></div>'+
+       '<div class="s">'+esc(mt.vardiya||'')+' · '+((s.cats||[]).length)+' kategori · '+((s.people||[]).length)+' kişi · '+goz+' gözlem</div></div>';
+    });
+    h+='<div style="padding:10px 13px 13px"><button class="b r" data-a="orneksil" data-u="'+esc(row.kisi)+'" style="margin:0">🗑 '+esc(ad(row.kisi))+' verisini sil</button></div></div>';
+   });
+  }
  }
 
  else if(V=='proje'){
@@ -4232,6 +4268,14 @@ document.addEventListener('click',function(e){
  if(a=='cekmecekapat'){cekmece(false);return}
  if(a=='ornekleme'){ornekAc();cekmece(false);return}
  if(a=='ornek-kapat'){ornekKapat();return}
+ if(a=='ornekyonet'){if(!silmeYetkisi()){say('Bu ekran için yetkin yok.');return}if(V!='ornekyonet')GECMIS.push(_navPrev);V='ornekyonet';ORNEK_KAYIT=null;cekmece(false);ornekYonetGetir();ciz();window.scrollTo(0,0);return}
+ if(a=='orneksil'){
+  if(!silmeYetkisi()){say('Yetkin yok.');return}
+  var _ou=t.dataset.u;if(!_ou)return;
+  if(!confirm('"'+ad(_ou)+'" kullanıcısının TÜM iş örneklemesi verisi buluttan silinecek. Emin misin?'))return;
+  if(dbClient)dbClient.from('isorn_kayit').delete().eq('kisi',_ou).then(function(){say('Silindi: '+ad(_ou));ornekYonetGetir();},function(e){say('Silinemedi: '+((e&&e.message)||''))});
+  return;
+ }
  if(a=='ayarlar'){if(V!='ayarlar')GECMIS.push(_navPrev);V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
  if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';if(PCV)document.body.classList.add('pcview');temaUygula();arkaPlanUygula();ciz();return}
  if(a=='pcview'){PCV=!PCV;pcvUygula();say(PCV?'Bilgisayar görünümü açıldı':'Bilgisayar görünümü kapandı');ciz();window.scrollTo(0,0);return}
