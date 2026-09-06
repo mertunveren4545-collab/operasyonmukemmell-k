@@ -1310,16 +1310,51 @@ function kisiGunluk(_k){
  var m={};
  function ekle(g,e){(m[g]=m[g]||[]).push(e)}
  function anahtar(ts){var d=zmn(ts);if(isNaN(d))return null;return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())}
+ /* 1) Çalışma kayıtları */
  (K||[]).forEach(function(r){
   if(r.k!=_k)return;var g=anahtar(r.ts);if(!g)return;
   ekle(g,{tur:'kayit',ad:r.tip||'Çalışma kaydı',detay:(r.ac||'')+(r.ts_?(' · '+tad(r.ts_)):''),ts:r.ts,sure:r.dk,is_id:r.is_id||null});
  });
+ /* 2) İşler — gün gün iş dökümü notları + adım kilometre taşları + log aksiyonları */
  (J||[]).forEach(function(j){
   if(j.silindi)return;
-  (j.lg||[]).forEach(function(l){
-   if(l.k!=_k||!l.ts)return;var g=anahtar(l.ts);if(!g)return;
-   ekle(g,{tur:'is',ad:j.ad,detay:l.tip||'',ts:l.ts,jid:j.id});
+  var _steps=(j.a||[]);
+  var _primary=_steps.filter(function(x){return stip(x)=='i'})[0];
+  var _isPrimary=_primary&&_primary.k==_k;
+  /* 2a) "Gün gün iş dökümü" notları — anahtar: owner|iso (eski kayıtlarda sadece iso) */
+  if(j.gunluk){
+   for(var gk in j.gunluk){
+    if(!j.gunluk[gk])continue;
+    var iso=null;
+    if(gk.indexOf('|')>=0){var pp=gk.split('|');if(pp[0]==_k)iso=pp[1];}
+    else if(_isPrimary){iso=gk;}
+    if(!iso)continue;
+    var g2=anahtar(iso+'T12:00:00')||iso;
+    ekle(g2,{tur:'is',ad:j.ad,detay:String(j.gunluk[gk]),ts:iso+'T12:00',jid:j.id});
+   }
+  }
+  /* 2b) Kişinin kendi adımları: başlangıç ve tamamlanma günleri */
+  _steps.forEach(function(x){
+   if(x.k!=_k)return;
+   if(x.g){var gs=anahtar(x.g);if(gs)ekle(gs,{tur:'is',ad:j.ad,detay:(stip(x)=='o'?'Onay adımı başladı':stip(x)=='k'?'Kontrol başladı':'İşe başlandı'),ts:x.g,jid:j.id});}
+   if(x.d=='t'&&x.b){var gb=anahtar(x.b);if(gb)ekle(gb,{tur:'is',ad:j.ad,detay:(stip(x)=='o'?'Onayladı':stip(x)=='k'?'Kontrol etti':'Tamamladı'),ts:x.b,jid:j.id});}
   });
+  /* 2c) Log kayıtları (kişinin aksiyonları) — ek detay. Ham "Gün notu —" logları hariç (2a doğru güne koyuyor). */
+  (j.lg||[]).forEach(function(l){
+   if(l.k!=_k||!l.ts)return;
+   if(/^Gün notu —/.test(l.tip||''))return;
+   var g3=anahtar(l.ts);if(!g3)return;
+   ekle(g3,{tur:'is',ad:j.ad,detay:l.tip||'',ts:l.ts,jid:j.id});
+  });
+ });
+ /* aynı gün + aynı iş + aynı detay tekrarlarını ele */
+ Object.keys(m).forEach(function(g){
+  var seen={},out=[];
+  m[g].forEach(function(e){
+   var key=e.tur+'|'+(e.jid||e.is_id||'')+'|'+(e.detay||'')+'|'+(e.ad||'');
+   if(seen[key])return;seen[key]=1;out.push(e);
+  });
+  m[g]=out;
  });
  return m;
 }
