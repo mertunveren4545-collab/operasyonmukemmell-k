@@ -208,6 +208,55 @@ body.dk .takvim .tkay{background:#20282E;border-color:#2A353D;color:#C6CED4}
 body.dk .takvim .tkyil{background:#161C21;border-color:#2A353D;color:#E4E9EE}
 body.dk .takvim .tkis{background:#20282E;border-color:#2A353D;color:#C6CED4}
 body.dk .takvim .tklbas{color:#7FD1A4}
+/* ---- Kişisel/profil takvimi ---- */
+.ptk-baslik{font-weight:800;font-size:15px;color:#12315C;margin:2px 2px 8px}
+body.dk .ptk-baslik{color:#8FB6EA}
+.ptk-bas{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ptk-bas b{font-size:15px;color:#20493A}
+body.dk .ptk-bas b{color:#E4E9EE}
+.ptk-nav{width:34px;height:34px;border-radius:9px;border:1px solid #D8E5DD;background:#fff;font-size:18px;font-weight:700;color:#1E4A85;cursor:pointer;line-height:1}
+body.dk .ptk-nav{background:#161C21;border-color:#2A353D;color:#8FB6EA}
+.ptk-wk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.ptk-wk span{text-align:center;font-size:10.5px;font-weight:700;color:#94A0A9;text-transform:uppercase;letter-spacing:.03em}
+.ptk-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.ptk-bos{aspect-ratio:1}
+.ptk-gun{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#F4F7F5;border:1px solid #E4EBE6;border-radius:9px;cursor:pointer;padding:0;transition:.12s}
+.ptk-gun i{font-style:normal;font-size:13px;font-weight:600;color:#2A3B33}
+.ptk-gun:hover{background:#E9F1EB}
+.ptk-gun.dolu{background:#EAF3EC;border-color:#CFE5D6}
+.ptk-gun.bugun{border-color:#1E4A85;border-width:2px}
+.ptk-gun.sec{background:#1E4A85;border-color:#1E4A85}
+.ptk-gun.sec i{color:#fff}
+.ptk-nok{display:flex;gap:3px;margin-top:3px;height:6px;align-items:center}
+.ptk-nok em{width:6px;height:6px;border-radius:4px;display:block}
+.ptk-nok em.is{background:#12315C}
+.ptk-nok em.ka{background:#1B7A47}
+.ptk-gun.sec .ptk-nok em{background:#fff}
+body.dk .ptk-gun{background:#20282E;border-color:#2A353D}
+body.dk .ptk-gun i{color:#C6CED4}
+body.dk .ptk-gun.dolu{background:#1C2A22;border-color:#2E4636}
+body.dk .ptk-gun.sec{background:#1E4A85;border-color:#1E4A85}
+.ptk-liste{margin-top:14px;border-top:1px solid #EEF1EF;padding-top:11px}
+body.dk .ptk-liste{border-color:#2A353D}
+.ptk-lbas{font-weight:700;font-size:12.5px;color:#1B5E3F;margin-bottom:9px}
+body.dk .ptk-lbas{color:#7FD1A4}
+.ptk-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;
+  background:#F9FBFA;border:1px solid #EEF1EF;border-radius:8px;padding:9px 11px;margin-bottom:6px;font-size:12.5px;color:#2A3B33}
+.ptk-row.is{cursor:pointer}
+.ptk-row.is:hover{background:#EFF6F1}
+.ptk-row .ptk-ic{min-width:0;flex:1;overflow:hidden}
+.ptk-row .ptk-ic b{font-weight:700}
+.ptk-row .ptk-alt{color:#8592A0;font-weight:400}
+.ptk-row i{font-style:normal;color:#12315C;font-weight:700;white-space:nowrap;font-size:11.5px}
+body.dk .ptk-row{background:#20282E;border-color:#2A353D;color:#C6CED4}
+body.dk .ptk-row i{color:#8FB6EA}
+.ptk-ipucu{margin-top:12px;font-size:12px;color:#8592A0;text-align:center;padding:6px}
+.ptk-ozet{display:flex;justify-content:center;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid #EEF1EF;font-size:12px;color:#5A6773}
+body.dk .ptk-ozet{border-color:#2A353D;color:#9FB0C2}
+.ptk-ozet em{display:inline-block;width:8px;height:8px;border-radius:5px;margin-right:4px}
+.ptk-ozet em.is{background:#12315C}
+.ptk-ozet em.ka{background:#1B7A47}
 /* PC'de sol altta, dar ve şık dursun */
 @media(min-width:900px){.takvim{max-width:360px;margin-right:auto}}
 .itab tr.gecsat td{background:#FDEEEC;box-shadow:inset 3px 0 0 #C0392B}
@@ -1255,6 +1304,65 @@ function takvimKart(){
  }else{h+='<div class="note" style="margin:8px 0 0">Termini olan işleri görmek için bir ay seç.</div>';}
  return h+'</div>';
 }
+/* ---- Kişisel takvim (profil): hangi gün hangi işlerde bulunuldu + çalışma kayıtları ---- */
+var PTKYIL=new Date().getFullYear(),PTKAY=new Date().getMonth(),PTKGUN=null;
+function kisiGunluk(_k){
+ var m={};
+ function ekle(g,e){(m[g]=m[g]||[]).push(e)}
+ function anahtar(ts){var d=zmn(ts);if(isNaN(d))return null;return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())}
+ (K||[]).forEach(function(r){
+  if(r.k!=_k)return;var g=anahtar(r.ts);if(!g)return;
+  ekle(g,{tur:'kayit',ad:r.tip||'Çalışma kaydı',detay:(r.ac||'')+(r.ts_?(' · '+tad(r.ts_)):''),ts:r.ts,sure:r.dk,is_id:r.is_id||null});
+ });
+ (J||[]).forEach(function(j){
+  if(j.silindi)return;
+  (j.lg||[]).forEach(function(l){
+   if(l.k!=_k||!l.ts)return;var g=anahtar(l.ts);if(!g)return;
+   ekle(g,{tur:'is',ad:j.ad,detay:l.tip||'',ts:l.ts,jid:j.id});
+  });
+ });
+ return m;
+}
+function profilTakvim(_k){
+ var m=kisiGunluk(_k),ay=PTKAY,yil=PTKYIL,today=new Date();
+ var basGun=(new Date(yil,ay,1).getDay()+6)%7;          /* Pazartesi=0 */
+ var gunSay=new Date(yil,ay+1,0).getDate();
+ var ayIs=0,ayKa=0,ayPre=yil+'-'+ii(ay+1);
+ Object.keys(m).forEach(function(g){if(g.slice(0,7)==ayPre)m[g].forEach(function(e){if(e.tur=='is')ayIs++;else ayKa++})});
+ var h='<div class="card ptk"><div class="ptk-bas">'+
+   '<button class="ptk-nav" data-a="ptk-prev">‹</button>'+
+   '<b>'+AYLAR[ay]+' '+yil+'</b>'+
+   '<button class="ptk-nav" data-a="ptk-next">›</button></div>'+
+   '<div class="ptk-wk"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div>'+
+   '<div class="ptk-grid">';
+ for(var i=0;i<basGun;i++)h+='<span class="ptk-bos"></span>';
+ for(var d=1;d<=gunSay;d++){
+  var key=yil+'-'+ii(ay+1)+'-'+ii(d),ev=m[key]||[];
+  var isV=ev.some(function(e){return e.tur=='is'}),kaV=ev.some(function(e){return e.tur=='kayit'});
+  var bugun=(d==today.getDate()&&ay==today.getMonth()&&yil==today.getFullYear());
+  h+='<button class="ptk-gun'+(ev.length?' dolu':'')+(PTKGUN==key?' sec':'')+(bugun?' bugun':'')+'" data-a="ptk-gun" data-g="'+key+'"><i>'+d+'</i>'+
+    (ev.length?'<span class="ptk-nok">'+(isV?'<em class="is"></em>':'')+(kaV?'<em class="ka"></em>':'')+'</span>':'')+'</button>';
+ }
+ h+='</div>';
+ var gun=(PTKGUN&&m[PTKGUN])?PTKGUN:null;
+ if(gun){
+  var list=m[gun].slice().sort(function(a,b){return (String(a.ts)<String(b.ts))?-1:1});
+  h+='<div class="ptk-liste"><div class="ptk-lbas">'+dtar(zmn(gun+'T12:00:00'))+' — '+list.length+' hareket</div>';
+  list.forEach(function(e){
+   var st='';try{var dd=zmn(e.ts);if(!isNaN(dd))st=ii(dd.getHours())+':'+ii(dd.getMinutes())}catch(x){}
+   if(e.tur=='is'){
+    h+='<button class="ptk-row is" data-a="det" data-j="'+e.jid+'"><span class="ptk-ic">🗂 <b>'+esc(e.ad)+'</b>'+(e.detay?' <span class="ptk-alt">— '+esc(e.detay)+'</span>':'')+'</span><i>'+st+'</i></button>';
+   }else{
+    h+='<div class="ptk-row ka"><span class="ptk-ic">✎ <b>'+esc(e.ad)+'</b>'+(e.detay?' <span class="ptk-alt">— '+esc(e.detay)+'</span>':'')+'</span><i>'+st+(e.sure?' · '+sa(e.sure)+' sa':'')+'</i></div>';
+   }
+  });
+  h+='</div>';
+ }else{
+  h+='<div class="ptk-ipucu">Bir güne dokun — o gün hangi işlerde bulunulduğu ve çalışma kayıtları listelenir.</div>';
+ }
+ h+='<div class="ptk-ozet"><span><em class="is"></em> '+ayIs+' iş hareketi</span><span><em class="ka"></em> '+ayKa+' çalışma kaydı</span></div>';
+ return h+'</div>';
+}
 function bekleyenDestek(){var r=[];
  J.forEach(function(j){(j.dst||[]).forEach(function(d,i){
   if(d.durum=='b'&&d.kimden==ME)r.push({j:j,d:d,i:i})})});
@@ -1600,7 +1708,15 @@ var SESLER={
  yumusak:{ad:'Yumuşak',d:[{hz:620,bas:0,sure:0.34,ses:0.2}]},
  dikkat:{ad:'Dikkat',d:[{hz:1050,bas:0,sure:0.09},{hz:1050,bas:0.15,sure:0.09},{hz:1050,bas:0.3,sure:0.11}]},
  zil:{ad:'Zil',d:[{hz:1568,bas:0,sure:0.14,ses:0.28,tip:'triangle'},{hz:2093,bas:0.1,sure:0.42,ses:0.2,tip:'triangle'}]},
- kisa:{ad:'Kısa bip',d:[{hz:1760,bas:0,sure:0.08,ses:0.25}]}
+ kisa:{ad:'Kısa bip',d:[{hz:1760,bas:0,sure:0.08,ses:0.25}]},
+ atari:{ad:'Atari (arcade)',d:[
+  {hz:523,bas:0.00,sure:0.10,ses:0.20,tip:'square'},
+  {hz:659,bas:0.10,sure:0.10,ses:0.20,tip:'square'},
+  {hz:784,bas:0.20,sure:0.10,ses:0.20,tip:'square'},
+  {hz:1047,bas:0.30,sure:0.14,ses:0.24,tip:'square'},
+  {hz:1319,bas:0.46,sure:0.24,ses:0.20,tip:'square'},
+  {hz:659,bas:0.46,sure:0.24,ses:0.10,tip:'triangle'}
+ ]}
 };
 function tonCal(dizi){
  try{
@@ -1632,6 +1748,31 @@ function sesCal(zorla,sec){
  tonCal((SESLER[sec]||SESLER.klasik).d);
 }
 function bip(){sesCal(false)}
+/* ---- İş tamamlanma sesi (Atari / arcade) + kaçırılanı açılışta çalma ---- */
+function tamamSesi(zorla){if(!SES&&!zorla)return;tonCal((SESLER.atari||SESLER.klasik).d)}
+function _tamamDuyulan(){try{return JSON.parse(localStorage.getItem('opmuk_tamam_duyulan')||'null')}catch(e){return null}}
+function _tamamYaz(a){try{localStorage.setItem('opmuk_tamam_duyulan',JSON.stringify(a.slice(-600)))}catch(e){}}
+/* Mert (sistem) tüm tamamlanan işleri duyar; diğerleri yalnızca katıldıkları işleri. */
+function tamamKapsam(j){if(!j||j.silindi||cur(j))return false;if(sistemci())return true;return katildi(j,ME)}
+/* Aynı işi iki kez çaldırmamak için 'duyuldu' işaretle. */
+function tamamIsaretle(id){try{var s=_tamamDuyulan();if(s===null)s=[];id=String(id);if(s.indexOf(id)<0){s.push(id);_tamamYaz(s)}}catch(e){}}
+/* Tamamlanan işleri tarar; yeni tamamlananlar için arcade ses çalar.
+   İlk çalıştırmada mevcut tamamlananları temel alır (sessiz) — açılışta yığın ses olmasın. */
+function tamamKontrol(){
+ try{
+  if(!J||!J.length)return;
+  var biten=J.filter(tamamKapsam).map(function(j){return String(j.id)});
+  var set=_tamamDuyulan();
+  if(set===null){_tamamYaz(biten);return}                 /* ilk kez: temel al, sessiz */
+  var yeni=biten.filter(function(id){return set.indexOf(id)<0});
+  if(!yeni.length)return;
+  _tamamYaz(set.concat(yeni));
+  tamamSesi();
+  try{konfeti()}catch(e){}
+  var _j=bul(+yeni[0]);
+  bildir('İş tamamlandı 🎉',(_j?_j.ad:'Bir iş')+(yeni.length>1?' ve '+(yeni.length-1)+' iş daha':'')+' — kapandı');
+ }catch(e){}
+}
 function rozetGuncelle(sayi){
  try{if(navigator.setAppBadge){if(sayi>0)navigator.setAppBadge(sayi);else if(navigator.clearAppBadge)navigator.clearAppBadge()}}catch(e){}
  try{document.title=(sayi>0?'🔔('+sayi+') ':'')+'OPEX'}catch(e){}
@@ -1760,6 +1901,7 @@ function isKontrol(){
    for(var i=0;i<J.length;i++)if(String(J[i].id)==String(y.id)){J[i]=y;v=true}
    if(!v)J.unshift(y);
   });
+  try{tamamKontrol()}catch(e){}   /* iş tamamlanınca arcade ses (Mert: tüm işler, diğerleri: katıldığı) */
   var bendeYeni=J.filter(function(j){var c=cur(j);
    if(!c||c.k!=ME)return false;
    var o=eski.filter(function(x){return x.id==j.id})[0];
@@ -1781,9 +1923,7 @@ function isKontrol(){
    var o=eski.filter(function(x){return x.id==j.id})[0];
    return o&&cur(o);
   });
-  if(yeniBiten.length){bip();konfeti();
-   bildir('İş tamamlandı',yeniBiten[0].ad+' — onaylandı ve kapandı');
-   if(V=='ana')ciz();}
+  if(yeniBiten.length && V=='ana')ciz();
   if(ISSAYIM!==null&&dst>ISSAYIM){bip();bildir('Veri/destek talebi','Senden bir veri isteniyor')}
   ISSAYIM=dst;
  },function(){});
@@ -2381,6 +2521,8 @@ function ciz(){try{gozBanner()}catch(e){}
     minik('Yapılan',oz.yap.length,'#1B7A47','#E6F4EC')+
     minik('Geciken',oz.gec.length,oz.gec.length?'#C0392B':'#94A0A9',oz.gec.length?'#FBEAE7':'#F1F3F4')+
     '</div>';
+  h+='<div class="ptk-baslik">📅 Çalışma takvimi</div>';
+  h+=profilTakvim(_k);
   function _ozsat(j){var c=cur(j),ovd=c&&as(c)>0;
    return '<button class="ozrow" data-a="det" data-j="'+j.id+'" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:'+(DARK?'#161C24':'#fff')+';border:1px solid '+(DARK?'#2A323C':'#ECEFF2')+';border-radius:12px;padding:11px 13px;margin-bottom:8px;cursor:pointer">'+
      '<span style="width:8px;height:8px;border-radius:5px;flex:none;background:'+(ovd?'#C0392B':(c&&(stip(c)=='o'||stip(c)=='k')?'#C08A1E':'#2E7D4B'))+'"></span>'+
@@ -3319,6 +3461,9 @@ function ciz(){try{gozBanner()}catch(e){}
   h+='<div style="height:8px"></div><label>Kendi sesini yükle (kısa ses, en fazla 1 MB)</label>'+
     '<input type="file" accept="audio/*" id="sesf">'+
     '<div class="note">Yüklediğin ses bu cihazda saklanır. Yeni iş atandığında bu ses çalar.</div></div>';
+  h+='<div class="card"><h3>İş tamamlanma sesi 🎉</h3>'+
+    '<div class="note" style="margin-top:0">Bir iş <b>tamamlanıp kapandığında</b> arcade (Atari) tarzı bir jingle çalar. O an uygulama açıksa hemen; kapalıysa tekrar açtığında duyulur. (Ses açıksa çalar.)</div>'+
+    '<button class="b" data-a="tamam-dinle">▶ Tamamlanma sesini dinle</button></div>';
  }
  else if(V=='ozet'){
   var bugun9=new Date(),ayBas=new Date(bugun9.getFullYear(),bugun9.getMonth(),1);
@@ -3845,6 +3990,7 @@ document.addEventListener('click',function(e){
   MHEDEF=null;MTASLAK='';ciz();return}
  if(a=='ses'){SES=!SES;if(SES)bip();ciz();return}
  if(a=='ses-dinle'){sesCal(true,t.dataset.v);return}
+ if(a=='tamam-dinle'){tamamSesi(true);return}
  if(a=='ses-sec'){var _v=t.dataset.v;try{localStorage.setItem('opmuk_ses',_v)}catch(e){}if(_v!='kapali')sesCal(true,_v);ciz();return}
  if(a=='mses'){
   if(KAYITTA){try{KAYITCI.stop()}catch(e){}KAYITTA=false;ciz();return}
@@ -4021,6 +4167,9 @@ document.addEventListener('click',function(e){
  if(a=='ayarlar'){if(V!='ayarlar')GECMIS.push(_navPrev);V='ayarlar';cekmece(false);ciz();window.scrollTo(0,0);return}
  if(a=='tema'){DARK=!DARK;document.body.className=DARK?'dk':'';if(PCV)document.body.classList.add('pcview');temaUygula();arkaPlanUygula();ciz();return}
  if(a=='pcview'){PCV=!PCV;pcvUygula();say(PCV?'Bilgisayar görünümü açıldı':'Bilgisayar görünümü kapandı');ciz();window.scrollTo(0,0);return}
+ if(a=='ptk-prev'){if(PTKAY==null){PTKAY=new Date().getMonth();PTKYIL=new Date().getFullYear()}PTKGUN=null;PTKAY--;if(PTKAY<0){PTKAY=11;PTKYIL--}ciz();return}
+ if(a=='ptk-next'){if(PTKAY==null){PTKAY=new Date().getMonth();PTKYIL=new Date().getFullYear()}PTKGUN=null;PTKAY++;if(PTKAY>11){PTKAY=0;PTKYIL++}ciz();return}
+ if(a=='ptk-gun'){PTKGUN=(PTKGUN==t.dataset.g)?null:t.dataset.g;ciz();return}
  if(a=='ana'){V='ana';RED=0;ED=0;GECMIS=[];}
  else if(a=='geri'){if(GECMIS.length){navYukle(GECMIS.pop());RED=0;ED=0;}else{V='ana';RED=0;ED=0;}}
  else if(a=='bdet'){V='bdet';OB=t.dataset.b}
@@ -4031,7 +4180,7 @@ document.addEventListener('click',function(e){
  else if(a=='liste'&&t.dataset.f=='bit'){V='bende';FILT='bit'}
  else if(a=='det'){V='det';OJ=+t.dataset.j;RED=0}
  else if(a=='org'){V='org'}
- else if(a=='kozet'){OZK=t.dataset.k||ME;V='kozet'}
+ else if(a=='kozet'){OZK=t.dataset.k||ME;V='kozet';PTKGUN=null}
  else if(a=='proje'){PRJBOL=t.dataset.b||'';V='proje'}
  else if(a=='prj-yeni'){V='projeyeni'}
  else if(a=='prj-olustur'){
@@ -4291,7 +4440,7 @@ document.addEventListener('click',function(e){
    if(n&&n.a=='Bölüm onayı')n.k=bolumOnayci(j.br);   /* onay doğru kişiye: SI → Mesut */
    if(n){n.d='a';if(!n.g)n.g=ts;j.lg.push({ts:ts,k:ME,tip:(c.o?'Onayladı':'Tamamladı')+' → '+ad(n.k)});say('Devredildi → '+ad(n.k));try{if(n.k!=ME)pushGonder([n.k],'Sana iş düştü',j.ad)}catch(e){}}
    else{j.lg.push({ts:ts,k:ME,tip:'İşi tamamladı — kapandı'});
-    konfeti();bip();say('🎉 İş tamamlandı — katılan herkese düştü')}
+    konfeti();tamamSesi();tamamIsaretle(j.id);say('🎉 İş tamamlandı — katılan herkese düştü')}
   }
   V='ana';RED=0;
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
@@ -4914,6 +5063,7 @@ function talepleriGetir(){
   }catch(e){}
   ciz();
   if(GIRIS)senkron();
+  try{if(GIRIS)setTimeout(function(){try{tamamKontrol()}catch(e){}},1500);}catch(e){}   /* kapalıyken tamamlanan işleri açılışta çal */
  })();
 })();
 </script>
