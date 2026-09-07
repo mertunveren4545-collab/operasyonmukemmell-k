@@ -5,32 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>İş Örneklemesi — Gözlem Matrisi</title>
 <script>
-/* ==== OPEX bulut köprüsü v2: çok cihazlı güvenli senkron ====
-   - Açılışta ve her yazımda üstüne yazmaz; buluttan çeker, BİRLEŞTİRİR (merge).
-   - Silmeler tombstone ile kalıcı; telefon değişiminde veri kaybolmaz.
-   - Görünür senkron durumu; uygulama dışında açılırsa uyarı.
-   - Fotoğraflar da buluta senkronlanır (kullanıcının tüm cihazlarında görünür).
-   Kullanıcı ?u=<id>&ad=<ad> ile gelir (OPEX iframe'i geçirir). Yoksa yerelde çalışır. */
+/* ==== OPEX bulut köprüsü v3: çok cihazlı güvenli senkron ====
+   İki veri kümesini de senkronlar ve kayıpsız birleştirir:
+     • İş Örneklemesi çalışmaları  -> localStorage 'isorn_db'  -> bulut satırı U|isorn_db
+     • Süreç/Deneme modülü (ayrı)  -> localStorage 'surec_data_v1' -> bulut satırı U|surec_db
+   - Üstüne yazmaz; buluttan çekip çalışma bazında birleştirir (id + zaman damgası, tombstone).
+   - Süreç modülü doğrudan localStorage'a yazdığı için setItem yakalanır (kaydet butonu gerekmez).
+   - Otomatik sayfa yenileme YOK; uzakta yeni veri varsa altta "dokun" çubuğu çıkar.
+   - Fotoğraf (İş Örneklemesi) buluta senkronlanır. Kullanıcı ?u=<id>&ad=<ad> ile gelir. */
 (function(){
   "use strict";
   var SB_URL='https://jdemzkcsressnxuxwqbc.supabase.co';
   var SB_KEY='sb_publishable_chrxzJfkyRB-alPEIrx49Q_BxgGaZYz';
   var TABLE='isorn_kayit';
   var DBKEY='isorn_db', IMGKEY='isorn_img';
+  var SKEY='surec_data_v1', SROW='surec_db';
   var qs; try{qs=new URLSearchParams(location.search)}catch(e){qs=null}
   var U=(qs&&qs.get('u')||'').trim();
   var UAD=(qs&&qs.get('ad')||'').trim();
   window.__ISORN_USER=U; window.__ISORN_AD=UAD;
   try{localStorage.setItem('isorn_theme','opex');localStorage.setItem('isorn_dark','0')}catch(e){}
 
-  /* ---- küçük durum rozeti (üstte ortada) ---- */
   function pill(txt,cls){
     try{
       var el=document.getElementById('__isorn_sync');
       if(!el){
         if(!document.body){document.addEventListener('DOMContentLoaded',function(){pill(txt,cls)});return;}
         el=document.createElement('div');el.id='__isorn_sync';
-        el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:0;z-index:9999;font:600 11px -apple-system,Arial,sans-serif;padding:4px 12px;border-radius:0 0 10px 10px;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);pointer-events:none;transition:opacity .3s;max-width:92%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:0;z-index:9999;font:600 11px -apple-system,Arial,sans-serif;padding:4px 12px;border-radius:0 0 10px 10px;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);pointer-events:none;transition:opacity .3s;max-width:92%;text-align:center;overflow:hidden;text-overflow:ellipsis';
         document.body.appendChild(el);
       }
       var col={ok:'#146B45',warn:'#D97400',err:'#A8271E',info:'#1F5C7D'}[cls]||'#1F5C7D';
@@ -42,28 +44,33 @@
   }
 
   if(!U){
-    /* kullanıcı yok: bulut kapalı, yerelde çalış + net uyarı */
     try{window.storage=undefined}catch(e){}
-    (function warnStandalone(){
-      try{
-        if(!document.body){document.addEventListener('DOMContentLoaded',warnStandalone);return;}
-        var b=document.createElement('div');
-        b.style.cssText='position:fixed;left:0;right:0;top:0;z-index:9999;background:#A8271E;color:#fff;font:600 12px -apple-system,Arial,sans-serif;padding:8px 12px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.3);cursor:pointer';
-        b.textContent='⚠ Buluta bağlı değil — bu çalışma yalnızca bu cihazda kalır. Diğer cihazlarda görünmesi için OPEX uygulamasından giriş yaparak aç. (kapatmak için dokun)';
-        b.onclick=function(){b.style.display='none'};
-        document.body.appendChild(b);
-      }catch(e){}
-    })();
+    (function warn(){try{
+      if(!document.body){document.addEventListener('DOMContentLoaded',warn);return;}
+      var b=document.createElement('div');
+      b.style.cssText='position:fixed;left:0;right:0;top:0;z-index:9999;background:#A8271E;color:#fff;font:600 12px -apple-system,Arial,sans-serif;padding:8px 12px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.3);cursor:pointer';
+      b.textContent='⚠ Buluta bağlı değil — bu çalışma yalnızca bu cihazda kalır. Diğer cihazlarda görünmesi için OPEX uygulamasından giriş yaparak aç. (kapatmak için dokun)';
+      b.onclick=function(){b.style.display='none'};document.body.appendChild(b);
+    }catch(e){}})();
     return;
   }
 
   function hdr(extra){var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};if(extra)for(var x in extra)h[x]=extra[x];return h}
   function rowId(k){return U+'|'+k}
-  function safeParse(s){try{return JSON.parse(s||'null')}catch(e){return null}}
+  function sp(s){try{return JSON.parse(s||'null')}catch(e){return null}}
+  function getRow(rid){ /* eşzamanlı olmayan senkron okuma */
+    try{var x=new XMLHttpRequest();x.open('GET',SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rid)+'&select=veri',false);
+      x.setRequestHeader('apikey',SB_KEY);x.setRequestHeader('Authorization','Bearer '+SB_KEY);x.send(null);
+      if(x.status>=200&&x.status<300){var r=JSON.parse(x.responseText||'[]');return (r&&r[0]&&r[0].veri)||null}
+    }catch(e){}
+    return null;
+  }
+  function getRowAsync(rid){return fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rid)+'&select=veri',{headers:hdr()}).then(function(r){return r.ok?r.json():[]}).then(function(rows){return (rows&&rows[0]&&rows[0].veri)||null}).catch(function(){return null})}
+  function putRow(rid,k,veri){return fetch(SB_URL+'/rest/v1/'+TABLE,{method:'POST',headers:hdr({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify([{id:rid,kisi:U,ad:UAD,k:k,veri:veri,upd:new Date().toISOString()}])})}
 
-  /* ---- iki DB halini kayıpsız birleştir (çalışma bazında, upd + tombstone) ---- */
+  /* ---------------- İŞ ÖRNEKLEMESİ (isorn_db) birleştirme ---------------- */
   function mergeDb(localStr,cloudStr){
-    var L=safeParse(localStr),C=safeParse(cloudStr);
+    var L=sp(localStr),C=sp(cloudStr);
     if(!L&&!C)return null; if(!L)return C; if(!C)return L;
     var tk={};[C.__tomb||{},L.__tomb||{}].forEach(function(tm){for(var id in tm)tk[id]=Math.max(tk[id]||0,tm[id]||0)});
     var out={cur:L.cur||C.cur||null,st:{},__tomb:tk};
@@ -71,230 +78,223 @@
     Object.keys(ids).forEach(function(id){
       var ls=(L.st||{})[id],cs=(C.st||{})[id];
       var pick=(!ls)?cs:(!cs)?ls:((+(cs.upd||0)>+(ls.upd||0))?cs:ls);
-      if(!pick)return;
-      var tomb=tk[id]||0; if(tomb&&tomb>=+(pick.upd||0))return; /* silinmiş */
+      if(!pick)return; var tomb=tk[id]||0; if(tomb&&tomb>=+(pick.upd||0))return;
       out.st[id]=pick;
     });
-    /* boş "YENİ ÇALIŞMA/(adsız)" kopyalarını yalnızca GÖRÜNÜMDEN gizle — SİLMEZ, mezar taşı yazmaz.
-       Deneme/Süreç verisi olan çalışmalar ek alanlar (urunKodu, duruslar, denemeSuresi...) taşıdığı
-       için asla boş sayılmaz; böylece hiçbir Deneme verisi kaybolmaz. */
+    /* tamamen boş adsız kopyaları görünümden gizle (SİLMEZ, tombstone yazmaz).
+       Deneme/ek alanı olan çalışma asla boş sayılmaz -> veri kaybı olmaz. */
     try{
       var known={meta:1,cats:1,people:1,data:1,assign:1,pnotes:1,staff:1,notes:1,ph:1,spans:1,lastc:1,upd:1};
       var blanks=Object.keys(out.st).filter(function(id){
         var s=out.st[id]; if(!s||typeof s!=='object'||!s.meta)return false;
-        var b=String(s.meta.birim||'').trim().toLocaleLowerCase('tr');
-        if(!(b===''||b==='yeni çalışma'))return false;                 /* adı varsa asla boş değil */
-        for(var k in s){ if(Object.prototype.hasOwnProperty.call(s,k)&&!known[k])return false; } /* Deneme vb. ek alan → boş değil */
-        return !(s.cats&&s.cats.length)&&!(s.people&&s.people.length)
-          &&!(s.data&&Object.keys(s.data).length)&&!(s.assign&&Object.keys(s.assign).length)
-          &&!(s.spans&&s.spans.length)&&!(s.ph&&Object.keys(s.ph).length)
-          &&!(s.pnotes&&Object.keys(s.pnotes).length)&&!(s.notes&&Object.keys(s.notes).length)
-          &&!(s.staff&&Object.keys(s.staff).length);
+        var b=String(s.meta.birim||'').trim().toLocaleLowerCase('tr'); if(!(b===''||b==='yeni çalışma'))return false;
+        for(var k in s){if(Object.prototype.hasOwnProperty.call(s,k)&&!known[k])return false;}
+        return !(s.cats&&s.cats.length)&&!(s.people&&s.people.length)&&!(s.data&&Object.keys(s.data).length)
+          &&!(s.assign&&Object.keys(s.assign).length)&&!(s.spans&&s.spans.length)&&!(s.ph&&Object.keys(s.ph).length)
+          &&!(s.pnotes&&Object.keys(s.pnotes).length)&&!(s.notes&&Object.keys(s.notes).length)&&!(s.staff&&Object.keys(s.staff).length);
       });
-      if(blanks.length>1){
-        blanks.sort(function(a,b){return (+(out.st[b].upd||0))-(+(out.st[a].upd||0))});
-        for(var bi=1;bi<blanks.length;bi++){delete out.st[blanks[bi]];} /* sadece gizle; tombstone YOK */
-      }
+      if(blanks.length>1){blanks.sort(function(a,b){return (+(out.st[b].upd||0))-(+(out.st[a].upd||0))});for(var bi=1;bi<blanks.length;bi++)delete out.st[blanks[bi]];}
     }catch(e){}
     return out;
   }
-  function sig(obj){if(!obj)return '';var st=obj.st||{};return Object.keys(st).sort().map(function(id){return id+':'+(+(st[id].upd||0))}).join('|')}
+  function sigDb(o){if(!o)return '';var st=o.st||{};return Object.keys(st).sort().map(function(id){return id+':'+(+(st[id].upd||0))}).join('|')}
 
-  var _cache={},_timer=null,_lastSet=0,_prevIds=[],_pushing=false,_phTimer=null;
+  /* ---------------- SÜREÇ / DENEME (surec_data_v1) birleştirme ---------------- */
+  function mergeSurec(localStr,cloudStr){
+    var L=sp(localStr),C=sp(cloudStr);
+    if(!L&&!C)return null; if(!L)return C; if(!C)return L;
+    var tomb={};[C._tomb||{},L._tomb||{}].forEach(function(tm){for(var id in tm)tomb[id]=Math.max(tomb[id]||0,tm[id]||0)});
+    var byId={};
+    (C.studies||[]).forEach(function(s){if(s&&s.id)byId[s.id]=s});
+    (L.studies||[]).forEach(function(s){if(!s||!s.id)return;var e=byId[s.id];if(!e||(+(s._m||0)>=+(e._m||0)))byId[s.id]=s});
+    var arr=Object.keys(byId).filter(function(id){var m=+(byId[id]._m||0);return !(tomb[id]&&tomb[id]>=m)}).map(function(id){return byId[id]});
+    arr.sort(function(a,b){return (+(b._m||0))-(+(a._m||0))});
+    var out={};for(var k in C)out[k]=C[k];for(var k2 in L)out[k2]=L[k2];
+    out.studies=arr; out._tomb=tomb; out.activeId=(L&&L.activeId)||(C&&C.activeId)||null;
+    return out;
+  }
+  function sigSurec(o){if(!o)return '';return (o.studies||[]).map(function(s){return s.id+':'+(+(s._m||0))}).sort().join('|')}
 
-  /* ---- buluta güvenli yazım: çek → birleştir → yaz (üstüne yazmaz) ---- */
-  function pushMerged(valStr){
+  var _lastSet=0,_pushing=false,_phTimer=null;
+
+  /* ---- isorn push (çek->birleştir->yaz) ---- */
+  var _tDb=null,_prevIds=[];
+  function pushDb(valStr){
     _pushing=true;pill('☁︎ eşitleniyor…','info');
-    fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rowId(DBKEY))+'&select=veri',{headers:hdr()})
-      .then(function(r){return r.ok?r.json():[]})
-      .then(function(rows){
-        var cloud=(rows&&rows[0]&&rows[0].veri)||null;
-        var merged=mergeDb(valStr,cloud);
-        var ms=JSON.stringify(merged);
-        return fetch(SB_URL+'/rest/v1/'+TABLE,{method:'POST',
-          headers:hdr({'Prefer':'resolution=merge-duplicates,return=minimal'}),
-          body:JSON.stringify([{id:rowId(DBKEY),kisi:U,ad:UAD,k:DBKEY,veri:ms,upd:new Date().toISOString()}])});
-      })
-      .then(function(r){
-        if(r&&r.ok){_pushing=false;pill('☁︎ kaydedildi ✓','ok');clearTimeout(_phTimer);_phTimer=setTimeout(function(){syncPhotos(false)},3000);return;}
-        return r.text().then(function(tx){_pushing=false;var msg=(tx||'').replace(/\s+/g,' ').slice(0,120);pill('⚠ bulut hatası '+(r&&r.status||'?')+(msg?' — '+msg:''),'err');try{console.warn('isorn push fail',r&&r.status,tx)}catch(e){}});
-      })
-      .catch(function(e){_pushing=false;pill('⚠ çevrimdışı — ağ hatası'+(e&&e.message?' ('+e.message+')':''),'err');try{console.warn('isorn push net',e)}catch(e){}});
+    getRowAsync(rowId(DBKEY)).then(function(cloud){
+      var merged=mergeDb(valStr,cloud);var ms=JSON.stringify(merged);
+      return putRow(rowId(DBKEY),DBKEY,ms);
+    }).then(function(r){
+      if(r&&r.ok){_pushing=false;pill('☁︎ kaydedildi ✓','ok');clearTimeout(_phTimer);_phTimer=setTimeout(function(){syncPhotos(false)},3000);return;}
+      return r.text().then(function(tx){_pushing=false;pill('⚠ bulut hatası '+(r&&r.status||'?')+' — '+(tx||'').replace(/\s+/g,' ').slice(0,110),'err')});
+    }).catch(function(e){_pushing=false;pill('⚠ çevrimdışı — ağ hatası'+(e&&e.message?' ('+e.message+')':''),'err')});
   }
 
+  /* ---- surec push (çek->birleştir->yaz) ---- */
+  var _tSurec=null;
+  function pushSurec(valStr){
+    _pushing=true;pill('☁︎ Süreç eşitleniyor…','info');
+    getRowAsync(rowId(SROW)).then(function(cloud){
+      var merged=mergeSurec(valStr,cloud);var ms=JSON.stringify(merged);
+      return putRow(rowId(SROW),SROW,ms);
+    }).then(function(r){
+      if(r&&r.ok){_pushing=false;pill('☁︎ Süreç kaydedildi ✓','ok');return;}
+      return r.text().then(function(tx){_pushing=false;pill('⚠ Süreç bulut hatası '+(r&&r.status||'?')+' — '+(tx||'').replace(/\s+/g,' ').slice(0,90),'err')});
+    }).catch(function(e){_pushing=false;pill('⚠ Süreç çevrimdışı'+(e&&e.message?' ('+e.message+')':''),'err')});
+  }
+
+  /* ---- window.storage: İş Örneklemesi uygulaması bunu kullanır ---- */
+  var _cache={};
   window.storage={
     set:function(k,val){
       _cache[k]=val;_lastSet=Date.now();
-      if(k===IMGKEY)return true; /* fotoğraflar ayrı katmandan senkronlanır */
+      if(k===IMGKEY)return true;
       if(k===DBKEY){
-        try{
-          var obj=JSON.parse(val);obj.__tomb=obj.__tomb||{};
-          var cur={};Object.keys(obj.st||{}).forEach(function(i){cur[i]=1});
-          var now=Date.now();
-          (_prevIds||[]).forEach(function(id){if(!cur[id])obj.__tomb[id]=now}); /* silinen = tombstone */
-          _prevIds=Object.keys(obj.st||{});
-          val=JSON.stringify(obj);_cache[k]=val;
-        }catch(e){}
-        clearTimeout(_timer);var v=val;
-        _timer=setTimeout(function(){pushMerged(v)},800);
+        try{var obj=JSON.parse(val);obj.__tomb=obj.__tomb||{};var cur={};Object.keys(obj.st||{}).forEach(function(i){cur[i]=1});
+          var now=Date.now();(_prevIds||[]).forEach(function(id){if(!cur[id])obj.__tomb[id]=now});_prevIds=Object.keys(obj.st||{});
+          val=JSON.stringify(obj);_cache[k]=val;}catch(e){}
+        clearTimeout(_tDb);var v=val;_tDb=setTimeout(function(){pushDb(v)},800);
       }
       return true;
     },
     get:function(k){
       if(_cache[k]!=null)return Promise.resolve({key:k,value:_cache[k]});
       if(k===IMGKEY)return Promise.resolve(null);
-      return fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rowId(k))+'&select=veri',{headers:hdr()})
-        .then(function(r){return r.ok?r.json():[]})
-        .then(function(rows){var v=(rows&&rows[0]&&rows[0].veri)||null;if(v!=null)_cache[k]=v;return v!=null?{key:k,value:v}:null})
-        .catch(function(){return null});
+      return getRowAsync(rowId(k)).then(function(v){if(v!=null)_cache[k]=v;return v!=null?{key:k,value:v}:null});
     }
   };
 
-  /* ---- açılış: farklı kullanıcı yereli temizle, sonra çek + birleştir ---- */
+  /* ---- SÜREÇ: localStorage.setItem yakala (modül doğrudan yazıyor) ---- */
+  var _sM={},_sSnap={},_sIds={},_selfWrite=false;
+  var _origSet=localStorage.setItem.bind(localStorage);
+  function stripM(s){var o={};for(var k in s)if(k!=='_m')o[k]=s[k];return JSON.stringify(o)}
+  function stampSurec(S){
+    S.studies=S.studies||[]; S._tomb=S._tomb||{};
+    var seen={};var now=Date.now();
+    S.studies.forEach(function(s){ if(!s||!s.id)return; seen[s.id]=1;
+      var j=stripM(s);
+      if(_sSnap[s.id]!==j){_sM[s.id]=now;_sSnap[s.id]=j;}
+      if(!_sM[s.id])_sM[s.id]=(+(s._m||0))||now;
+      s._m=_sM[s.id];
+    });
+    Object.keys(_sIds).forEach(function(id){ if(!seen[id]){S._tomb[id]=now;delete _sM[id];delete _sSnap[id];} });
+    _sIds=seen;
+    return S;
+  }
+  localStorage.setItem=function(k,v){
+    _origSet(k,v);
+    if(_selfWrite||k!==SKEY)return;
+    try{
+      var S=JSON.parse(v); if(!S||typeof S!=='object')return;
+      stampSurec(S);
+      var out=JSON.stringify(S);
+      _selfWrite=true; try{_origSet(SKEY,out)}finally{_selfWrite=false;}
+      _lastSet=Date.now();
+      clearTimeout(_tSurec);_tSurec=setTimeout(function(){pushSurec(out)},900);
+    }catch(e){}
+  };
+
+  /* ---------------- AÇILIŞ: farklı kullanıcı temizliği + çift anahtar çek/birleştir ---------------- */
   try{
     if(localStorage.getItem('isorn_owner')!==U){
-      try{localStorage.removeItem(DBKEY)}catch(e){}
-      try{localStorage.removeItem(IMGKEY)}catch(e){}
-      try{localStorage.removeItem('isorn_ph_up')}catch(e){}
+      ['isorn_db','isorn_img','isorn_ph_up',SKEY].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});
       try{sessionStorage.removeItem('isorn_ph_reload')}catch(e){}
-      try{localStorage.setItem('isorn_owner',U)}catch(e){}
+      try{_origSet('isorn_owner',U)}catch(e){}
       try{if(window.indexedDB)indexedDB.deleteDatabase('isorn_photos')}catch(e){}
     }
-    var _cloud=null;
-    var _x=new XMLHttpRequest();
-    _x.open('GET',SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rowId(DBKEY))+'&select=veri',false);
-    _x.setRequestHeader('apikey',SB_KEY);_x.setRequestHeader('Authorization','Bearer '+SB_KEY);
-    _x.send(null);
-    if(_x.status>=200&&_x.status<300){var _rows=JSON.parse(_x.responseText||'[]');_cloud=(_rows&&_rows[0]&&_rows[0].veri)||null;}
-    var _local=null;try{_local=localStorage.getItem(DBKEY)}catch(e){}
-    var _merged=mergeDb(_local,_cloud);
-    if(_merged){
-      var _ms=JSON.stringify(_merged);
-      try{localStorage.setItem(DBKEY,_ms)}catch(e){}
-      window.__ISORN_CLOUD=_ms;_cache[DBKEY]=_ms;_prevIds=Object.keys(_merged.st||{});
-      /* birleşik hali buluta geri yaz ki iki cihaz aynılaşsın */
-      if(_ms!==JSON.stringify(safeParse(_cloud)))setTimeout(function(){pushMerged(_ms)},1800);
-      /* teşhis: buluttan kaç çalışma geldi + hangi kullanıcı */
-      try{var _cc=safeParse(_cloud);var _n=_cc&&_cc.st?Object.keys(_cc.st).length:0;setTimeout(function(){pill('☁︎ bulut: '+_n+' çalışma · kullanıcı '+(U.length>14?U.slice(0,14)+'…':U),'info')},900);}catch(e){}
+    /* isorn */
+    var _cloudDb=getRow(rowId(DBKEY));
+    var _localDb=null;try{_localDb=localStorage.getItem(DBKEY)}catch(e){}
+    var _mDb=mergeDb(_localDb,_cloudDb);
+    if(_mDb){var _ms=JSON.stringify(_mDb);_selfWrite=true;try{_origSet(DBKEY,_ms)}finally{_selfWrite=false;}
+      window.__ISORN_CLOUD=_ms;_cache[DBKEY]=_ms;_prevIds=Object.keys(_mDb.st||{});
+      if(_ms!==JSON.stringify(sp(_cloudDb)))setTimeout(function(){pushDb(_ms)},1800);
     }
+    /* surec */
+    var _cloudS=getRow(rowId(SROW));
+    var _localS=null;try{_localS=localStorage.getItem(SKEY)}catch(e){}
+    var _mS=mergeSurec(_localS,_cloudS);
+    if(_mS){
+      /* zaman damgası haritalarını doldur */
+      (_mS.studies||[]).forEach(function(s){if(s&&s.id){_sM[s.id]=(+(s._m||0))||Date.now();s._m=_sM[s.id];_sSnap[s.id]=stripM(s);_sIds[s.id]=1;}});
+      var _sms=JSON.stringify(_mS);_selfWrite=true;try{_origSet(SKEY,_sms)}finally{_selfWrite=false;}
+      if(_sms!==JSON.stringify(sp(_cloudS)))setTimeout(function(){pushSurec(_sms)},2200);
+    }
+    /* teşhis rozeti */
+    try{var _ncd=sp(_cloudDb),_ncs=sp(_cloudS);
+      var _n1=_ncd&&_ncd.st?Object.keys(_ncd.st).length:0;var _n2=_ncs&&_ncs.studies?_ncs.studies.length:0;
+      setTimeout(function(){pill('☁︎ bulut: '+_n1+' iş örn. · '+_n2+' süreç · kul. '+(U.length>12?U.slice(0,12)+'…':U),'info')},900);
+    }catch(e){}
     try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}
   }catch(e){}
 
-  /* ---- "yeni veri geldi" çubuğu (sayfayı kendi kendine yenilemez; sen dokununca yeniler) ---- */
+  /* ---------------- "yeni veri geldi" çubuğu (sayfayı kendi yenilemez) ---------------- */
   function newDataBanner(){
     try{
       if(!document.body){document.addEventListener('DOMContentLoaded',newDataBanner);return;}
       var b=document.getElementById('__isorn_new');
-      if(!b){
-        b=document.createElement('div');b.id='__isorn_new';
+      if(!b){b=document.createElement('div');b.id='__isorn_new';
         b.style.cssText='position:fixed;left:8px;right:8px;bottom:64px;z-index:9999;background:#1F5C7D;color:#fff;font:600 13px -apple-system,Arial,sans-serif;padding:11px 14px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.35);text-align:center;cursor:pointer';
-        b.onclick=function(){location.reload()};
-        document.body.appendChild(b);
-      }
-      b.textContent='☁︎ Yeni veri geldi — göstermek için dokun';
-      b.style.display='block';
+        b.onclick=function(){location.reload()};document.body.appendChild(b);}
+      b.textContent='☁︎ Yeni veri geldi — göstermek için dokun';b.style.display='block';
     }catch(e){}
   }
 
-  /* ---- canlı izleme: 10 sn'de bir buluttan çek, birleştir; değiştiyse sessizce yaz + çubuk göster ---- */
+  /* ---------------- CANLI İZLEME: 10 sn'de bir; uzakta yeni varsa yalnızca çubuk göster ---------------- */
   setInterval(function(){
     try{
-      if(_pushing)return; if(document.hidden)return;
-      fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rowId(DBKEY))+'&select=veri',{headers:hdr()})
-        .then(function(r){return r.ok?r.json():[]})
-        .then(function(rows){
-          var cloud=(rows&&rows[0]&&rows[0].veri)||null; if(cloud==null)return;
-          var local=null;try{local=localStorage.getItem(DBKEY)}catch(e){}
-          var lp=safeParse(local),cp=safeParse(cloud);
-          /* uzakta bizde olmayan ya da daha yeni bir çalışma var mı? (yalnızca o zaman haber ver) */
-          var remoteNewer=false,ls=(lp&&lp.st)||{},cs=(cp&&cp.st)||{};
-          for(var id in cs){ if(!ls[id]){remoteNewer=true;break;} if(+(cs[id].upd||0)>+(ls[id].upd||0)){remoteNewer=true;break;} }
-          if(!remoteNewer)return;
-          var merged=mergeDb(local,cloud);
-          if(sig(merged)===sig(lp))return;
-          var ms=JSON.stringify(merged);_cache[DBKEY]=ms;
-          try{localStorage.setItem(DBKEY,ms)}catch(e){}
-          if(Date.now()-_lastSet<15000)return; /* aktif yazıyorsan çubuğu erteleme dışında gösterme */
-          newDataBanner();
-        }).catch(function(){});
+      if(_pushing||document.hidden)return; if(Date.now()-_lastSet<15000)return;
+      /* isorn */
+      getRowAsync(rowId(DBKEY)).then(function(cloud){
+        if(cloud==null)return; var local=null;try{local=localStorage.getItem(DBKEY)}catch(e){}
+        var lp=sp(local),cp=sp(cloud),ls=(lp&&lp.st)||{},cs=(cp&&cp.st)||{},nw=false;
+        for(var id in cs){if(!ls[id]){nw=true;break;}if(+(cs[id].upd||0)>+(ls[id].upd||0)){nw=true;break;}}
+        if(nw)newDataBanner();
+      });
+      /* surec */
+      getRowAsync(rowId(SROW)).then(function(cloud){
+        if(cloud==null)return; var local=null;try{local=localStorage.getItem(SKEY)}catch(e){}
+        var lp=sp(local),cp=sp(cloud);var lm={};((lp&&lp.studies)||[]).forEach(function(s){if(s&&s.id)lm[s.id]=+(s._m||0)});
+        var nw=false;((cp&&cp.studies)||[]).forEach(function(s){if(!s||!s.id)return;if(!(s.id in lm)||+(s._m||0)>lm[s.id])nw=true});
+        if(nw)newDataBanner();
+      });
     }catch(e){}
   },10000);
 
-  /* ================= FOTOĞRAF SENKRONU (IndexedDB <-> Supabase) ================= */
+  /* ================= FOTOĞRAF SENKRONU (İş Örneklemesi, IndexedDB<->Supabase) ================= */
   var PH_DB='isorn_photos',PH_ST='img';
-  function phOpen(){return new Promise(function(res,rej){
-    if(!window.indexedDB)return rej(new Error('no idb'));
-    var rq;try{rq=indexedDB.open(PH_DB,1)}catch(e){return rej(e)}
+  function phOpen(){return new Promise(function(res,rej){if(!window.indexedDB)return rej(0);var rq;try{rq=indexedDB.open(PH_DB,1)}catch(e){return rej(e)}
     rq.onupgradeneeded=function(){var db=rq.result;if(!db.objectStoreNames.contains(PH_ST))db.createObjectStore(PH_ST)};
-    rq.onsuccess=function(){res(rq.result)};rq.onerror=function(){rej(rq.error||new Error('open'))};
-  })}
-  function phAll(){return phOpen().then(function(db){return new Promise(function(res,rej){
-    var out={},tx=db.transaction(PH_ST,'readonly'),os=tx.objectStore(PH_ST),cur=os.openCursor();
-    cur.onsuccess=function(e){var c=e.target.result;if(c){out[c.key]=c.value;c.continue()}else res(out)};
-    cur.onerror=function(){rej(cur.error)};
-  })})}
-  function phPut(id,val){return phOpen().then(function(db){return new Promise(function(res,rej){
-    var tx=db.transaction(PH_ST,'readwrite');tx.objectStore(PH_ST).put(val,id);
-    tx.oncomplete=function(){res()};tx.onerror=function(){rej(tx.error)};
-  })})}
-  function upSet(){try{return JSON.parse(localStorage.getItem('isorn_ph_up')||'{}')||{}}catch(e){return {}}}
-  function upSave(o){try{localStorage.setItem('isorn_ph_up',JSON.stringify(o))}catch(e){}}
-
-  function syncPhotos(downloadToo){
-    var uploaded=upSet();
+    rq.onsuccess=function(){res(rq.result)};rq.onerror=function(){rej(rq.error||0)}})}
+  function phAll(){return phOpen().then(function(db){return new Promise(function(res,rej){var out={},tx=db.transaction(PH_ST,'readonly'),c=tx.objectStore(PH_ST).openCursor();
+    c.onsuccess=function(e){var cu=e.target.result;if(cu){out[cu.key]=cu.value;cu.continue()}else res(out)};c.onerror=function(){rej(c.error)}})})}
+  function phPut(id,val){return phOpen().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(PH_ST,'readwrite');tx.objectStore(PH_ST).put(val,id);tx.oncomplete=function(){res()};tx.onerror=function(){rej(tx.error)}})})}
+  function upGet(){try{return JSON.parse(localStorage.getItem('isorn_ph_up')||'{}')||{}}catch(e){return {}}}
+  function upSave(o){try{_selfWrite=true;_origSet('isorn_ph_up',JSON.stringify(o));_selfWrite=false}catch(e){}}
+  function syncPhotos(dl){
+    var up=upGet();
     phAll().then(function(local){
-      /* 1) YÜKLE: yerelde olup buluta gitmemiş fotoğraflar */
-      var toUp=Object.keys(local).filter(function(id){return !uploaded[id]&&local[id]});
-      function upNext(i){
-        if(i>=toUp.length){ if(downloadToo)downloadPhase(local); return; }
-        var id=toUp[i];
-        fetch(SB_URL+'/rest/v1/'+TABLE,{method:'POST',
-          headers:hdr({'Prefer':'resolution=merge-duplicates,return=minimal'}),
-          body:JSON.stringify([{id:rowId(IMGKEY+'|'+id),kisi:U,ad:UAD,k:IMGKEY,veri:local[id],upd:new Date().toISOString()}])})
-          .then(function(r){if(r&&r.ok){uploaded[id]=1;upSave(uploaded)}})
-          .catch(function(){})
-          .then(function(){setTimeout(function(){upNext(i+1)},120)});
-      }
+      var toUp=Object.keys(local).filter(function(id){return !up[id]&&local[id]});
       if(toUp.length)pill('☁︎ '+toUp.length+' fotoğraf yükleniyor…','info');
-      upNext(0);
+      (function un(i){ if(i>=toUp.length){ if(dl)dlPhase(local); return; }
+        var id=toUp[i];
+        putRow(rowId(IMGKEY+'|'+id),IMGKEY,local[id]).then(function(r){if(r&&r.ok){up[id]=1;upSave(up)}}).catch(function(){}).then(function(){setTimeout(function(){un(i+1)},120)});
+      })(0);
     }).catch(function(){});
   }
-  function downloadPhase(local){
-    /* 2) İNDİR: bulutta olup bu cihazda olmayan fotoğraflar */
+  function dlPhase(local){
+    var pref=rowId(IMGKEY+'|');
     fetch(SB_URL+'/rest/v1/'+TABLE+'?kisi=eq.'+encodeURIComponent(U)+'&k=eq.'+encodeURIComponent(IMGKEY)+'&select=id',{headers:hdr()})
       .then(function(r){return r.ok?r.json():[]})
       .then(function(rows){
-        var pref=rowId(IMGKEY+'|');
-        var missing=(rows||[]).map(function(x){return x.id}).filter(function(rid){
-          if(String(rid).indexOf(pref)!==0)return false;
-          var pid=String(rid).slice(pref.length);
-          return pid&&!local[pid];
-        });
-        if(!missing.length)return;
-        pill('☁︎ '+missing.length+' fotoğraf indiriliyor…','info');
-        var added=0;
-        function dlNext(i){
-          if(i>=missing.length){
-            if(added>0){
-              try{
-                if(!sessionStorage.getItem('isorn_ph_reload')){sessionStorage.setItem('isorn_ph_reload','1');
-                  if(Date.now()-_lastSet>8000&&!_pushing){pill('☁︎ fotoğraflar indi ✓','ok');setTimeout(function(){location.reload()},700);}
-                }
-              }catch(e){}
-            }
-            return;
-          }
-          var rid=missing[i],pid=rid.slice(rowId(IMGKEY+'|').length);
-          fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(rid)+'&select=veri',{headers:hdr()})
-            .then(function(r){return r.ok?r.json():[]})
-            .then(function(rr){var v=rr&&rr[0]&&rr[0].veri;if(v)return phPut(pid,v).then(function(){added++})})
-            .catch(function(){})
-            .then(function(){setTimeout(function(){dlNext(i+1)},120)});
-        }
-        dlNext(0);
+        var missing=(rows||[]).map(function(x){return x.id}).filter(function(rid){return String(rid).indexOf(pref)===0 && !local[String(rid).slice(pref.length)]});
+        if(!missing.length)return; pill('☁︎ '+missing.length+' fotoğraf indiriliyor…','info');var added=0;
+        (function dn(i){ if(i>=missing.length){ if(added>0){try{if(!sessionStorage.getItem('isorn_ph_reload')){sessionStorage.setItem('isorn_ph_reload','1');if(Date.now()-_lastSet>8000&&!_pushing){pill('☁︎ fotoğraflar indi ✓','ok');setTimeout(function(){location.reload()},700);}}}catch(e){}} return; }
+          var rid=missing[i],pid=rid.slice(pref.length);
+          getRowAsync(rid).then(function(v){if(v)return phPut(pid,v).then(function(){added++})}).catch(function(){}).then(function(){setTimeout(function(){dn(i+1)},120)});
+        })(0);
       }).catch(function(){});
   }
-  /* açılıştan ~2.5 sn sonra ilk foto senkronu (yükle + indir) */
   setTimeout(function(){try{syncPhotos(true)}catch(e){}},2500);
 })();
 </script>
