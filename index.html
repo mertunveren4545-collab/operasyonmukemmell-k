@@ -2291,11 +2291,28 @@ function kotaGetir(){
 }
 var EKLER={};        /* is_id -> [ek] */
 var EKYUK={};        /* yüklendi işareti */
+/* ===== Uygulama içi Hata / Öneri Bildirimi (yalnızca Mert görür) ===== */
+var GB=[],GBLOAD=false,_gbId=null;
+function gbYukle(){ if(!dbClient)return; dbClient.from('geri_bildirim').select('*').order('olusturma',{ascending:false}).then(function(r){ if(r&&r.data){GB=r.data;GBLOAD=true; if(V=='bildir'||V=='bildiradmin'||V=='ana')ciz();} },function(){}); }
+function gbYetkili(){ return sistemci()||String(ME)=='mert'; }
+function gbThumbs(id){ var d=(EKLER[id]||[]).filter(function(e){return e.tur=='i'&&e.veri;}); if(!d.length)return ''; return '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px 0">'+d.map(function(e){return '<img src="'+e.veri+'" alt="" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid #C8D3DC">';}).join('')+'</div>'; }
+function gbDurumRoz(x){ var c=(x.durum=='cozuldu'); return '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;'+(c?'background:#E1F2EA;color:#146B45':'background:#FDF0DF;color:#B9770E')+'">'+(c?'✓ Çözüldü':'Açık')+'</span>'; }
+function gbSatir(x){ if(!(x.id in EKLER))ekGetir(x.id);
+  return '<div style="padding:11px 13px;border-top:1px solid #EEF1EF"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:13px">'+esc((x.olusturma||'').slice(0,10))+'</b>'+gbDurumRoz(x)+'</div>'+
+   '<div style="font-size:13px;color:#16202B;margin-top:4px;white-space:pre-wrap">'+esc(x.metin||'')+'</div>'+gbThumbs(x.id)+
+   (x.yanit?'<div style="margin-top:6px;padding:8px 10px;background:#EAF4EE;border-radius:9px;font-size:12.5px"><b>Mert:</b> '+esc(x.yanit)+'</div>':'')+'</div>'; }
+function gbAdminKart(x){ if(!(x.id in EKLER))ekGetir(x.id);
+  return '<div class="card" style="padding:12px;margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>'+esc(x.ad||ad(x.gonderen))+'</b><span style="font-size:11px;color:#8592A0">'+esc((x.olusturma||'').replace('T',' ').slice(0,16))+'</span></div>'+
+   '<div style="font-size:13px;color:#16202B;margin-top:5px;white-space:pre-wrap">'+esc(x.metin||'')+'</div>'+gbThumbs(x.id)+
+   '<div style="margin-top:8px">'+gbDurumRoz(x)+'</div>'+
+   '<textarea id="gbY_'+x.id+'" rows="2" placeholder="Yanıt / bilgi (gönderen görür)" style="margin-top:8px;width:100%;padding:9px 10px;border:1.5px solid #C8D3DC;border-radius:9px;font:400 13px inherit">'+esc(x.yanit||'')+'</textarea>'+
+   '<div style="display:flex;gap:8px;margin-top:8px"><button data-a="gbyanit" data-id="'+x.id+'" style="flex:1;padding:9px;border-radius:9px;border:0;background:#12315C;color:#fff;font-weight:700;cursor:pointer">Yanıtı kaydet</button>'+
+   '<button data-a="gbdurum" data-id="'+x.id+'" style="flex:1;padding:9px;border-radius:9px;border:1.5px solid #C8D3DC;background:#fff;font-weight:700;cursor:pointer">'+(x.durum=='cozuldu'?'↩ Yeniden aç':'✓ Çözüldü')+'</button></div></div>'; }
 function ekGetir(jid){
  if(!dbClient||EKYUK[jid])return;
  EKYUK[jid]=1;
  dbClient.from('ekler').select('*').eq('is_id',String(jid)).then(function(r){
-  if(r.data){EKLER[jid]=r.data.map(function(x){return {id:x.id,ad:x.ad,tur:x.tur,boyut:x.boyut,k:x.kisi||x.k||'',ts:x.ts,veri:x.veri,is_id:x.is_id}});if(V=='det'&&OJ==jid)ciz();else if(V=='kayit'&&r.data.length)ciz();else if(V=='genliste'&&r.data&&r.data.length)ciz()}
+  if(r.data){EKLER[jid]=r.data.map(function(x){return {id:x.id,ad:x.ad,tur:x.tur,boyut:x.boyut,k:x.kisi||x.k||'',ts:x.ts,veri:x.veri,is_id:x.is_id}});if(V=='det'&&OJ==jid)ciz();else if(V=='kayit'&&r.data.length)ciz();else if(V=='genliste'&&r.data&&r.data.length)ciz();else if((V=='bildir'||V=='bildiradmin'))ciz()}
  },function(){EKYUK[jid]=0});
 }
 /* Çalışma kaydına eklenmiş dosyalar (ekler.is_id = kayıt id). */
@@ -2444,7 +2461,7 @@ function ciz(){try{gozBanner()}catch(e){}
  var t=document.getElementById('top');
  var bl={ana:'Operasyonel Mükemmellik',bdet:bad(OB),det:'İş detayı',genliste:'İşler',kayit:'Çalışma kaydı',
    yeni:'Yeni iş aç',org:'Organizasyon',ekle:'Personel ekle',bende:(FILT=='bit'?'Tamamlanan işlerim':'Bende bekleyenler'),
-   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',kozet:'Kişi özeti',proje:'Kaizen / Projeler',projeyeni:'Yeni proje',projedet:'Proje / Problem Detayı',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik',ornekyonet:'İş Örneklemesi — Kullanıcılar'};
+   akis:'Onay akışı',veri:'Veriler',tesis:'Tesisler',pedit:'Personel düzenle',sifre:'Şifre değiştir',gorunum:'Görünüm',ayarlar:'Ayarlar',kota:'Depolama ve kota',ozet:'Aylık özet',bildir:'Hata / Öneri',bildiradmin:'Gelen Bildirimler',kozet:'Kişi özeti',proje:'Kaizen / Projeler',projeyeni:'Yeni proje',projedet:'Proje / Problem Detayı',kullanicilar:'Kullanıcı durumu',mesaj:'Telsiz',yedek:'Yedek ve temizlik',ornekyonet:'İş Örneklemesi — Kullanıcılar'};
  t.innerHTML='<button class="mnb" data-a="cekmeceac">☰</button>'+
    (V=='ana'?'':'<button class="bk" data-a="geri">‹ Geri</button>')+
    (V=='ana'?'':'<button class="bk anab" data-a="ana" title="Ana sayfa">⌂<span class="anab-t"> Ana Sayfa</span></button>')+
@@ -2478,6 +2495,8 @@ function ciz(){try{gozBanner()}catch(e){}
     '<div class="sy">'+mn.length+'</div></div></button>';
   var _mot='';try{_mot=localStorage.getItem('opmuk_bgtext')||''}catch(e){}
   if(_mot)h+='<div class="motkart">“'+esc(_mot)+'”</div>';
+  h+='<button data-a="bildir" style="display:block;width:100%;text-align:left;border:0;background:#EEF3F8;color:#1F5C7D;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13.5px;cursor:pointer;font-weight:600">\uD83D\uDC1E Hata / öneri bildir — dokun</button>';
+  if(gbYetkili()){ if(!GBLOAD)gbYukle(); var _gbAcik=GB.filter(function(x){return (x.durum||'acik')!='cozuldu';}).length; h+='<button data-a="bildiradmin" style="display:block;width:100%;text-align:left;border:0;background:#FDF3E7;color:#8A5512;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13.5px;cursor:pointer;font-weight:600">\uD83D\uDCE5 Gelen bildirimler'+(_gbAcik?' — '+_gbAcik+' açık':'')+' — dokun</button>'; }
   if(('Notification' in window)&&Notification.permission!=='granted'){
    h+='<button data-a="bildirimac" style="display:block;width:100%;text-align:left;border:0;background:#FFF8E1;color:#8A6512;border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:13px;cursor:pointer;font-weight:600">\uD83D\uDD14 Bildirimler kapalı \u2014 açmak için dokun</button>';
   }
@@ -2591,6 +2610,29 @@ function ciz(){try{gozBanner()}catch(e){}
      tumBolum()?'Tüm bölümleri görüntüleyebilirsin.':'Sadece kendi bölümünü görüntüleyebilirsin.')+'</div>';
  }
 
+ else if(V=='bildir'){
+  if(!GBLOAD)gbYukle();
+  if(!_gbId)_gbId='gb'+Date.now()+Math.floor(Math.random()*999);
+  h='<h2 style="margin:4px 0 10px">Hata / Öneri Bildir</h2>';
+  h+='<div class="card" style="padding:13px">';
+  h+='<div style="font-size:12.5px;color:#5A6773;margin-bottom:8px">Gördüğün hatayı veya öneriyi yaz, istersen resim ekle. <b>Yalnızca Mert görür.</b></div>';
+  h+='<textarea id="gbMetin" rows="4" placeholder="Ne oldu / ne öneriyorsun?" style="width:100%;padding:11px 12px;border:1.5px solid #C8D3DC;border-radius:11px;font:400 14px inherit"></textarea>';
+  h+='<div style="margin-top:9px"><label style="display:inline-block;padding:9px 13px;border:1.5px solid #C8D3DC;border-radius:10px;background:#F4F7F9;font-size:13px;font-weight:600;cursor:pointer">\uD83D\uDCCE Resim ekle<input type="file" class="kayfu" data-k="'+_gbId+'" accept="image/*" multiple style="display:none"></label></div>';
+  h+=gbThumbs(_gbId);
+  h+='<button data-a="bildirgonder" style="margin-top:11px;width:100%;padding:13px;border-radius:12px;border:0;background:#1B7A45;color:#fff;font-weight:700;font-size:14px;cursor:pointer">Gönder</button>';
+  h+='</div>';
+  var _mine=GB.filter(function(x){return String(x.gonderen)==String(ME);});
+  h+='<div class="card"><h3 style="margin:0;padding:12px 14px;font-weight:700;border-bottom:1px solid #EEF1EF">Gönderdiklerim ('+_mine.length+')</h3>'+(_mine.length?_mine.map(gbSatir).join(''):'<div style="padding:20px;text-align:center;color:#8592A0;font-size:13px">Henüz bildirim yok.</div>')+'</div>';
+ }
+ else if(V=='bildiradmin'){
+  if(!gbYetkili()){ h='<div style="padding:24px;text-align:center;color:#8592A0">Bu bölüm yalnızca yöneticiye açık.</div>'; }
+  else {
+   if(!GBLOAD)gbYukle();
+   h='<h2 style="margin:4px 0 10px">Gelen Bildirimler ('+GB.length+')</h2>';
+   if(!GB.length)h+='<div style="padding:24px;text-align:center;color:#8592A0;font-size:13px">Henüz bildirim yok.</div>';
+   else h+=GB.map(gbAdminKart).join('');
+  }
+ }
  else if(V=='kozet'){
   var _k=OZK||ME,_pp=pn(_k)||[_k,_k,'',''];var oz=kisiOzet(_k);
   var _rnk=kisiRenk(_k),_uz=_pp[2]||'—',_bl=_pp[3]?bad(_pp[3]):'Direktörlük';
@@ -4026,6 +4068,21 @@ document.addEventListener('click',function(e){
   }
   return;}
  if(a=='ozet'){V='ozet';ciz();return}
+ if(a=='bildir'){V='bildir';_gbId=null;ciz();window.scrollTo(0,0);return}
+ if(a=='bildiradmin'){V='bildiradmin';gbYukle();ciz();window.scrollTo(0,0);return}
+ if(a=='bildirgonder'){
+  var _m=(g('gbMetin')&&g('gbMetin').value||'').trim();
+  if(!_m){say('Lütfen bir açıklama yaz.');return}
+  var _id=_gbId||('gb'+Date.now()+Math.floor(Math.random()*999));
+  var _rec={id:_id,gonderen:ME,ad:ad(ME),metin:_m,durum:'acik',yanit:'',olusturma:new Date().toISOString(),guncelleme:new Date().toISOString()};
+  GB.unshift(_rec);
+  if(dbClient)dbClient.from('geri_bildirim').upsert([_rec]).then(function(r){if(r&&r.error)say('Gönderilemedi: '+r.error.message);else say('✓ Gönderildi — yalnızca Mert görecek');},function(){say('Bağlantı hatası');});
+  else say('✓ Gönderildi');
+  try{pushGonder(['mert'],'Yeni hata/öneri',ad(ME)+': '+_m.slice(0,60));}catch(e){}
+  _gbId=null;ciz();return;
+ }
+ if(a=='gbdurum'){ if(!gbYetkili()){say('Yetkin yok');return} var _r=null,_q;for(_q=0;_q<GB.length;_q++)if(String(GB[_q].id)==String(t.dataset.id))_r=GB[_q]; if(!_r)return; _r.durum=(_r.durum=='cozuldu')?'acik':'cozuldu';_r.guncelleme=new Date().toISOString(); if(dbClient)dbClient.from('geri_bildirim').upsert([_r]).then(function(r){if(r&&r.error)say('Kaydedilemedi: '+r.error.message)},function(){}); say(_r.durum=='cozuldu'?'✓ Çözüldü':'Yeniden açıldı');ciz();return; }
+ if(a=='gbyanit'){ if(!gbYetkili()){say('Yetkin yok');return} var _r=null,_q;for(_q=0;_q<GB.length;_q++)if(String(GB[_q].id)==String(t.dataset.id))_r=GB[_q]; if(!_r)return; var _el=g('gbY_'+_r.id),_y=_el?_el.value.trim():''; _r.yanit=_y;_r.guncelleme=new Date().toISOString(); if(dbClient)dbClient.from('geri_bildirim').upsert([_r]).then(function(r){if(r&&r.error)say('Kaydedilemedi: '+r.error.message);else say('Yanıt kaydedildi');},function(){}); try{if(String(_r.gonderen)!=String(ME))pushGonder([_r.gonderen],'Bildirimine yanıt geldi',_y.slice(0,60));}catch(e){} ciz();return; }
  if(a=='ozetkopya'){
   var ta=document.getElementById('ozetmetin');
   try{ta.select();document.execCommand('copy');say('Rapor kopyalandı')}
