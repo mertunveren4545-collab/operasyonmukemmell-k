@@ -5167,16 +5167,17 @@ function talepleriGetir(){
     await guvenliYaz('bolumler',Object.keys(B).map(function(k,i){
       return {id:k,ad:B[k].ad,sef:B[k].sef,ust:B[k].ust,ust_gerek:!!B[k].ug,sira:i}}));
    }
-   var _krow=function(r,withOnay){var o={id:String(r.id),personel:r.k,bolum:pn(r.k)[3],tesis:r.ts_,faaliyet:r.tip,
+   var _krow=function(r,withOnay,withTam){var o={id:String(r.id),personel:r.k,bolum:pn(r.k)[3],tesis:r.ts_,faaliyet:r.tip,
       aciklama:r.ac,baslangic:isoYaz(r.ts),bitis:r.bit||null,dakika:r.dk,is_id:r.is_id||null};
-      if(withOnay){o.onay=r.onay||null;o.onayci=r.onayci||null;o.onay_ts=r.onayts||null;}return o;};
-   var _ksig=function(r){return [r.ts,r.bit,r.tip,r.ts_,r.ac,r.dk,r.onay,r.onayci].join('|');};
+      if(withOnay){o.onay=r.onay||null;o.onayci=r.onayci||null;o.onay_ts=r.onayts||null;}if(withTam){o.tamal=r.tamAl?true:false;}return o;};
+   var _ksig=function(r){return [r.ts,r.bit,r.tip,r.ts_,r.ac,r.dk,r.onay,r.onayci,(r.tamAl?1:0)].join('|');};
    var yeni=K.filter(function(r){return !yazilan[r.id]||_kSig[r.id]!==_ksig(r)});
    if(yeni.length){
-    var ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,true)}));   /* onay kolonlarıyla dene */
+    var ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,true,true)}));   /* onay + tamamlandı bayrağı ile dene */
+    if(ok2===false){ ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,true,false)})); }  /* tamal kolonu yoksa: onaylı ama bayraksız (onay bozulmasın) */
     if(ok2===false){
      if(!_onayKolonUyari && yeni.some(function(r){return r.onay})){_onayKolonUyari=true;say('⚠ Çalışma kaydı onayı buluta yazılamıyor — kayitlar tablosuna onay kolonları eklenmeli.');}
-     ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,false)}),'Çalışma kayıtları');  /* kolon yoksa onaysız yaz — sync bozulmasın */
+     ok2=await guvenliYaz('kayitlar',yeni.map(function(r){return _krow(r,false,false)}),'Çalışma kayıtları');  /* kolon yoksa onaysız yaz — sync bozulmasın */
     }
     if(ok2)yeni.forEach(function(r){yazilan[r.id]=1;_kSig[r.id]=_ksig(r)});
    }
@@ -5210,8 +5211,8 @@ function talepleriGetir(){
    if(kL&&kL.length){
     K=kL.map(function(x){return {id:x.id,k:x.personel,ts:x.baslangic,bit:x.bitis,
       tip:x.faaliyet,ac:x.aciklama,dk:x.dakika,ts_:x.tesis,is_id:x.is_id||null,
-      onay:x.onay||null,onayci:x.onayci||null,onayts:x.onay_ts||null}});
-    K.forEach(function(x){yazilan[x.id]=1;try{_kSig[x.id]=[x.ts,x.bit,x.tip,x.ts_,x.ac,x.dk,x.onay,x.onayci].join('|')}catch(e){}});
+      onay:x.onay||null,onayci:x.onayci||null,onayts:x.onay_ts||null,tamAl:x.tamal?1:0}});
+    K.forEach(function(x){yazilan[x.id]=1;try{_kSig[x.id]=[x.ts,x.bit,x.tip,x.ts_,x.ac,x.dk,x.onay,x.onayci,(x.tamAl?1:0)].join('|')}catch(e){}});
    }
    if(_personelOK)VERI_YUKLENDI=true;   /* artık senkron güvenle yazabilir */
    /* iş başlangıç onarımı: sadece veri yüklendikten SONRA */
