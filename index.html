@@ -2615,7 +2615,7 @@ function ciz(){try{gozBanner()}catch(e){}
   if(!_gbId)_gbId='gb'+Date.now()+Math.floor(Math.random()*999);
   h='<h2 style="margin:4px 0 10px">Hata / Öneri Bildir</h2>';
   h+='<div class="card" style="padding:13px">';
-  h+='<div style="font-size:12.5px;color:#5A6773;margin-bottom:8px">Gördüğün hatayı veya öneriyi yaz, istersen resim ekle. <b>Yalnızca Mert görür.</b></div>';
+  h+='<div style="font-size:12.5px;color:#5A6773;margin-bottom:8px">Gördüğün hatayı veya öneriyi yaz, istersen resim ekle.</div>';
   h+='<textarea id="gbMetin" rows="4" placeholder="Ne oldu / ne öneriyorsun?" style="width:100%;padding:11px 12px;border:1.5px solid #C8D3DC;border-radius:11px;font:400 14px inherit"></textarea>';
   h+='<div style="margin-top:9px"><label style="display:inline-block;padding:9px 13px;border:1.5px solid #C8D3DC;border-radius:10px;background:#F4F7F9;font-size:13px;font-weight:600;cursor:pointer">\uD83D\uDCCE Resim ekle<input type="file" class="kayfu" data-k="'+_gbId+'" accept="image/*" multiple style="display:none"></label></div>';
   h+=gbThumbs(_gbId);
@@ -4076,7 +4076,7 @@ document.addEventListener('click',function(e){
   var _id=_gbId||('gb'+Date.now()+Math.floor(Math.random()*999));
   var _rec={id:_id,gonderen:ME,ad:ad(ME),metin:_m,durum:'acik',yanit:'',olusturma:new Date().toISOString(),guncelleme:new Date().toISOString()};
   GB.unshift(_rec);
-  if(dbClient)dbClient.from('geri_bildirim').upsert([_rec]).then(function(r){if(r&&r.error)say('Gönderilemedi: '+r.error.message);else say('✓ Gönderildi — yalnızca Mert görecek');},function(){say('Bağlantı hatası');});
+  if(dbClient)dbClient.from('geri_bildirim').upsert([_rec]).then(function(r){if(r&&r.error)say('Gönderilemedi: '+r.error.message);else say('✓ Gönderildi');},function(){say('Bağlantı hatası');});
   else say('✓ Gönderildi');
   try{pushGonder(['mert'],'Yeni hata/öneri',ad(ME)+': '+_m.slice(0,60));}catch(e){}
   _gbId=null;ciz();return;
