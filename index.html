@@ -1162,7 +1162,7 @@ function isTablo(list,extraRows){if(!list.length&&!extraRows)return '<div style=
 function kayHasDosya(r){var d=EKLER[r.id]||[];return d.some(function(x){return (x.tur&&x.tur!='i')||(x.veri&&!/^data:image/.test(x.veri))})}
 function kayitTamamSatir(r){var _t=dtar(zmn(r.onayts||r.ts)),_b=r.ts?dtar(zmn(r.ts)):'';
  return '<tr data-a="kayit" class="ortakgrp" style="cursor:pointer"><td>'+esc(ad(r.k))+'</td>'+
-  '<td class="isad">'+esc(r.tip||'Çalışma kaydı')+'<span class="ortak" title="Onaylanan çalışma kaydı — çıktı (dosya ekli)">📄 çalışma kaydı</span>'+
+  '<td class="isad">'+esc(r.tip||'Çalışma kaydı')+'<span class="ortak" title="Tamamlanan işe alınmış çalışma kaydı">📄 çalışma kaydı</span>'+
   (r.ac?'<div style="font-size:11px;color:#5A6672;margin-top:3px">'+esc(r.ac.length>60?r.ac.slice(0,58)+'…':r.ac)+'</div>':'')+'</td>'+
   '<td>'+esc(tad(r.ts_))+'</td><td>'+_b+'</td><td>—</td><td></td><td>'+_b+'</td>'+
   '<td>'+_t+'</td><td>—</td><td>✓ '+esc(ad(r.onayci))+'</td><td>'+_t+'</td></tr>';}
@@ -2872,7 +2872,7 @@ function ciz(){try{gozBanner()}catch(e){}
     /* Tamamlanan işler: tamamlanma tarihi en güncel olan en üstte */
     liste.sort(function(a,b){var sa=(a.a&&a.a.length)?(a.a[a.a.length-1].b||''):'',sb=(b.a&&b.a.length)?(b.a[b.a.length-1].b||''):'';return sa<sb?1:(sa>sb?-1:0)});
     /* onaylanan + DOSYA EKLİ (çıktı) çalışma kayıtları aynı tabloya karışır; eksiz (toplantı vb.) girmez */
-    K.forEach(function(r){if(r.onay!='t')return;if(GBOL&&(pn(r.k)[3]||'')!=GBOL)return;if(GKIS&&String(r.k)!=String(GKIS))return;if(dbClient)ekGetir(r.id);if(kayHasDosya(r))_okr.push(r);});
+    K.forEach(function(r){if(r.onay!='t')return;if(GBOL&&(pn(r.k)[3]||'')!=GBOL)return;if(GKIS&&String(r.k)!=String(GKIS))return;if(r.tamAl)_okr.push(r);});
     _okr.sort(function(a,b){return (a.onayts||a.ts)<(b.onayts||b.ts)?1:-1});
   }else{
     liste.sort(function(a,b){var c1=cur(a),c2=cur(b);var g1=c1?as(c1):-999,g2=c2?as(c2):-999;if(g1!=g2)return g2-g1;return (_w[a.oncelik]==null?2:_w[a.oncelik])-(_w[b.oncelik]==null?2:_w[b.oncelik])});
@@ -3881,13 +3881,14 @@ function ciz(){try{gozBanner()}catch(e){}
    var _rd=zmn(r.ts);var sa1=ii(_rd.getHours())+':'+ii(_rd.getMinutes()),sa2=r.bit||'';
    var _demo=/^k([0-9]|1[0-4])$/.test(String(r.id));
    var _st=r.onay=='b'?'<div class="s" style="color:#C08A1E;font-weight:600;margin-top:4px">⏳ Onay bekliyor — '+ad(r.onayci)+'</div>'
-          :r.onay=='t'?'<div class="s" style="color:#1B7A45;font-weight:600;margin-top:4px">✓ '+ad(r.onayci)+' onayladı</div>'
+          :r.onay=='t'?'<div class="s" style="color:#1B7A45;font-weight:600;margin-top:4px">✓ '+ad(r.onayci)+' onayladı'+(r.tamAl?' · <span style="color:#12315C">tamamlanan işlere eklendi</span>':' · <span style="color:#8592A0">çalışma kaydı olarak bekliyor</span>')+'</div>'
           :r.onay=='r'?'<div class="s" style="color:#C0392B;font-weight:600;margin-top:4px">↩ Reddedildi — düzeltip tekrar gönder</div>':'';
    var _kilit=(r.onay=='b'||r.onay=='t');   /* onayda/onaylı → düzeltme kapalı */
    var _btns='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">';
    if(!_kilit)_btns+='<button class="b g" data-a="kayduz" data-k="'+r.id+'" style="margin:0;padding:5px 12px;font-size:11px;width:auto">✎ Düzelt</button>';
    _btns+='<label class="gupl" style="margin:0">📎 Dosya<input type="file" class="kayfu" data-k="'+r.id+'" multiple accept="image/*,.xlsx,.xls,.csv,.pdf,.docx"></label>';
    if((!r.onay||r.onay=='r'))_btns+='<button class="b" data-a="kayonaygo" data-k="'+r.id+'" style="margin:0;padding:5px 12px;font-size:11px;width:auto;background:#1B7A45">➤ Yöneticiye gönder</button>';
+   if(r.onay=='t'){ if(r.tamAl)_btns+='<button class="b g" data-a="kaytamcik" data-k="'+r.id+'" style="margin:0;padding:5px 12px;font-size:11px;width:auto">↩ Tamamlanandan çıkar</button>'; else _btns+='<button class="b" data-a="kaytamal" data-k="'+r.id+'" style="margin:0;padding:5px 12px;font-size:11px;width:auto;background:#12315C">✓ Tamamlanan işe al</button>'; }
    _btns+='<button class="b r" data-a="kaydsil" data-k="'+r.id+'" style="margin:0;padding:5px 12px;font-size:11px;width:auto">Sil</button>';
    _btns+='</div>';
    h+='<div class="li"><div class="h"><b>'+esc(r.tip)+(_demo?' <span style="font-size:10px;color:#C0392B">(demo)</span>':'')+'</b><i>'+gunAd(r.ts)+' · '+sa(r.dk)+' sa</i></div>'+
@@ -3942,7 +3943,7 @@ document.addEventListener('click',function(e){
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
-  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1,'isbasla':1,'kisiekle':1,'kisicikar':1};
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1,'isbasla':1,'kisiekle':1,'kisicikar':1,'kaytamal':1,'kaytamcik':1};
   if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
  }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
@@ -4770,6 +4771,15 @@ document.addEventListener('click',function(e){
   if(a=='kayonayla'){_r.onay='t';_r.onayts=now();say('✓ Onaylandı');try{if(_r.k!=ME)pushGonder([_r.k],'Çalışma kaydın onaylandı',_r.tip||'')}catch(e){}}
   else{_r.onay='r';_r.onayts=now();say('Reddedildi');try{if(_r.k!=ME)pushGonder([_r.k],'Çalışma kaydın reddedildi',_r.tip||'')}catch(e){}}
   delete yazilan[_r.id];
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
+ }
+ else if(a=='kaytamal'||a=='kaytamcik'){
+  var _kid=t.dataset.k,_r=null;for(var _q=0;_q<K.length;_q++)if(String(K[_q].id)==String(_kid))_r=K[_q];
+  if(!_r){say('Kayıt bulunamadı.');return}
+  if(!(String(_r.k)==String(ME)||sistemci())){say('Yalnızca kendi kaydın için yapabilirsin.');return}
+  if(_r.onay!='t'){say('Önce kaydın onaylanmalı.');return}
+  if(a=='kaytamal'){_r.tamAl=1;say('✓ Tamamlanan işlere eklendi');}
+  else{delete _r.tamAl;say('Tamamlanandan çıkarıldı');}
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
  }
  else if(a=='isbasla'){
