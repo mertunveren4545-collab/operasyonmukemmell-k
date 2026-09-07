@@ -1165,7 +1165,7 @@ function kayitTamamSatir(r){var _t=dtar(zmn(r.onayts||r.ts)),_b=r.ts?dtar(zmn(r.
   '<td class="isad">'+esc(r.tip||'Çalışma kaydı')+'<span class="ortak" title="Tamamlanan işe alınmış çalışma kaydı">📄 çalışma kaydı</span>'+
   (r.ac?'<div style="font-size:11px;color:#5A6672;margin-top:3px">'+esc(r.ac.length>60?r.ac.slice(0,58)+'…':r.ac)+'</div>':'')+'</td>'+
   '<td>'+esc(tad(r.ts_))+'</td><td>'+_b+'</td><td>—</td><td></td><td>'+_b+'</td>'+
-  '<td>'+_t+'</td><td>—</td><td>✓ '+esc(ad(r.onayci))+'</td><td>'+_t+'</td></tr>';}
+  '<td>'+_t+'</td><td>—</td><td style="color:#1B7A47;font-weight:600">Tamamlandı</td><td>'+_t+'</td></tr>';}
 function yer(d){return d.getFullYear()+'-'+ii(d.getMonth()+1)+'-'+ii(d.getDate())+'T'+ii(d.getHours())+':'+ii(d.getMinutes())}
 var ST=['08:40','10:15','13:20','15:45','09:30','11:50','16:20','14:05'],SX=0;
 function ago(n,s){var d=new Date();d.setDate(d.getDate()-n);var t=s||ST[SX++%8];
@@ -2178,9 +2178,10 @@ function iade(j){var n=0;(j.lg||[]).forEach(function(l){if(l.hedef)n++});return 
 function bj(k){return J.filter(gor).filter(function(j){return j.br==k})}
 function bolStat(k){
   var jb=bj(k),ac=jb.filter(cur);
+  var _kr=K.filter(function(r){return r.onay=='t'&&r.tamAl&&(pn(r.k)[3]||'')==k}).length;
   var onay=ac.filter(function(j){var st=stip(cur(j));return st=='o'||st=='k'}).length;
   var bekle=ac.filter(function(j){return j.kabul===false}).length;
-  return {toplam:jb.length,acik:ac.length,tamam:jb.length-ac.length,onay:onay,bekle:bekle,
+  return {toplam:jb.length+_kr,acik:ac.length,tamam:(jb.length-ac.length)+_kr,onay:onay,bekle:bekle,
     devam:ac.filter(function(j){return stip(cur(j))=='i'&&j.kabul!==false}).length,
     gec:ac.filter(function(j){return as(cur(j))>0&&j.kabul!==false}).length};
 }
