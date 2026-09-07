@@ -1137,7 +1137,7 @@ function dosyaOnizle(jid,idx){
   gv.innerHTML='<div class="oniz-yok">Bu dosya türü önizlenemiyor.<br>Yukarıdaki <b>İndir</b> ile açabilirsin.</div>';
  }
 }
-function isKolon(j,taskOverride){var steps=j.a||[],task=null,onays=[];steps.forEach(function(x){var tp=stip(x);if(tp=='i'&&!task){task=x}else if(tp=='o'){onays.push(x)}});if(taskOverride)task=taskOverride;var c=cur(j);var acilisTs=(task&&task.g)?task.g:j.bas;var terminD='';if(task&&acilisTs){var gl=isGunleri(zmn(acilisTs),Math.round(task.t)||1);if(gl.length)terminD=dtar(gl[gl.length-1])}var surec=(j.kabul===false)?'Kabul bekliyor':(c?((stip(c)=='o'||stip(c)=='k')?(ad(c.k)+' (onayda)'):ad(c.k)):'Tamamlandı');var bitti=!c&&j.kabul!==false;return {isim:task?ad(task.k):'',is:j.ad,tesis:tad(j.ts_),acilis:acilisTs?dtar(zmn(acilisTs)):'',termin:terminD,sebep:(j.uzama&&j.uzama.length)?j.uzama.map(function(u){return u.neden}).join(' | '):(j.gecikmeSebebi||''),gonderme:(task&&task.b)?dtar(zmn(task.b)):'',onay1:(onays[0]&&onays[0].b)?dtar(zmn(onays[0].b)):'',onay2:(onays[1]&&onays[1].b)?dtar(zmn(onays[1].b)):'',surec:surec,tamam:(bitti&&steps.length&&steps[steps.length-1].b)?dtar(zmn(steps[steps.length-1].b)):'',aciklama:(j.aciklama||'')}}
+function isKolon(j,taskOverride){var steps=j.a||[],task=null,onays=[];steps.forEach(function(x){var tp=stip(x);if(tp=='i'&&!task){task=x}else if(tp=='o'){onays.push(x)}});if(taskOverride)task=taskOverride;var c=cur(j);var acilisTs=(task&&task.g)?task.g:j.bas;var terminD='';if(task&&acilisTs){var gl=isGunleri(zmn(acilisTs),Math.round(task.t)||1);if(gl.length)terminD=dtar(gl[gl.length-1])}var surec;if(j.kabul===false){surec='Kabul bekliyor';}else if(taskOverride&&task&&stip(task)=='i'&&task.d!='t'&&!task.b){surec=ad(task.k);}else{surec=(c?((stip(c)=='o'||stip(c)=='k')?(ad(c.k)+' (onayda)'):ad(c.k)):'Tamamlandı');}var bitti=!c&&j.kabul!==false;return {isim:task?ad(task.k):'',is:j.ad,tesis:tad(j.ts_),acilis:acilisTs?dtar(zmn(acilisTs)):'',termin:terminD,sebep:(j.uzama&&j.uzama.length)?j.uzama.map(function(u){return u.neden}).join(' | '):(j.gecikmeSebebi||''),gonderme:(task&&task.b)?dtar(zmn(task.b)):'',onay1:(onays[0]&&onays[0].b)?dtar(zmn(onays[0].b)):'',onay2:(onays[1]&&onays[1].b)?dtar(zmn(onays[1].b)):'',surec:surec,tamam:(bitti&&steps.length&&steps[steps.length-1].b)?dtar(zmn(steps[steps.length-1].b)):'',aciklama:(j.aciklama||'')}}
 function isTablo(list){if(!list.length)return '<div style="font-size:13px;color:#8592A0">İş yok.</div>';
  /* bilgisayarda: sabit kolonlu tam-ekran tablo. telefonda: yatay kaydırılabilir,
     okunur sütun genişlikleri, kelime bazında sarma (CSS itabWrap + @media 599px) */
@@ -1213,7 +1213,7 @@ function temaUygula(){
   '.obas{color:'+c.ana+'}';
  try{localStorage.setItem('opmuk_tema',TEMA);localStorage.setItem('opmuk_dark',DARK?'1':'0')}catch(e){}
 }
-var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0,TERMED=0,KDUZ=0,BASED=0;
+var DARK=false,ZOOM=false,SIG=false,TAL=0,GEC2=0,DST=0,ATAND=0,TERMED=0,KDUZ=0,BASED=0,EKED=0;
 /* Bilgisayar görünümü: telefonda geniş (masaüstü) viewport'a geçerek
    mevcut min-width:900px masaüstü düzenini tetikler. Sadece Mert kullanır. */
 var PCV=false;function pcvUygula(){
@@ -2986,6 +2986,33 @@ function ciz(){try{gozBanner()}catch(e){}
     h+='<div style="height:6px"></div><button class="b g" data-a="basgunac" data-j="'+j.id+'">Başlangıç günlerini düzelt</button></div>';
    }
   })();
+  /* ---- Ekip / personel: mevcut işe kişi ekle veya çıkar (yönetici) ---- */
+  (function(){
+   if(!(terminYetkisi()||atamaYetkisi()||sistemci()))return;
+   var _ta=anaAdim(j); if(!_ta||_ta.d=='t')return;
+   var _isS=(j.a||[]).filter(function(x){return stip(x)=='i'});
+   var _mev={}; _isS.forEach(function(s){_mev[s.k]=1});
+   h+='<div class="card"><h3>Ekip / personel</h3>';
+   if(EKED==j.id){
+    h+='<div class="note" style="margin:0 0 10px">İşe kişi ekleyebilir veya çıkarabilirsin. Aynı işi yapan herkes ekipte görünür. Son kişi çıkarılamaz — onun yerine “Atanan kişiyi değiştir”i kullan.</div>';
+    _isS.forEach(function(s){
+     h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #F2F4F3">'+
+        '<span style="font-size:13px">'+esc(ad(s.k))+'</span>'+
+        (_isS.length>1?'<button class="b g" style="width:auto;padding:6px 12px" data-a="kisicikar" data-j="'+j.id+'" data-k="'+esc(s.k)+'">Çıkar</button>':'<span style="font-size:11px;color:#8592A0">tek kişi</span>')+
+        '</div>';
+    });
+    h+='<label style="margin-top:10px">Kişi ekle</label><select class="n" id="eksec"><option value="">— Kişi seç —</option>'+
+      Object.keys(B).map(function(bk){var g7=P.filter(function(p){return p[3]==bk&&!_mev[p[0]]});
+       return g7.length?'<optgroup label="'+B[bk].ad+'">'+g7.map(function(p){return '<option value="'+p[0]+'">'+esc(p[1])+' — '+esc(p[2])+'</option>'}).join('')+'</optgroup>':''}).join('')+
+      '</select>'+
+      '<div style="height:10px"></div><div class="two">'+
+      '<button class="b" data-a="kisiekle" data-j="'+j.id+'">Ekle</button>'+
+      '<button class="b g" data-a="ekipno">Kapat</button></div></div>';
+   }else{
+    h+='<div style="font-size:13px;color:#5A6A63;margin-bottom:6px">Ekip ('+_isS.length+' kişi): <b>'+esc(_isS.map(function(s){return ad(s.k)}).join(', '))+'</b></div>'+
+       '<button class="b g" data-a="ekipac" data-j="'+j.id+'">Ekip / personel düzenle</button></div>';
+   }
+  })();
    if(c&&as(c)>0){
     var _srm=c.k;
     var _dk=K.filter(function(kk){return kk.k==_srm&&(!j.bas||String(kk.ts)>=String(j.bas))}).sort(function(a,b){return (String(b.ts)>String(a.ts))?1:-1});
@@ -3904,7 +3931,7 @@ document.addEventListener('click',function(e){
  if(a=='gozu-cik'){window.kullaniciGozuCik();return}
  if(a=='gozu-git'){var _gk=document.getElementById('gozsec');if(_gk&&_gk.value)window.kullaniciGozu(_gk.value);return}
  if(GERCEK_ME){
-  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1,'isbasla':1};
+  var _yaz={'new':1,'sil':1,'medyasil':1,'eksil':1,'onay':1,'onayla':1,'red':1,'ilerlet':1,'iade':1,'ata':1,'dstonay':1,'dstred':1,'dst':1,'pkaydet':1,'psil':1,'pekle':1,'tesisekle':1,'tesissil':1,'sifrekaydet':1,'ses-sec':1,'mses':1,'kayitekle':1,'kkaydet':1,'sifrestir':1,'termeddgo':1,'geriac':1,'kayonaygo':1,'kayonayla':1,'kayred':1,'basgunkaydet':1,'isbasla':1,'kisiekle':1,'kisicikar':1};
   if(_yaz[a]){say('\uD83D\uDC41 '+ad(ME)+' g\u00f6r\u00fcn\u00fcm\u00fcndesin \u2014 de\u011fi\u015fiklik yapamazs\u0131n. \u00d6nce kendi g\u00f6r\u00fcn\u00fcm\u00fcne d\u00f6n.');return}
  }
  if(a=='fs'){var d=document.createElement('div');d.className='fs';d.id='fsv';
@@ -4895,6 +4922,39 @@ document.addEventListener('click',function(e){
   V='ana';say(_bitti?('✓ Geçmiş iş kaydedildi — tamamlandı ('+dtar(_bitD)+')'):(kisiler.length>1?('İş atandı — '+kisiler.length+' kişiye'):(anaK!=ME?('✓ İş atandı → '+ad(anaK)+' (kabul bekliyor)'):_selfMsg)));
   if(window.senkronCalistir)setTimeout(window.senkronCalistir,100);
   try{var _hd=kisiler.filter(function(x){return x!=ME});if(_hd.length){var _pb=(onc=='acil'?'🔴 ACİL — ':onc=='yuksek'?'⚠ Öncelikli — ':'')+'Sana iş atandı — kabul et';pushGonder(_hd,_pb,nm);}}catch(e){}
+ }
+ else if(a=='ekipac'){EKED=+t.dataset.j}
+ else if(a=='ekipno'){EKED=0}
+ else if(a=='kisiekle'){
+  var _ej=bul(+t.dataset.j); if(!_ej){return}
+  if(!(atamaYetkisi()||terminYetkisi()||sistemci())){say('Bunun için yetkin yok.');return}
+  var _s=document.getElementById('eksec'),_ky=_s?_s.value:''; if(!_ky){say('Eklenecek kişiyi seç.');return}
+  if((_ej.a||[]).some(function(x){return stip(x)=='i'&&String(x.k)==String(_ky)})){say('Bu kişi zaten ekipte.');return}
+  var _base=anaAdim(_ej)||{},_t=Math.round(_base.t)||1,_tn=now(),_g=_ej.bas||_base.g||_tn;
+  var _yeni={a:_ej.ad,k:_ky,t:_t,tp:'i',o:0,d:'a',g:_g,b:0,basladi:true};
+  var _ix=_ej.a.length;for(var _i=0;_i<_ej.a.length;_i++){if(stip(_ej.a[_i])=='o'){_ix=_i;break}}
+  _ej.a.splice(_ix,0,_yeni);
+  var _mn=null;_ej.a.forEach(function(x){if(stip(x)=='i'&&x.g&&(_mn===null||x.g<_mn))_mn=x.g});if(_mn)_ej.bas=_mn;
+  (_ej.lg=_ej.lg||[]).push({ts:_tn,k:ME,tip:'Ekibe eklendi: '+ad(_ky)});
+  try{if(String(_ky)!=String(ME))pushGonder([_ky],'Bir işe eklendin',_ej.ad);}catch(e){}
+  EKED=0;say(ad(_ky)+' ekibe eklendi');
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
+ }
+ else if(a=='kisicikar'){
+  var _cj=bul(+t.dataset.j); if(!_cj){return}
+  if(!(atamaYetkisi()||terminYetkisi()||sistemci())){say('Bunun için yetkin yok.');return}
+  var _ck=t.dataset.k;
+  var _isS2=(_cj.a||[]).filter(function(x){return stip(x)=='i'});
+  if(_isS2.length<=1){say('Son kişi çıkarılamaz — bunun yerine “Atanan kişiyi değiştir”i kullan.');return}
+  var _idx=-1;for(var _q=0;_q<_cj.a.length;_q++){if(stip(_cj.a[_q])=='i'&&String(_cj.a[_q].k)==String(_ck)){_idx=_q;break}}
+  if(_idx<0){say('Kişi bulunamadı.');return}
+  var _nm2=ad(_cj.a[_idx].k);
+  _cj.a.splice(_idx,1);
+  var _mn2=null;_cj.a.forEach(function(x){if(stip(x)=='i'&&x.g&&(_mn2===null||x.g<_mn2))_mn2=x.g});if(_mn2)_cj.bas=_mn2;
+  (_cj.lg=_cj.lg||[]).push({ts:now(),k:ME,tip:'Ekipten çıkarıldı: '+_nm2});
+  try{if(String(_ck)!=String(ME))pushGonder([_ck],'Bir işten çıkarıldın',_cj.ad);}catch(e){}
+  say(_nm2+' ekipten çıkarıldı');
+  if(window.senkronCalistir)setTimeout(window.senkronCalistir,150);
  }
  else return;
  /* geri geçmişi: ekran gerçekten değiştiyse önceki durumu yığına ekle (ana/geri hariç) */
