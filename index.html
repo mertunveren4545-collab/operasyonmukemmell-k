@@ -4074,7 +4074,7 @@ document.addEventListener('click',function(e){
  if(a=='bildiradmin'){V='bildiradmin';gbYukle();ciz();window.scrollTo(0,0);return}
  if(a=='bildirgonder'){
   try{
-   var _el=g('gbMetin'); var _m=_el?(_el.value||'').trim():'';
+   var _el=document.getElementById('gbMetin'); var _m=_el?(_el.value||'').trim():'';
    if(!_m){say('Lütfen bir açıklama yaz.');return}
    var _id=_gbId||('gb'+Date.now()+Math.floor(Math.random()*999));
    var _rec={id:_id,gonderen:ME,ad:ad(ME),metin:_m,durum:'acik',yanit:'',olusturma:new Date().toISOString(),guncelleme:new Date().toISOString()};
@@ -4087,7 +4087,7 @@ document.addEventListener('click',function(e){
   return;
  }
  if(a=='gbdurum'){ if(!gbYetkili()){say('Yetkin yok');return} var _r=null,_q;for(_q=0;_q<GB.length;_q++)if(String(GB[_q].id)==String(t.dataset.id))_r=GB[_q]; if(!_r)return; _r.durum=(_r.durum=='cozuldu')?'acik':'cozuldu';_r.guncelleme=new Date().toISOString(); if(dbClient)dbClient.from('geri_bildirim').upsert([_r]).then(function(r){if(r&&r.error)say('Kaydedilemedi: '+r.error.message)},function(){}); say(_r.durum=='cozuldu'?'✓ Çözüldü':'Yeniden açıldı');ciz();return; }
- if(a=='gbyanit'){ if(!gbYetkili()){say('Yetkin yok');return} var _r=null,_q;for(_q=0;_q<GB.length;_q++)if(String(GB[_q].id)==String(t.dataset.id))_r=GB[_q]; if(!_r)return; var _el=g('gbY_'+_r.id),_y=_el?_el.value.trim():''; _r.yanit=_y;_r.guncelleme=new Date().toISOString(); if(dbClient)dbClient.from('geri_bildirim').upsert([_r]).then(function(r){if(r&&r.error)say('Kaydedilemedi: '+r.error.message);else say('Yanıt kaydedildi');},function(){}); try{if(String(_r.gonderen)!=String(ME))pushGonder([_r.gonderen],'Bildirimine yanıt geldi',_y.slice(0,60));}catch(e){} ciz();return; }
+ if(a=='gbyanit'){ if(!gbYetkili()){say('Yetkin yok');return} var _r=null,_q;for(_q=0;_q<GB.length;_q++)if(String(GB[_q].id)==String(t.dataset.id))_r=GB[_q]; if(!_r)return; var _el=document.getElementById('gbY_'+_r.id),_y=_el?_el.value.trim():''; _r.yanit=_y;_r.guncelleme=new Date().toISOString(); if(dbClient)dbClient.from('geri_bildirim').upsert([_r]).then(function(r){if(r&&r.error)say('Kaydedilemedi: '+r.error.message);else say('Yanıt kaydedildi');},function(){}); try{if(String(_r.gonderen)!=String(ME))pushGonder([_r.gonderen],'Bildirimine yanıt geldi',_y.slice(0,60));}catch(e){} ciz();return; }
  if(a=='ozetkopya'){
   var ta=document.getElementById('ozetmetin');
   try{ta.select();document.execCommand('copy');say('Rapor kopyalandı')}
