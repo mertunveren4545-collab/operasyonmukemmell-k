@@ -1621,8 +1621,15 @@ html.dk #pg-urun .urtag.sk{background:rgba(76,159,212,.16);color:#7FC0EA;border-
   }
   function addDurus(sn){sn=num(sn);if(sn<=0)return;var c=cur();c.duruslar=c.duruslar||[];c.duruslar.push({sn:r2(sn)});save();renderDurus();updateDSDisplay();}
   function updateDSDisplay(){
-    if(twRun)return; // canlı sayarken twTick yönetir
-    var c=cur(),sn=num(c.denemeSaniye);
+    var c=cur();
+    if(c.twT0abs){ // bu çalışma çalışıyor (kalıcı + senkron) — kaldığı yerden devam eder
+      if(!twRun){twRun=true;clearInterval(twTimer);twTimer=setInterval(twTick,100);
+        var _b=g('srDSMeasure');if(_b){_b.className='btn gh';_b.style.borderColor='var(--rd)';_b.style.color='var(--rd)';}
+        var _rz=g('srDSReset');if(_rz)_rz.style.display='none';}
+      twTick();return;
+    }
+    if(twRun){twRun=false;if(twTimer){clearInterval(twTimer);twTimer=null;}}
+    var sn=num(c.denemeSaniye);
     if(sn){
       g('srDSDisp').textContent='▶ '+twFmt(sn*1000)+' · '+r2(sn)+' sn · Devam';
       g('srDSReset').style.display='block';
@@ -2002,7 +2009,8 @@ html.dk #pg-urun .urtag.sk{background:rgba(76,159,212,.16);color:#7FC0EA;border-
 
   /* ---------- DENEME SÜRESİ KRONOMETRESİ (arka planda çalışır) ---------- */
   var twRun=false, twBase=0, twT0=0, twTimer=null;
-  function twEl(){return twBase+(twRun?(performance.now()-twT0):0);}
+  function twElSec(){var c=cur();return num(c.denemeSaniye)+(c.twT0abs?(Date.now()-c.twT0abs)/1000:0);}
+  function twEl(){return twElSec()*1000;}
   function twFmt(ms){var s=ms/1000,m=Math.floor(s/60),ss=s-m*60;return ('0'+m).slice(-2)+':'+(ss<10?'0':'')+ss.toFixed(1);}
   function twTick(){
     var e=twEl();
@@ -2010,27 +2018,27 @@ html.dk #pg-urun .urtag.sk{background:rgba(76,159,212,.16);color:#7FC0EA;border-
     var mi=g('srSWTrial');if(mi&&mi.style.display!=='none')mi.textContent='● Deneme çalışıyor: '+twFmt(e);
   }
   function twStart(){
-    if(twBase===0){var s=num(cur().denemeSaniye);if(s)twBase=s*1000;}
-    twT0=performance.now();twRun=true;twTimer=setInterval(twTick,100);
+    var c=cur();if(!c.twT0abs)c.twT0abs=Date.now();save();
+    twRun=true;clearInterval(twTimer);twTimer=setInterval(twTick,100);
     var b=g('srDSMeasure');b.className='btn gh';b.style.borderColor='var(--rd)';b.style.color='var(--rd)';
     g('srDSReset').style.display='none';twTick();
   }
   function twStop(){
-    if(!twRun)return;
-    twBase=twEl();twRun=false;clearInterval(twTimer);twTimer=null;
-    var sec=Math.round(twBase/100)/10,c=cur();c.denemeSaniye=sec;c.denemeSuresi=sec/60;save();
+    var c=cur();if(!c.twT0abs&&!twRun)return;
+    var sec=twElSec();c.denemeSaniye=Math.round(sec*10)/10;c.denemeSuresi=c.denemeSaniye/60;c.twT0abs=null;
+    twRun=false;clearInterval(twTimer);twTimer=null;save();
     var b=g('srDSMeasure');b.className='btn st';b.style.borderColor='';b.style.color='';
     updateDSDisplay();
-    var mi=g('srSWTrial');if(mi&&mi.style.display!=='none')mi.textContent='■ Deneme durdu: '+twFmt(twBase);
+    var mi=g('srSWTrial');if(mi&&mi.style.display!=='none')mi.textContent='■ Deneme durdu: '+twFmt(c.denemeSaniye*1000);
   }
-  function twToggleInline(){ if(twRun)twStop(); else twStart(); }
+  function twToggleInline(){ if(cur().twT0abs||twRun)twStop(); else twStart(); }
   function twResetInline(){
-    twRun=false;if(twTimer){clearInterval(twTimer);twTimer=null;}twBase=0;
-    var c=cur();c.denemeSaniye='';c.denemeSuresi='';save();
+    twRun=false;if(twTimer){clearInterval(twTimer);twTimer=null;}
+    var c=cur();c.denemeSaniye='';c.denemeSuresi='';c.twT0abs=null;save();
     var b=g('srDSMeasure');b.className='btn st';b.style.borderColor='';b.style.color='';
     updateDSDisplay();
   }
-  function twStopTimerOnly(){ twRun=false;if(twTimer){clearInterval(twTimer);twTimer=null;}twBase=0; }
+  function twStopTimerOnly(){ twRun=false;if(twTimer){clearInterval(twTimer);twTimer=null;} }
   /* ---- Duruş kronometresi ---- */
   var dwRun=false,dwBase=0,dwT0=0,dwTimer=null;
   function dwEl(){return dwBase+(dwRun?(performance.now()-dwT0):0);}
@@ -2042,7 +2050,7 @@ html.dk #pg-urun .urtag.sk{background:rgba(76,159,212,.16);color:#7FC0EA;border-
   }
   function twSyncSWTrial(){
     var mi=g('srSWTrial');if(!mi)return;
-    if(twRun){mi.style.display='';mi.textContent='● Deneme çalışıyor: '+twFmt(twEl());}
+    if(cur().twT0abs){mi.style.display='';mi.textContent='● Deneme çalışıyor: '+twFmt(twEl());}
     else{mi.style.display='none';}
   }
 
@@ -2245,13 +2253,13 @@ html.dk #pg-urun .urtag.sk{background:rgba(76,159,212,.16);color:#7FC0EA;border-
     document.querySelectorAll('#pg-surec [data-dsreset]').forEach(function(el){el.onclick=twResetInline;});
     (function(){var mIn=g('srDSManual');if(!mIn)return;
       var applyManual=function(){
-        if(twRun)twStop();
+        if(cur().twT0abs||twRun)twStop();
         var v=(mIn.value||'').trim().replace(',','.');var c=cur();
-        if(v===''){c.denemeSaniye='';c.denemeSuresi='';twBase=0;save();updateDSDisplay();return;}
+        if(v===''){c.denemeSaniye='';c.denemeSuresi='';c.twT0abs=null;save();updateDSDisplay();return;}
         var sec=0;
         if(v.indexOf(':')>=0){var p=v.split(':');sec=(parseFloat(p[0])||0)*60+(parseFloat(p[1])||0);}
         else{var dk=parseFloat(v);if(isNaN(dk)||dk<0)return;sec=dk*60;}
-        sec=Math.round(sec*10)/10;c.denemeSaniye=sec;c.denemeSuresi=sec/60;twBase=sec*1000;save();updateDSDisplay();
+        sec=Math.round(sec*10)/10;c.denemeSaniye=sec;c.denemeSuresi=sec/60;c.twT0abs=null;save();updateDSDisplay();
       };
       mIn.onchange=applyManual;
       mIn.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();applyManual();try{mIn.blur();}catch(_){}}};
